@@ -1,39 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-	<TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <UseWPF>true</UseWPF>
-	<UseWindowsForms>true</UseWindowsForms>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UseWPF>true</UseWPF>
+		<UseWindowsForms>true</UseWindowsForms>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="Resources\Screenshots\Hardware.png" />
-    <None Remove="Resource\Screenshots\HardwarePrieview.png" />
-    <None Remove="Resource\Screenshots\MediaPrieview.png" />
-    <None Remove="UI\Shaders\LiquidGlass.ps" />
-  </ItemGroup>
+	<ItemGroup>
+		<!-- English: Include EVERYTHING in Resources folder correctly -->
+		<Resource Include="Resource\**\*" />
+		<!-- English: Explicitly include the shader bytecode -->
+		<Resource Include="UI\Shaders\LiquidGlass.ps" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Resource Include="Resource\Screenshots\HardwarePrieview.png" />
-    <Resource Include="Resource\Screenshots\MediaPrieview.png" />
-    <Resource Include="UI\Shaders\LiquidGlass.ps" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="LibreHardwareMonitorLib" Version="0.9.6" />
+		<PackageReference Include="MahApps.Metro.IconPacks.Lucide" Version="6.2.1" />
+		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142" />
+		<PackageReference Include="System.Drawing.Common" Version="9.0.0" />
+		<PackageReference Include="Tinkoff.InvestApi" Version="0.6.21" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.6" />
-    <PackageReference Include="MahApps.Metro.IconPacks.Lucide" Version="6.2.1" />
-    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142" />
-    <PackageReference Include="System.Text.Json" Version="10.0.7" />
-    <PackageReference Include="Tinkoff.InvestApi" Version="0.6.21" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="UI\Dictionaries\" />
-    <Folder Include="Widgets\Time\" />
-    <Folder Include="Widgets\Finance\" />
-    <Folder Include="Widgets\Weather\" />
-  </ItemGroup>
 </Project>

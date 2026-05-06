@@ -78,12 +78,13 @@
 			</Border.BorderBrush>
 			<Grid>
 				<!-- Layer 1: Glass -->
-				<Border x:Name="GlassBase" CornerRadius="24">
-					<Border.Background>
-						<ImageBrush x:Name="WallpaperBrush" Stretch="Fill"/>
-					</Border.Background>
-				</Border>
-				<!-- Layer 2: Album Art -->
+                <!-- Должно быть внутри Grid -->
+                <Border x:Name="GlassBase" CornerRadius="28">
+                    <Border.Background>
+                        <ImageBrush x:Name="WallpaperBrush" Stretch="Fill"/>
+                    </Border.Background>
+                </Border>
+                <!-- Layer 2: Album Art -->
 				<Border CornerRadius="24,24,0,0" VerticalAlignment="Top" Height="150" Opacity="0.85">
 					<Border.Background>
 						<ImageBrush ImageSource="{Binding AlbumArt}" Stretch="UniformToFill"/>

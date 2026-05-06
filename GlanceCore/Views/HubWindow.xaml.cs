@@ -106,9 +106,9 @@ public partial class HubWindow : Window
         Core.WidgetHost.ToggleWidget(widgetId);
     }
 
+    // 1. ОБНОВИ ЭТОТ МЕТОД:
     private void BtnWidgetSettings_Click(object sender, RoutedEventArgs e)
     {
-
         if (sender is Button btn && btn.Tag != null)
         {
             _editingWidgetId = btn.Tag.ToString()!;
@@ -119,18 +119,47 @@ public partial class HubWindow : Window
 
             SldOpacity.Value = state.Opacity;
             SldScale.Value = state.Scale;
-            SldFontSize.Value = state.FontSize;
-            foreach (ComboBoxItem item in ComboFont.Items)
-                if (item.Content.ToString() == state.FontFamily) item.IsSelected = true;
-            _isLoaded = true;
-            // English: Accessing the newly named checkbox
-            if (TglWidgetTopmost != null)
-                TglWidgetTopmost.IsChecked = state.IsAlwaysOnTop;
+            if (TglWidgetTopmost != null) TglWidgetTopmost.IsChecked = state.IsAlwaysOnTop;
+            if (SldFontSize != null) SldFontSize.Value = state.FontSize;
+
+            // English: Show/Hide UI based on widget type
+            if (_editingWidgetId == "Image_01")
+            {
+                BtnUploadImage.Visibility = Visibility.Visible;
+                TypographySettingsPanel.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                BtnUploadImage.Visibility = Visibility.Collapsed;
+                TypographySettingsPanel.Visibility = Visibility.Visible;
+            }
 
             _isLoaded = true;
 
             WidgetsPanel.Visibility = Visibility.Collapsed;
             WidgetConfigPanel.Visibility = Visibility.Visible;
+        }
+    }
+
+    // 2. ДОБАВЬ НОВЫЙ МЕТОД (Обрати внимание на явное указание Microsoft.Win32):
+    private void BtnUploadImage_Click(object sender, RoutedEventArgs e)
+    {
+        // English: Explicitly use Microsoft.Win32 to avoid WinForms CS0104 error
+        var dlg = new Microsoft.Win32.OpenFileDialog
+        {
+            Filter = "Images|*.jpg;*.jpeg;*.png;*.webp;*.bmp",
+            Title = "Выберите фото для виджета"
+        };
+
+        if (dlg.ShowDialog() == true)
+        {
+            var cfg = Core.WidgetHost.CurrentConfig;
+            if (!cfg.Widgets.ContainsKey("Image_01")) cfg.Widgets["Image_01"] = new Core.WidgetState();
+
+            cfg.Widgets["Image_01"].CustomData = dlg.FileName;
+            Core.ConfigManager.Save(cfg);
+
+            Core.WidgetHost.RefreshWidgetCustomData("Image_01");
         }
     }
 
@@ -162,27 +191,41 @@ public partial class HubWindow : Window
     {
         var cfg = Core.WidgetHost.CurrentConfig;
         if (!cfg.Widgets.ContainsKey(_editingWidgetId)) return;
-        var state = cfg.Widgets[_editingWidgetId];
 
+        var state = cfg.Widgets[_editingWidgetId];
         state.Opacity = SldOpacity.Value;
         state.Scale = SldScale.Value;
         state.IsAlwaysOnTop = TglWidgetTopmost.IsChecked == true;
         state.FontSize = SldFontSize.Value;
         state.FontFamily = (ComboFont.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "Segoe UI Variable";
 
-        // English: Send all 6 parameters to the host
-        Core.WidgetHost.UpdateWidgetVisuals(_editingWidgetId, state.Opacity, state.Scale, state.IsAlwaysOnTop, state.FontFamily, state.FontSize);
+        // English: Pass 7 arguments including the shader state
+        Core.WidgetHost.UpdateWidgetVisuals(
+            _editingWidgetId,
+            state.Opacity,
+            state.Scale,
+            state.IsAlwaysOnTop,
+            state.FontFamily,
+            state.FontSize,
+            cfg.EnableShader); // 7th argument
     }
+    // English: Triggers when user clicks AutoStart, Lock, or Shader toggle in System Settings tab
     private void SystemSettings_Changed(object sender, RoutedEventArgs e)
     {
         if (!_isLoaded) return;
-        WidgetHost.CurrentConfig.RunAtStartup = TglAutoStart.IsChecked == true;
-        WidgetHost.CurrentConfig.LockWidgets = TglLock.IsChecked == true;
-        WidgetHost.CurrentConfig.DisableShaderForScreenshots = TglShader.IsChecked == true;
-        AutoStartManager.SetAutoStart(WidgetHost.CurrentConfig.RunAtStartup);
-        WidgetHost.ApplySystemSettings();
-    }
+        var cfg = Core.WidgetHost.CurrentConfig;
 
+        // 1. Читаем состояние UI
+        cfg.RunAtStartup = TglAutoStart.IsChecked == true;
+        cfg.LockWidgets = TglLock.IsChecked == true;
+        cfg.EnableShader = TglShader.IsChecked == true; // Вот он, рубильник шейдера!
+
+        // 2. Применяем автостарт
+        Core.AutoStartManager.SetAutoStart(cfg.RunAtStartup);
+
+        // 3. Рассылаем команду ВСЕМ активным виджетам мгновенно
+        Core.WidgetHost.ApplySystemSettings();
+    }
 
 
     private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) { if (e.ChangedButton == MouseButton.Left) DragMove(); }

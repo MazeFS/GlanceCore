@@ -1,61 +1,32 @@
-﻿using System;
+﻿namespace GlanceCore.Widgets.Hardware;
+
+using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using System.Linq;
 using LibreHardwareMonitor.Hardware;
-using GlanceCore.Widgets;
-using GlanceCore.UI.Shaders;
 
-namespace GlanceCore.Widgets.Hardware;
-
-public partial class HardwareWidget : BaseWidgetWindow, INotifyPropertyChanged
+public partial class HardwareWidget : GlanceCore.Widgets.BaseWidgetWindow, INotifyPropertyChanged
 {
-    // --- WIN32 API DECLARATIONS ---
-
-    [DllImport("gdi32.dll")]
-    static extern bool BitBlt(IntPtr hdcDest, int xDest, int yDest, int wDest, int hDest, IntPtr hdcSource, int xSrc, int ySrc, int rop);
-
-    [DllImport("user32.dll")]
-    static extern IntPtr GetDesktopWindow();
-
-    [DllImport("user32.dll")]
-    static extern IntPtr GetWindowDC(IntPtr hWnd);
-
-    [DllImport("user32.dll")]
-    static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
-
-    [DllImport("gdi32.dll")]
-    static extern IntPtr CreateCompatibleDC(IntPtr hDC);
-
-    [DllImport("gdi32.dll")]
-    static extern IntPtr CreateCompatibleBitmap(IntPtr hDC, int nWidth, int nHeight);
-
-    [DllImport("gdi32.dll")]
-    static extern IntPtr SelectObject(IntPtr hDC, IntPtr hObject);
-
-    [DllImport("gdi32.dll")]
-    static extern bool DeleteDC(IntPtr hDC);
-
-    [DllImport("gdi32.dll")]
-    static extern bool DeleteObject(IntPtr hObject);
-
-    [DllImport("user32.dll")]
-    static extern uint SetWindowDisplayAffinity(IntPtr hwnd, uint dwAffinity);
-
-    private const uint WDA_EXCLUDEFROMCAPTURE = 0x00000011;
-
-    // --- FIELDS ---
+    [DllImport("gdi32.dll")] static extern bool BitBlt(IntPtr d, int dx, int dy, int w, int h, IntPtr s, int sx, int sy, int r);
+    [DllImport("user32.dll")] static extern IntPtr GetDesktopWindow();
+    [DllImport("user32.dll")] static extern IntPtr GetWindowDC(IntPtr w);
+    [DllImport("user32.dll")] static extern int ReleaseDC(IntPtr w, IntPtr dc);
+    [DllImport("gdi32.dll")] static extern IntPtr CreateCompatibleDC(IntPtr dc);
+    [DllImport("gdi32.dll")] static extern IntPtr CreateCompatibleBitmap(IntPtr dc, int w, int h);
+    [DllImport("gdi32.dll")] static extern IntPtr SelectObject(IntPtr dc, IntPtr obj);
+    [DllImport("gdi32.dll")] static extern bool DeleteDC(IntPtr dc);
+    [DllImport("gdi32.dll")] static extern bool DeleteObject(IntPtr obj);
+    [DllImport("user32.dll")] static extern uint SetWindowDisplayAffinity(IntPtr hwnd, uint dwAffinity);
 
     private readonly Computer _computer;
     private readonly DispatcherTimer _statsTimer;
     private readonly DispatcherTimer _captureTimer;
-
-    // --- BINDINGS ---
 
     private string _cpuText = "0%"; public string CpuText { get => _cpuText; set { _cpuText = value; OnPropertyChanged(); } }
     private double _cpuValue = 0; public double CpuValue { get => _cpuValue; set { _cpuValue = value; OnPropertyChanged(); } }
@@ -65,124 +36,96 @@ public partial class HardwareWidget : BaseWidgetWindow, INotifyPropertyChanged
     public HardwareWidget()
     {
         InitializeComponent();
-
         _computer = new Computer { IsCpuEnabled = true, IsGpuEnabled = true };
-        try { _computer.Open(); } catch { /* Admin rights handled by manifest */ }
+        try { _computer.Open(); } catch { }
 
+        // English: Ensure capture timer is RUNNING
         _captureTimer = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(33) };
         _captureTimer.Tick += (s, e) => UpdateRealtimeBackground();
+        _captureTimer.Start();
 
-        // English: Hardware polling timer
         _statsTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1.5) };
         _statsTimer.Tick += async (s, e) => await UpdateStatsAsync();
         _statsTimer.Start();
+
+        this.Loaded += (s, e) => {
+            var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+            SetWindowDisplayAffinity(hwnd, 0x00000011);
+        };
     }
 
-    protected override void ApplyShaderSettings(bool disableShaderForScreenshots)
+    public override void ApplyShaderSettings(bool enable)
     {
+        if (GlassBase == null || _captureTimer == null) return;
         var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
-        if (!disableShaderForScreenshots)
+
+        if (enable)
         {
+            // 1. Включаем невидимость
             SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE);
-            Task.Delay(300).ContinueWith(_ => Dispatcher.Invoke(() => GlassBase.Effect = new LiquidGlassEffect { Amount = 0.08 }));
+
+            // 2. Включаем шейдер
+            if (GlassBase.Effect == null)
+                GlassBase.Effect = new UI.Shaders.LiquidGlassEffect { Amount = -0.05 }; // Для Media поставь -0.15
+
+            // 3. Запускаем захват экрана
             _captureTimer.Start();
         }
         else
         {
-            SetWindowDisplayAffinity(hwnd, 0); // WDA_NONE
-            GlassBase.Effect = null;
+            // 1. Останавливаем захват экрана (чтобы не было туннеля)
             _captureTimer.Stop();
+
+            // 2. Убираем шейдер
+            GlassBase.Effect = null;
+
+            // 3. Разрешаем Windows видеть окно для скриншота
+            SetWindowDisplayAffinity(hwnd, WDA_NONE);
+
+            // 4. Очищаем фон, чтобы он стал прозрачным/черным для чистого скрина
+            WallpaperBrush.ImageSource = null;
         }
     }
-
     private void UpdateRealtimeBackground()
     {
-        if (!this.IsVisible || this.ActualWidth <= 0 || this.ActualHeight <= 0) return;
-
+        if (!this.IsVisible || this.ActualWidth <= 0) return;
         try
         {
-            // Явно указываем пространство имен для Point
-            System.Windows.Point p = this.PointToScreen(new System.Windows.Point(0, 0));
-            int w = (int)this.ActualWidth;
-            int h = (int)this.ActualHeight;
-
-
-            IntPtr hDesk = GetDesktopWindow();
-            IntPtr hSrc = GetWindowDC(hDesk);
-            IntPtr hDest = CreateCompatibleDC(hSrc);
-            IntPtr hBmp = CreateCompatibleBitmap(hSrc, w, h);
+            var p = this.PointToScreen(new Point(0, 0));
+            IntPtr hDesk = GetDesktopWindow(); IntPtr hSrc = GetWindowDC(hDesk);
+            IntPtr hDest = CreateCompatibleDC(hSrc); IntPtr hBmp = CreateCompatibleBitmap(hSrc, (int)ActualWidth, (int)ActualHeight);
             IntPtr hOld = SelectObject(hDest, hBmp);
-
-            BitBlt(hDest, 0, 0, w, h, hSrc, (int)p.X, (int)p.Y, 0x00CC0020);
-
-            // English: Use options to prevent WPF from caching every single frame in RAM
-            var bmpSource = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                hBmp,
-                IntPtr.Zero,
-                Int32Rect.Empty,
-                BitmapSizeOptions.FromEmptyOptions());
-
-            bmpSource.Freeze();
-
-            DeleteDC(hDest);
-            ReleaseDC(hDesk, hSrc);
-            DeleteObject(hBmp);
-
-            WallpaperBrush.ImageSource = bmpSource;
-
-            // English: Aggressive per-frame cleanup suggestion for the GC
-            bmpSource = null;
+            BitBlt(hDest, 0, 0, (int)ActualWidth, (int)ActualHeight, hSrc, (int)p.X, (int)p.Y, 0x00CC0020);
+            SelectObject(hDest, hOld);
+            var bmp = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(hBmp, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            bmp.Freeze();
+            DeleteDC(hDest); ReleaseDC(hDesk, hSrc); DeleteObject(hBmp);
+            WallpaperBrush.ImageSource = bmp;
         }
         catch { }
     }
 
     private async Task UpdateStatsAsync()
     {
-        var stats = await Task.Run(() =>
-        {
+        var stats = await Task.Run(() => {
             double cpu = 0, gpu = 0;
             foreach (var hw in _computer.Hardware)
             {
                 hw.Update();
-
-                // English: Look for CPU Load
-                if (hw.HardwareType == HardwareType.Cpu)
+                var load = hw.Sensors.FirstOrDefault(s => s.SensorType == SensorType.Load && (s.Name.Contains("Total") || hw.Sensors.Count() == 1));
+                if (load?.Value != null)
                 {
-                    // English: Specifically look for the "Total" sensor to avoid 0% on individual cores
-                    var sensor = hw.Sensors.FirstOrDefault(s =>
-                        s.SensorType == SensorType.Load &&
-                        (s.Name.Contains("Total") || hw.Sensors.Count() == 1));
-
-                    if (sensor?.Value != null) cpu = (double)sensor.Value;
-                }
-
-                // English: Look for GPU Load
-                if (hw.HardwareType.ToString().Contains("Gpu"))
-                {
-                    var sensor = hw.Sensors.FirstOrDefault(s => s.SensorType == SensorType.Load);
-                    if (sensor?.Value != null) gpu = (double)sensor.Value;
+                    if (hw.HardwareType == HardwareType.Cpu) cpu = (double)load.Value;
+                    else if (hw.HardwareType.ToString().Contains("Gpu")) gpu = (double)load.Value;
                 }
             }
             return (cpu, gpu);
         });
-
-        // English: Apply values to properties (triggers UI update via INotifyPropertyChanged)
-        CpuText = $"{(int)stats.cpu}%";
-        CpuValue = stats.cpu;
-        GpuText = $"{(int)stats.gpu}%";
-        GpuValue = stats.gpu;
+        CpuText = $"{(int)stats.cpu}%"; CpuValue = stats.cpu;
+        GpuText = $"{(int)stats.gpu}%"; GpuValue = stats.gpu;
     }
 
-    private void CloseWidget_Click(object sender, RoutedEventArgs e) => this.Close();
-
-    protected override void OnClosed(EventArgs e)
-    {
-        _captureTimer.Stop();
-        _statsTimer.Stop();
-        _computer.Close();
-        base.OnClosed(e);
-    }
-
+    private void CloseWidget_Click(object sender, RoutedEventArgs e) => GlanceCore.Core.WidgetHost.CloseWidgetExplicitly("Hardware_01");
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 }

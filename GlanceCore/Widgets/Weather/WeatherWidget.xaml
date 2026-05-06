@@ -1,0 +1,87 @@
+<widgets:BaseWidgetWindow x:Class="GlanceCore.Widgets.Weather.WeatherWidget"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:widgets="clr-namespace:GlanceCore.Widgets"
+        xmlns:shaders="clr-namespace:GlanceCore.UI.Shaders"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        Title="Weather" Height="180" Width="320"
+        WindowStyle="None" Background="Transparent" AllowsTransparency="True"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}">
+
+	<Window.ContextMenu>
+		<ContextMenu Background="#1A1A1A" Foreground="White" BorderBrush="#40FFFFFF">
+			<MenuItem Header="Обновить погоду" Click="RefreshWeather_Click"/>
+			<Separator Background="#30FFFFFF"/>
+			<MenuItem Header="Закрыть виджет" Click="CloseWidget_Click"/>
+		</ContextMenu>
+	</Window.ContextMenu>
+
+	<!-- English: Fixed base size for perfect scaling -->
+	<Grid x:Name="MainRoot" Width="280" Height="140" Margin="15">
+		<Grid.Effect>
+			<DropShadowEffect BlurRadius="25" ShadowDepth="8" Opacity="0.4" Color="Black"/>
+		</Grid.Effect>
+
+		<Border CornerRadius="28" BorderThickness="1.5" ClipToBounds="True">
+			<Border.BorderBrush>
+				<LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+					<GradientStop Color="#80FFFFFF" Offset="0"/>
+					<GradientStop Color="#10FFFFFF" Offset="0.5"/>
+					<GradientStop Color="#40FFFFFF" Offset="1"/>
+				</LinearGradientBrush>
+			</Border.BorderBrush>
+
+			<Grid>
+				<!-- LAYER 1: Liquid Glass (Screen Capture) -->
+				<Border x:Name="GlassBase" CornerRadius="28">
+					<Border.Background>
+						<ImageBrush x:Name="WallpaperBrush" Stretch="Fill"/>
+					</Border.Background>
+				</Border>
+
+				<!-- LAYER 2: Dynamic Weather Tint -->
+				<Border x:Name="WeatherTint" CornerRadius="28" Background="#40000000" Opacity="0.85" IsHitTestVisible="False"/>
+
+				<!-- LAYER 3: Inner Glass Bevel -->
+				<Border CornerRadius="28" BorderBrush="#35FFFFFF" BorderThickness="1.5" Margin="1" IsHitTestVisible="False">
+					<Border.Background>
+						<RadialGradientBrush Center="0.5,0" RadiusX="0.9" RadiusY="0.6">
+							<GradientStop Color="#25FFFFFF" Offset="0"/>
+							<GradientStop Color="Transparent" Offset="1"/>
+						</RadialGradientBrush>
+					</Border.Background>
+				</Border>
+
+				<!-- LAYER 4: UI Content -->
+				<Grid Margin="25,0" IsHitTestVisible="False">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="Auto"/>
+						<!-- Icon -->
+						<ColumnDefinition Width="*"/>
+						<!-- Temp & City -->
+					</Grid.ColumnDefinitions>
+
+					<StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,5,0,0">
+						<iconPacks:PackIconLucide Kind="{Binding CurrentIcon}" Width="46" Height="46" Foreground="White" Margin="0,0,0,8" HorizontalAlignment="Center"/>
+						<TextBlock Text="{Binding WeatherDescription}"
+                                   FontSize="{Binding FontSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                                   FontWeight="SemiBold" Foreground="#E0FFFFFF" HorizontalAlignment="Center"/>
+					</StackPanel>
+
+					<StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
+						<TextBlock Text="{Binding Temperature}" FontSize="48" FontWeight="Light" Foreground="White"
+                                   HorizontalAlignment="Right" Margin="0,-10,0,-5">
+							<TextBlock.Effect>
+								<DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" Color="Black"/>
+							</TextBlock.Effect>
+						</TextBlock>
+						<TextBlock Text="{Binding CityName}"
+                                   FontSize="{Binding FontSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                                   FontWeight="Medium" Foreground="#A0FFFFFF" HorizontalAlignment="Right"
+                                   TextTrimming="CharacterEllipsis" MaxWidth="140"/>
+					</StackPanel>
+				</Grid>
+			</Grid>
+		</Border>
+	</Grid>
+</widgets:BaseWidgetWindow>

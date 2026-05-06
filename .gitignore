@@ -1,0 +1,12 @@
+## Visual Studio Temp Files
+.vs/
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+*.cache
+*.log
+
+## GlanceCore Specific
+config.json
+*.ps

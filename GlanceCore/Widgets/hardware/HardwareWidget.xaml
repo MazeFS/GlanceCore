@@ -66,7 +66,7 @@
 						<!-- Header -->
 						<TextBlock Text="SYSTEM"
 								   FontSize="{Binding FontSize, RelativeSource={RelativeSource AncestorType=Window}}"
-								   FontWeight="Black" Foreground="White" Opacity="0.5"
+								   FontWeight="Black" Foreground="White" Opacity="0.9"
 								   HorizontalAlignment="Center" Margin="0,0,0,16"/>
 
 						<!-- CPU Section -->
