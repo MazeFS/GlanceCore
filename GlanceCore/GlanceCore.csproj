@@ -13,15 +13,20 @@
 	<ItemGroup>
 		<!-- English: Include EVERYTHING in Resources folder correctly -->
 		<Resource Include="Resource\**\*" />
+		<None Remove="UI\Shaders\RetroPixel.ps" />
 		<!-- English: Explicitly include the shader bytecode -->
 		<Resource Include="UI\Shaders\LiquidGlass.ps" />
-	</ItemGroup>
+		<Resource Include="UI\Shaders\RetroPixel.ps" />
+	    <None Update="Skins\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="MahApps.Metro.IconPacks.SimpleIcons" Version="6.2.1" />
 		<PackageReference Include="LibreHardwareMonitorLib" Version="0.9.6" />
 		<PackageReference Include="MahApps.Metro.IconPacks.Lucide" Version="6.2.1" />
 		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142" />
-		<PackageReference Include="System.Drawing.Common" Version="9.0.0" />
 		<PackageReference Include="Tinkoff.InvestApi" Version="0.6.21" />
 	</ItemGroup>
 

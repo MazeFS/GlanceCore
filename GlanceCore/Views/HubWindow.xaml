@@ -25,7 +25,53 @@
             <ColorAnimation Storyboard.TargetName="Color2" Storyboard.TargetProperty="Color" To="#6441A5" Duration="0:0:12" />
             <ColorAnimation Storyboard.TargetName="Color3" Storyboard.TargetProperty="Color" To="#151525" Duration="0:0:10" />
         </Storyboard>
-
+        <!-- Элегантный Apple-style Slider -->
+        <Style TargetType="Slider">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid Height="24">
+                            <!-- Фоновая дорожка -->
+                            <Border Height="6" Background="#30FFFFFF" CornerRadius="3" VerticalAlignment="Center"/>
+                            <Track x:Name="PART_Track">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Command="{x:Static Slider.DecreaseLarge}" Background="#E0FFFFFF" BorderThickness="0">
+                                        <RepeatButton.Template>
+                                            <ControlTemplate TargetType="RepeatButton">
+                                                <Border Height="6" Background="{TemplateBinding Background}" CornerRadius="3,0,0,3"/>
+                                            </ControlTemplate>
+                                        </RepeatButton.Template>
+                                    </RepeatButton>
+                                </Track.DecreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb Width="20" Height="20">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Ellipse Fill="White" Cursor="Hand">
+                                                    <Ellipse.Effect>
+                                                        <DropShadowEffect BlurRadius="6" ShadowDepth="2" Opacity="0.4"/>
+                                                    </Ellipse.Effect>
+                                                </Ellipse>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Command="{x:Static Slider.IncreaseLarge}" Background="Transparent" BorderThickness="0">
+                                        <RepeatButton.Template>
+                                            <ControlTemplate TargetType="RepeatButton">
+                                                <Border Background="Transparent"/>
+                                            </ControlTemplate>
+                                        </RepeatButton.Template>
+                                    </RepeatButton>
+                                </Track.IncreaseRepeatButton>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <!-- Стиль для социальных кнопок -->
         <Style x:Key="SocialBtnStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
@@ -48,7 +94,25 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
+        <Style x:Key="TextLinkStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#80FFFFFF"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <TextBlock Text="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}" TextDecorations="Underline"/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <!-- Остальные стили (Тумблеры, Скролл, и т.д. остаются как были) -->
         <Style x:Key="AppleSwitchStyle" TargetType="CheckBox">
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
@@ -259,7 +323,6 @@
                 <ToggleButton x:Name="BtnMenuToggle" Grid.Column="0" Click="BtnMenuToggle_Click" Style="{StaticResource TransparentHoverToggleButtonStyle}" FontFamily="Segoe MDL2 Assets" Content="&#xE700;" FontSize="16" Foreground="White"/>
                 <Border Grid.Column="1" Background="Transparent" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown"/>
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
-                    <Button Style="{StaticResource TransparentHoverButtonStyle}" Content="&#xE8FE;" Click="BtnAbout_Click" ToolTip="О программе"/>
                     <Button Style="{StaticResource WinBtn}" Content="&#xE921;" Click="BtnMinimize_Click"/>
                     <Button Style="{StaticResource WinBtn}" Content="&#xE922;" Click="BtnMaximize_Click"/>
                     <Button Style="{StaticResource WinCloseBtn}" Content="&#xE8BB;" Click="BtnClose_Click"/>
@@ -307,24 +370,25 @@
                             </StackPanel>
                         </Grid>
 
-                        <!-- СОЦИАЛЬНЫЕ КНОПКИ (ВНИЗУ) -->
+                        <!-- СОЦИАЛЬНЫЕ КНОПКИ (В самом низу Sidebar) -->
                         <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,15,0">
-                            <Button Style="{StaticResource SocialBtnStyle}" Tag="https://discord.gg/glancecore" Click="OpenLink_Click" ToolTip="Discord">
-                                <iconPacks:PackIconLucide Kind="MessageSquare" Width="14" Height="14"/>
+                            <Button Style="{StaticResource SocialBtnStyle}" Tag="https://discord.gg/" Click="OpenLink_Click" ToolTip="Discord">
+                                <iconPacks:PackIconSimpleIcons Kind="Discord" Width="14" Height="14"/>
                             </Button>
-                            <Button Style="{StaticResource SocialBtnStyle}" Tag="https://reddit.com/r/GlanceCore" Click="OpenLink_Click" ToolTip="Reddit">
-                                <iconPacks:PackIconLucide Kind="MessageCircle" Width="14" Height="14"/>
+                            <Button Style="{StaticResource SocialBtnStyle}" Tag="https://reddit.com/" Click="OpenLink_Click" ToolTip="Reddit">
+                                <iconPacks:PackIconSimpleIcons Kind="Reddit" Width="14" Height="14"/>
                             </Button>
-                            <Button Style="{StaticResource SocialBtnStyle}" Tag="https://tiktok.com/@glancecore" Click="OpenLink_Click" ToolTip="TikTok">
-                                <iconPacks:PackIconLucide Kind="Music" Width="14" Height="14"/>
+                            <Button Style="{StaticResource SocialBtnStyle}" Tag="https://tiktok.com/" Click="OpenLink_Click" ToolTip="TikTok">
+                                <iconPacks:PackIconSimpleIcons Kind="TikTok" Width="14" Height="14"/>
                             </Button>
-                            <Button Style="{StaticResource SocialBtnStyle}" Tag="https://x.com/glancecore" Click="OpenLink_Click" ToolTip="Twitter / X">
-                                <iconPacks:PackIconLucide Kind="Hash" Width="14" Height="14"/>
-                            </Button>
-                            <Button Style="{StaticResource SocialBtnStyle}" Tag="https://t.me/glancecore" Click="OpenLink_Click" ToolTip="Telegram">
-                                <iconPacks:PackIconLucide Kind="Send" Width="14" Height="14"/>
+                            <Button Style="{StaticResource SocialBtnStyle}" Tag="https://x.com/" Click="OpenLink_Click" ToolTip="X (Twitter)">
+                                <iconPacks:PackIconSimpleIcons Kind="X" Width="14" Height="14"/>
                             </Button>
 
+                            <!-- КНОПКА ABOUT (Выделяется размером) -->
+                            <Button Style="{StaticResource SocialBtnStyle}" Click="BtnAbout_Click" ToolTip="О программе" Margin="10,0,0,0">
+                                <iconPacks:PackIconLucide Kind="Info" Width="20" Height="20" Foreground="White"/>
+                            </Button>
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -412,22 +476,74 @@
                                                     </Button.Resources>
                                                 </Button>
 
-                                                <CheckBox x:Name="TglWidgetTopmost" Style="{StaticResource AppleSwitchStyle}" Click="Topmost_Changed" Content="Поверх всех окон" Foreground="White" Margin="0,0,0,15"/>
+                                                <Grid Margin="0,0,0,15">
+                                                    <StackPanel>
+                                                        <TextBlock Text="Поверх всех окон" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
+                                                        <TextBlock Text="Виджет будет виден поверх других окон и программ" Foreground="#80FFFFFF" FontSize="12"/>
+                                                    </StackPanel>
+                                                    <CheckBox x:Name="TglWidgetTopmost" Style="{StaticResource AppleSwitchStyle}" 
+              HorizontalAlignment="Right" VerticalAlignment="Center" Click="Topmost_Changed"/>
+                                                </Grid>
 
                                                 <TextBlock Text="Прозрачность" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
                                                 <Slider x:Name="SldOpacity" Minimum="0.1" Maximum="1.0" ValueChanged="Slider_Changed" Margin="0,0,0,15"/>
 
                                                 <TextBlock Text="Масштаб" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
                                                 <Slider x:Name="SldScale" Minimum="0.5" Maximum="1.5" ValueChanged="Slider_Changed" Margin="0,0,0,15"/>
+                                                <TextBlock Text="Ширина окна" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                <Slider x:Name="SldWidth" Minimum="100" Maximum="500" ValueChanged="Slider_Changed" Margin="0,0,0,15"/>
 
+                                                <TextBlock Text="Высота окна" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                <Slider x:Name="SldHeight" Minimum="80" Maximum="600" ValueChanged="Slider_Changed" Margin="0,0,0,15"/>
+                                                <!-- СКРУГЛЕНИЕ УГЛОВ -->
+                                                <TextBlock Text="Скругление углов (Corner Radius)" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                <Slider x:Name="SldRadius" Minimum="0" Maximum="100" ValueChanged="Slider_Changed" Margin="0,0,0,15"/>
+
+                                                <!-- ВЫБОР ЦВЕТА (Кружочки) -->
+                                                <Grid Margin="0,10,0,15">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <StackPanel Grid.Column="0">
+                                                        <TextBlock Text="Цвет текста" Foreground="White" Opacity="0.6" Margin="0,0,0,5"/>
+                                                        <Button Tag="Text" Click="BtnPickColor_Click" Width="32" Height="32" HorizontalAlignment="Left" Style="{StaticResource TransparentHoverButtonStyle}" Cursor="Hand">
+                                                            <Ellipse x:Name="CircleTextColor" Width="30" Height="30" Fill="White" Stroke="#40FFFFFF" StrokeThickness="2"/>
+                                                        </Button>
+                                                    </StackPanel>
+
+                                                    <StackPanel Grid.Column="1">
+                                                        <TextBlock Text="Цвет фона (Тонировка)" Foreground="White" Opacity="0.6" Margin="0,0,0,5"/>
+                                                        <Button Tag="Bg" Click="BtnPickColor_Click" Width="32" Height="32" HorizontalAlignment="Left" Style="{StaticResource TransparentHoverButtonStyle}" Cursor="Hand">
+                                                            <Ellipse x:Name="CircleBgColor" Width="30" Height="30" Fill="#45000000" Stroke="#40FFFFFF" StrokeThickness="2"/>
+                                                        </Button>
+                                                    </StackPanel>
+                                                </Grid>
+
+                                                <!-- СПЕЦИАЛЬНЫЕ НАСТРОЙКИ (Только для Hardware) -->
+                                                <StackPanel x:Name="HardwareSettingsPanel" Visibility="Collapsed">
+                                                    <Border Height="1" Background="#15FFFFFF" Margin="0,10"/>
+                                                    <Grid Margin="0,10,0,0">
+                                                        <StackPanel>
+                                                            <TextBlock Text="Поменять CPU и GPU" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="GPU будет сверху, CPU снизу" Foreground="#80FFFFFF" FontSize="12"/>
+                                                        </StackPanel>
+                                                        <CheckBox x:Name="TglSwapCpuGpu" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="TglSwapCpuGpu_Click"/>
+                                                    </Grid>
+                                                </StackPanel>
+                                                
                                                 <!-- Группа шрифтов (скрывается для фото) -->
                                                 <StackPanel x:Name="TypographySettingsPanel">
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,10"/>
                                                     <TextBlock Text="Шрифт" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
-                                                    <ComboBox x:Name="ComboFont" SelectionChanged="Topmost_Changed" Background="#20FFFFFF" Foreground="Black" Margin="0,0,0,15">
-                                                        <ComboBoxItem Content="Segoe UI Variable" IsSelected="True"/>
-                                                        <ComboBoxItem Content="Segoe Print"/>
-                                                        <ComboBoxItem Content="Consolas"/>
+                                                    <ComboBox x:Name="ComboFont" SelectionChanged="ComboBox_SelectionChanged" Background="#20FFFFFF" Foreground="Black" Margin="0,0,0,15">
+                                                        <ComboBoxItem Content="Segoe UI Variable" FontFamily="Segoe UI Variable" FontSize="14"/>
+                                                        <ComboBoxItem Content="Segoe Print" FontFamily="Segoe Print" FontSize="14"/>
+                                                        <ComboBoxItem Content="Consolas" FontFamily="Consolas" FontSize="14"/>
+                                                        <ComboBoxItem Content="Arial" FontFamily="Arial" FontSize="14"/>
+                                                        <ComboBoxItem Content="Cascadia Code" FontFamily="Cascadia Code" FontSize="14"/>
+                                                        <ComboBoxItem Content="Comic Sans MS" FontFamily="Comic Sans MS" FontSize="14"/>
                                                     </ComboBox>
                                                     <TextBlock Text="Размер текста" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
                                                     <Slider x:Name="SldFontSize" Minimum="8" Maximum="30" ValueChanged="Slider_Changed"/>
@@ -451,8 +567,70 @@
                                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                         <StackPanel Margin="0,0,10,0">
 
+                                            <!-- 🌟 ПРЕМИАЛЬНАЯ КАРТОЧКА ДОНАТА 🌟 -->
+                                            <Border CornerRadius="20" Padding="2" Margin="0,0,0,25">
+                                                <!-- Анимированная неоновая обводка -->
+                                                <Border.Background>
+                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                        <GradientStop Color="#FFFFD700" Offset="0"/>
+                                                        <!-- Золото -->
+                                                        <GradientStop Color="#FFFF5E3A" Offset="0.5"/>
+                                                        <!-- Оранж Boosty -->
+                                                        <GradientStop Color="#FFB24592" Offset="1"/>
+                                                        <!-- Пурпур -->
+                                                    </LinearGradientBrush>
+                                                </Border.Background>
+                                                <Border.Effect>
+                                                    <DropShadowEffect BlurRadius="15" ShadowDepth="0" Color="#FF5E3A" Opacity="0.4"/>
+                                                </Border.Effect>
+
+                                                <!-- Внутреннее темное стекло -->
+                                                <Border Background="#E0101015" CornerRadius="18" Padding="25">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,20,0">
+                                                            <TextBlock Text="Поддержите создателя GlanceCore ☕" Foreground="White" FontSize="18" FontWeight="Bold" Margin="0,0,0,5"/>
+                                                            <TextBlock Text="Проект создается одним человеком в свободное время. Ваш донат напрямую ускоряет выход новых виджетов, стилей и функций." 
+                                       Foreground="#B0FFFFFF" FontSize="12" TextWrapping="Wrap" LineHeight="18"/>
+                                                        </StackPanel>
+
+                                                        <!-- Кнопки доната -->
+                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                            <Button Content="Buy Me a Coffee" Tag="https://www.buymeacoffee.com/" Click="OpenLink_Click" 
+                                    Background="#FFDD00" Foreground="Black" FontWeight="Bold" FontSize="13" 
+                                    Padding="20,10" BorderThickness="0" Cursor="Hand" Margin="0,0,0,10" FocusVisualStyle="{x:Null}">
+                                                                <Button.Resources>
+                                                                    <Style TargetType="Border">
+                                                                        <Setter Property="CornerRadius" Value="10"/>
+                                                                    </Style>
+                                                                </Button.Resources>
+                                                            </Button>
+
+                                                            <Button Content="Поддержать на Boosty" Tag="https://boosty.to/" Click="OpenLink_Click" 
+                                    Background="#F15F2C" Foreground="White" FontWeight="Bold" FontSize="13" 
+                                    Padding="20,10" BorderThickness="0" Cursor="Hand" FocusVisualStyle="{x:Null}">
+                                                                <Button.Resources>
+                                                                    <Style TargetType="Border">
+                                                                        <Setter Property="CornerRadius" Value="10"/>
+                                                                    </Style>
+                                                                </Button.Resources>
+                                                            </Button>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Border>
+                                            </Border>
+
+                                            <!-- СИСТЕМНЫЕ НАСТРОЙКИ -->
                                             <Border Background="#15000000" CornerRadius="16" Padding="20" BorderBrush="#20FFFFFF" BorderThickness="1">
                                                 <StackPanel>
+                                                    <!-- English: Changed invalid LetterSpacing to WPF-compliant CharacterSpacing -->
+                                                    <!-- English: Removed spacing properties to guarantee 100% clean compilation on .NET 10 -->
+                                                    <TextBlock Text="СИСТЕМНЫЕ ПАРАМЕТРЫ" Foreground="White" Opacity="0.5" FontSize="11" FontWeight="Bold" Margin="0,0,0,15"/>
+
                                                     <Grid Margin="0,0,0,15">
                                                         <StackPanel>
                                                             <TextBlock Text="Автозапуск" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
@@ -461,57 +639,34 @@
                                                         <CheckBox x:Name="TglAutoStart" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="SystemSettings_Changed"/>
                                                     </Grid>
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,0,0,15"/>
+
                                                     <Grid Margin="0,0,0,15">
                                                         <StackPanel>
                                                             <TextBlock Text="Блокировка позиций" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
-                                                            <TextBlock Text="Запретить перетаскивание виджетов" Foreground="#80FFFFFF" FontSize="12"/>
+                                                            <TextBlock Text="Запретить перетаскивание виджетов мышью" Foreground="#80FFFFFF" FontSize="12"/>
                                                         </StackPanel>
                                                         <CheckBox x:Name="TglLock" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="SystemSettings_Changed"/>
                                                     </Grid>
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,0,0,15"/>
+
                                                     <Grid>
                                                         <StackPanel>
                                                             <TextBlock Text="Liquid Glass (Шейдер)" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
-                                                            <TextBlock Text="Искажение обоев рабочего стола" Foreground="#80FFFFFF" FontSize="12"/>
+                                                            <TextBlock Text="Искажение обоев рабочего стола (GPU)" Foreground="#80FFFFFF" FontSize="12"/>
                                                         </StackPanel>
-                                                        <CheckBox x:Name="TglShader" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="SystemSettings_Changed" IsChecked="{Binding Source={x:Static Core:WidgetHost.CurrentConfig}, Path=DisableShaderForScreenshots}"/>
+                                                        <CheckBox x:Name="TglShader" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="SystemSettings_Changed"/>
                                                     </Grid>
                                                 </StackPanel>
                                             </Border>
 
-                                            <!-- СЕКЦИЯ ДОНАТА (ЧАШКА КОФЕ) -->
-                                            <Border Background="#20FFFFFF" CornerRadius="16" Padding="20" BorderBrush="#40FFFFFF" BorderThickness="1" Margin="0,20,0,0">
-                                                <Grid>
-                                                    <StackPanel>
-                                                        <TextBlock Text="Поддержите развитие проекта ☕" Foreground="White" FontSize="16" FontWeight="Bold"/>
-                                                        <TextBlock Text="GlanceCore создается одним энтузиастом. Ваш донат ускоряет выход новых фич!" Foreground="#D0FFFFFF" FontSize="12" TextWrapping="Wrap" Margin="0,5,0,15"/>
-                                                        <StackPanel Orientation="Horizontal">
-                                                            <Button Content="Buy Me a Coffee (World)" Tag="https://www.buymeacoffee.com/" Click="OpenLink_Click" Background="#FFDD00" Foreground="Black" FontWeight="Bold" Padding="15,8" BorderThickness="0" Cursor="Hand" FocusVisualStyle="{x:Null}">
-                                                                <Button.Resources>
-                                                                    <Style TargetType="Border">
-                                                                        <Setter Property="CornerRadius" Value="8"/>
-                                                                    </Style>
-                                                                </Button.Resources>
-                                                            </Button>
-                                                            <Button Content="Boosty (RU/CIS)" Tag="https://boosty.to/" Click="OpenLink_Click" Background="#F15F2C" Foreground="White" FontWeight="Bold" Padding="15,8" BorderThickness="0" Cursor="Hand" Margin="10,0,0,0" FocusVisualStyle="{x:Null}">
-                                                                <Button.Resources>
-                                                                    <Style TargetType="Border">
-                                                                        <Setter Property="CornerRadius" Value="8"/>
-                                                                    </Style>
-                                                                </Button.Resources>
-                                                            </Button>
-                                                        </StackPanel>
-                                                    </StackPanel>
-                                                </Grid>
-                                            </Border>                                        </StackPanel>
+                                        </StackPanel>
                                     </ScrollViewer>
                                 </Grid>
 
-                                <!-- ВКЛАДКА 5: ABOUT (О ПРОГРАММЕ) -->
+                                <!-- ВКЛАДКА ABOUT (О ПРОГРАММЕ) -->
                                 <Grid x:Name="AboutPanel" Visibility="Collapsed">
                                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                         <StackPanel Margin="0,0,15,20">
-                                            <!-- ЗАГОЛОВОК -->
                                             <TextBlock Text="GLANCECORE" FontFamily="Segoe Print" FontSize="36" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
                                             <TextBlock Text="Стиль. Оптимизация. Уникальность." FontSize="14" FontWeight="SemiBold" Foreground="#A0FFFFFF" HorizontalAlignment="Center" Margin="0,0,0,30"/>
 
@@ -521,20 +676,27 @@
                                                     <TextBlock Text="Версия: 0.1.5 &quot;Liquid&quot; Alpha" FontSize="12" Foreground="#80FFA3" Margin="0,0,0,20"/>
 
                                                     <TextBlock Text="📜 Манифест" FontSize="16" FontWeight="Bold" Foreground="White" Margin="0,0,0,10"/>
-                                                    <TextBlock Text="GlanceCore — это не просто набор виджетов. Это манифест минимализма и производительности в экосистеме Windows. Мы верим, что системные инструменты должны быть не только полезными, но и визуально безупречными.&#x0a;&#x0a;Мы создали GlanceCore для тех, кто ценит детали: от плавности анимации в 60 FPS до физически корректного преломления света в «жидком стекле». Это новый уровень персонализации, где технологии встречаются с искусством." Foreground="#D0FFFFFF" TextWrapping="Wrap" LineHeight="20" Margin="0,0,0,20"/>
+                                                    <TextBlock Text="GlanceCore — это не просто набор виджетов. Это манифест минимализма и производительности в экосистеме Windows. Мы создали его для тех, кто ценит детали: от плавности анимации до физически корректного преломления света в «жидком стекле»." Foreground="#D0FFFFFF" TextWrapping="Wrap" LineHeight="20" Margin="0,0,0,20"/>
 
                                                     <TextBlock Text="🛠 Технологический стек" FontSize="16" FontWeight="Bold" Foreground="White" Margin="0,0,0,10"/>
-                                                    <TextBlock Text="Мы отказались от тяжелых веб-технологий (Electron/Chrome) в пользу нативной мощи." Foreground="#D0FFFFFF" TextWrapping="Wrap" Margin="0,0,0,5"/>
-                                                    <TextBlock Text="• Движок: .NET 10 + WPF (Pure Native).&#x0a;• Графика: Аппаратное ускорение DirectX и кастомные HLSL-шейдеры.&#x0a;• Ресурсы: Потребление памяти в 5-10 раз ниже существующих аналогов.&#x0a;• Приватность: Мы не собираем ваши данные. Все настройки хранятся локально." Foreground="#A0FFFFFF" TextWrapping="Wrap" LineHeight="20" Margin="10,0,0,20"/>
+                                                    <TextBlock Text="• Движок: .NET 10 + WPF (Pure Native)&#x0a;• Графика: Аппаратное ускорение DirectX и HLSL-шейдеры&#x0a;• Приватность: Мы не собираем ваши данные. Всё хранится локально." Foreground="#A0FFFFFF" TextWrapping="Wrap" LineHeight="20" Margin="10,0,0,20"/>
 
-                                                    <TextBlock Text="✨ Ключевые особенности" FontSize="16" FontWeight="Bold" Foreground="White" Margin="0,0,0,10"/>
-                                                    <TextBlock Text="• Liquid Glass: Эффект «жидкого стекла», преломляющий фон рабочего стола.&#x0a;• Smart Hub: Единый центр управления с интуитивной навигацией.&#x0a;• Полная свобода: Настраивайте масштаб, шрифты и прозрачность." Foreground="#A0FFFFFF" TextWrapping="Wrap" LineHeight="20" Margin="10,0,0,20"/>
-
-                                                    <TextBlock Text="👥 Команда и поддержка" FontSize="16" FontWeight="Bold" Foreground="White" Margin="0,0,0,10"/>
-                                                    <TextBlock Text="Ведущий разработчик: Александр/MazeFS&#x0a;Дизайн: Вдохновлено философией Apple и Modern Fluent." Foreground="#D0FFFFFF" TextWrapping="Wrap" LineHeight="20" Margin="0,0,0,20"/>
+                                                    <TextBlock Text="👥 Команда" FontSize="16" FontWeight="Bold" Foreground="White" Margin="0,0,0,10"/>
+                                                    <TextBlock Text="Ведущий разработчик: MazeFS&#x0a;Дизайн: Вдохновлено философией Apple и Modern Fluent." Foreground="#D0FFFFFF" TextWrapping="Wrap" LineHeight="20"/>
                                                 </StackPanel>
                                             </Border>
 
+                                            <!-- ЮРИДИЧЕСКИЕ ССЫЛКИ НА GITHUB PAGES -->
+                                            <Border Background="#10000000" CornerRadius="16" Padding="20" BorderBrush="#15FFFFFF" BorderThickness="1">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                    <!-- Замени 'mazefs' на свой реальный логин GitHub -->
+                                                    <Button Content="Privacy Policy" Tag="https://mazefs.github.io/GlanceCore/PRIVACY" Click="OpenLink_Click" Style="{StaticResource TextLinkStyle}"/>
+                                                    <TextBlock Text="|" Foreground="#40FFFFFF" Margin="15,0"/>
+                                                    <Button Content="Terms of Service" Tag="https://mazefs.github.io/GlanceCore/TERMS" Click="OpenLink_Click" Style="{StaticResource TextLinkStyle}"/>
+                                                    <TextBlock Text="|" Foreground="#40FFFFFF" Margin="15,0"/>
+                                                    <Button Content="F.A.Q." Tag="https://mazefs.github.io/GlanceCore/FAQ" Click="OpenLink_Click" Style="{StaticResource TextLinkStyle}"/>
+                                                </StackPanel>
+                                            </Border>
                                         </StackPanel>
                                     </ScrollViewer>
                                 </Grid>

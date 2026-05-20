@@ -8,132 +8,153 @@
         WindowStyle="None" Background="Transparent" AllowsTransparency="True"
         DataContext="{Binding RelativeSource={RelativeSource Self}}">
 
-	<Window.Resources>
-		<!-- Reusable Media Button Style with Apple-style Hover -->
-		<Style x:Key="MediaBtnStyle" TargetType="Button">
-			<Setter Property="Background" Value="Transparent"/>
-			<Setter Property="BorderThickness" Value="0"/>
-			<Setter Property="Cursor" Value="Hand"/>
-			<Setter Property="Template">
-				<Setter.Value>
-					<ControlTemplate TargetType="Button">
-						<Border x:Name="BtnRoot" Background="{TemplateBinding Background}" RenderTransformOrigin="0.5,0.5">
-							<Border.RenderTransform>
-								<ScaleTransform ScaleX="1" ScaleY="1"/>
-							</Border.RenderTransform>
-							<ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-						</Border>
-						<ControlTemplate.Triggers>
-							<EventTrigger RoutedEvent="MouseEnter">
-								<BeginStoryboard>
-									<Storyboard>
-										<DoubleAnimation Storyboard.TargetName="BtnRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.15" Duration="0:0:0.2"/>
-										<DoubleAnimation Storyboard.TargetName="BtnRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.15" Duration="0:0:0.2"/>
-									</Storyboard>
-								</BeginStoryboard>
-							</EventTrigger>
-							<EventTrigger RoutedEvent="MouseLeave">
-								<BeginStoryboard>
-									<Storyboard>
-										<DoubleAnimation Storyboard.TargetName="BtnRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.0" Duration="0:0:0.2"/>
-										<DoubleAnimation Storyboard.TargetName="BtnRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.0" Duration="0:0:0.2"/>
-									</Storyboard>
-								</BeginStoryboard>
-							</EventTrigger>
-						</ControlTemplate.Triggers>
-					</ControlTemplate>
-				</Setter.Value>
-			</Setter>
-		</Style>
+    <Window.Resources>
+        <!-- Reusable Media Button Style with Apple-style Hover -->
+        <Style x:Key="MediaBtnStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="BtnRoot" Background="{TemplateBinding Background}" RenderTransformOrigin="0.5,0.5">
+                            <Border.RenderTransform>
+                                <ScaleTransform ScaleX="1" ScaleY="1"/>
+                            </Border.RenderTransform>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <EventTrigger RoutedEvent="MouseEnter">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="BtnRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.15" Duration="0:0:0.2"/>
+                                        <DoubleAnimation Storyboard.TargetName="BtnRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.15" Duration="0:0:0.2"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <EventTrigger RoutedEvent="MouseLeave">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="BtnRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.0" Duration="0:0:0.2"/>
+                                        <DoubleAnimation Storyboard.TargetName="BtnRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.0" Duration="0:0:0.2"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-		<!-- Clean White Timeline Style -->
-		<Style x:Key="WhiteProgressStyle" TargetType="ProgressBar">
-			<Setter Property="Template">
-				<Setter.Value>
-					<ControlTemplate TargetType="ProgressBar">
-						<Grid Height="4">
-							<Border Background="#20FFFFFF" CornerRadius="2"/>
-							<Border x:Name="PART_Indicator" HorizontalAlignment="Left" Background="White" CornerRadius="2">
-								<Border.Effect>
-									<DropShadowEffect Color="White" BlurRadius="5" ShadowDepth="0" Opacity="0.5"/>
-								</Border.Effect>
-							</Border>
-						</Grid>
-					</ControlTemplate>
-				</Setter.Value>
-			</Setter>
-		</Style>
-	</Window.Resources>
+        <!-- Clean White Timeline Style -->
+        <Style x:Key="WhiteProgressStyle" TargetType="ProgressBar">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Grid Height="4">
+                            <Border Background="#20FFFFFF" CornerRadius="2"/>
+                            <Border x:Name="PART_Indicator" HorizontalAlignment="Left" Background="White" CornerRadius="2">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="White" BlurRadius="5" ShadowDepth="0" Opacity="0.5"/>
+                                </Border.Effect>
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
 
-	<Grid x:Name="MainRoot" Margin="10" Width="180" Height="260">
-		<Grid.Effect>
-			<DropShadowEffect BlurRadius="25" ShadowDepth="8" Opacity="0.4"/>
-		</Grid.Effect>
-		<Border CornerRadius="24" BorderThickness="1.5" ClipToBounds="True">
-			<Border.BorderBrush>
-				<LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-					<GradientStop Color="#50FFFFFF" Offset="0"/>
-					<GradientStop Color="#10FFFFFF" Offset="1"/>
-				</LinearGradientBrush>
-			</Border.BorderBrush>
-			<Grid>
-				<!-- Layer 1: Glass -->
-                <!-- Должно быть внутри Grid -->
+    <Grid x:Name="MainRoot" Margin="10" Width="180" Height="260">
+        <Grid.Effect>
+            <DropShadowEffect BlurRadius="25" ShadowDepth="8" Opacity="0.4"/>
+        </Grid.Effect>
+        <Border CornerRadius="24" BorderThickness="1.5" ClipToBounds="True">
+            <Border.BorderBrush>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#50FFFFFF" Offset="0"/>
+                    <GradientStop Color="#10FFFFFF" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.BorderBrush>
+            <Grid>
+                <!-- Layer 1: Glass -->
                 <Border x:Name="GlassBase" CornerRadius="28">
                     <Border.Background>
                         <ImageBrush x:Name="WallpaperBrush" Stretch="Fill"/>
                     </Border.Background>
                 </Border>
+
                 <!-- Layer 2: Album Art -->
-				<Border CornerRadius="24,24,0,0" VerticalAlignment="Top" Height="150" Opacity="0.85">
-					<Border.Background>
-						<ImageBrush ImageSource="{Binding AlbumArt}" Stretch="UniformToFill"/>
-					</Border.Background>
-				</Border>
-				<!-- Layer 3: Tint -->
-				<Border CornerRadius="24">
-					<Border.Background>
-						<LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-							<GradientStop Color="#30000000" Offset="0"/>
-							<GradientStop Color="#E0000000" Offset="0.6"/>
-							<GradientStop Color="Black" Offset="1"/>
-						</LinearGradientBrush>
-					</Border.Background>
-				</Border>
+                <Border CornerRadius="24,24,0,0" VerticalAlignment="Top" Height="150" Opacity="0.85">
+                    <Border.Background>
+                        <ImageBrush ImageSource="{Binding AlbumArt}" Stretch="UniformToFill"/>
+                    </Border.Background>
+                </Border>
+                <!-- Layer 3: Dark Tint -->
+                <Border CornerRadius="24">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#30000000" Offset="0"/>
+                            <GradientStop Color="#E0000000" Offset="0.6"/>
+                            <GradientStop Color="Black" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                </Border>
 
-				<!-- Content -->
-				<Grid Margin="15,140,15,15">
-					<Grid.RowDefinitions>
-						<RowDefinition Height="Auto"/>
-						<RowDefinition Height="Auto"/>
-						<RowDefinition Height="Auto"/>
-						<RowDefinition Height="*"/>
-					</Grid.RowDefinitions>
+                <!-- Content -->
+                <Grid Margin="15,140,15,15">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-					<!-- WHITE TIMELINE -->
-					<ProgressBar Grid.Row="0" Value="{Binding TrackProgress}" Maximum="{Binding TrackDuration}"
+                    <!-- WHITE TIMELINE -->
+                    <ProgressBar Grid.Row="0" Value="{Binding TrackProgress}" Maximum="{Binding TrackDuration}" 
                                  Style="{StaticResource WhiteProgressStyle}" Margin="0,0,0,12"/>
 
-					<TextBlock Grid.Row="1" Text="{Binding TrackName}" FontSize="{Binding FontSize, RelativeSource={RelativeSource AncestorType=Window}}" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-					<TextBlock Grid.Row="2" Text="{Binding ArtistName}" FontSize="11" FontWeight="Medium" Foreground="#90FFFFFF" HorizontalAlignment="Center" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                    <!-- Используем привязку к MainRoot, чтобы текст обрезался троеточием и не раздвигал окно -->
+                    <!-- Название трека -->
+                    <!-- Название трека -->
+                    <TextBlock Grid.Row="1" Text="{Binding TrackName}" 
+                               FontSize="{Binding FontSize}" FontWeight="Bold" Foreground="{Binding TextColorBrush}" 
+                               HorizontalAlignment="Center" 
+                               TextTrimming="CharacterEllipsis" 
+                               Margin="10,0"/>
 
-					<!-- CONTROL BUTTONS WITH HOVER -->
-					<StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,5">
-						<Button Style="{StaticResource MediaBtnStyle}" Click="BtnPrev_Click" Margin="0,0,20,0">
-							<iconPacks:PackIconLucide Kind="SkipBack" Width="18" Height="18" Foreground="#E0FFFFFF"/>
-						</Button>
-						<Button Style="{StaticResource MediaBtnStyle}" Click="BtnPlayPause_Click" Margin="0,0,20,0">
-							<Grid>
-								<Ellipse Width="38" Height="38" Fill="#15FFFFFF"/>
-								<iconPacks:PackIconLucide x:Name="IconPlayPause" Kind="Play" Width="20" Height="20" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-							</Grid>
-						</Button>
-						<Button Style="{StaticResource MediaBtnStyle}" Click="BtnNext_Click">
-							<iconPacks:PackIconLucide Kind="SkipForward" Width="18" Height="18" Foreground="#E0FFFFFF"/>
-						</Button>
-					</StackPanel>
-				</Grid>
-			</Grid>
-		</Border>
-	</Grid>
+                    <!-- Имя артиста -->
+                    <TextBlock Grid.Row="2" Text="{Binding ArtistName}" 
+                               FontSize="11" FontWeight="Medium" Foreground="{Binding TextColorBrush}" Opacity="0.7" 
+                               HorizontalAlignment="Center" Margin="10,2,10,0" 
+                               TextTrimming="CharacterEllipsis"/>
+
+                    <TextBlock Grid.Row="2" Text="{Binding ArtistName}" 
+                        FontSize="11" FontWeight="Medium" Foreground="{Binding TextColorBrush}" Opacity="0.7" 
+                        HorizontalAlignment="Center" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" 
+                        MaxWidth="{Binding ActualWidth, ElementName=MainRoot}"/>
+                    <TextBlock Grid.Row="2" Text="{Binding ArtistName}" 
+                        FontSize="11" FontWeight="Medium" Foreground="{Binding TextColorBrush}" Opacity="0.7" 
+                        HorizontalAlignment="Center" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" 
+                        MaxWidth="{Binding ActualWidth, ElementName=MainRoot}"/>
+
+                    <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,5">
+                        <Button Style="{StaticResource MediaBtnStyle}" Click="BtnPrev_Click" Margin="0,0,20,0">
+                            <iconPacks:PackIconLucide Kind="SkipBack" Width="18" Height="18" Foreground="#E0FFFFFF"/>
+                        </Button>
+                        <Button Style="{StaticResource MediaBtnStyle}" Click="BtnPlayPause_Click" Margin="0,0,20,0">
+                            <Grid>
+                                <Ellipse Width="38" Height="38" Fill="#15FFFFFF"/>
+                                <iconPacks:PackIconLucide x:Name="IconPlayPause" Kind="Play" Width="20" Height="20" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Button>
+                        <Button Style="{StaticResource MediaBtnStyle}" Click="BtnNext_Click">
+                            <iconPacks:PackIconLucide Kind="SkipForward" Width="18" Height="18" Foreground="#E0FFFFFF"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
 </widgets:BaseWidgetWindow>

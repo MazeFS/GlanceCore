@@ -31,12 +31,13 @@ public static class WidgetHost
         AvailableWidgets.Clear();
 
         // 1. Hardware Monitor
-        AvailableWidgets.Add(new WidgetInfo {
+        AvailableWidgets.Add(new WidgetInfo
+        {
             Id = "Hardware_01",
             Title = "Система",
             Description = "Hardware Monitor",
             PreviewImage = "/Resource/ScreenShots/HardwarePreview.png",
-            Width = 250,
+            Width = 250, // БЫЛО 280, СТАЛО 220
             WidgetType = typeof(HardwareWidget)
         });
 
@@ -92,7 +93,6 @@ public static class WidgetHost
 
         if (_activeWidgets.TryGetValue(widgetId, out var widget))
         {
-            // English: Save position and close
             _config.Widgets[widgetId].X = widget.Left;
             _config.Widgets[widgetId].Y = widget.Top;
             _config.Widgets[widgetId].IsEnabled = false;
@@ -102,7 +102,6 @@ public static class WidgetHost
         }
         else
         {
-            // English: Create new instance using Reflection
             widget = (Window)Activator.CreateInstance(info.WidgetType)!;
 
             if (!_config.Widgets.ContainsKey(widgetId))
@@ -112,12 +111,7 @@ public static class WidgetHost
 
             var state = _config.Widgets[widgetId];
 
-            // English: Set saved position
-            if (state.X != -1)
-            {
-                widget.Left = state.X;
-                widget.Top = state.Y;
-            }
+            if (state.X != -1) { widget.Left = state.X; widget.Top = state.Y; }
 
             widget.LocationChanged += (s, e) => {
                 state.X = widget.Left;
@@ -127,22 +121,12 @@ public static class WidgetHost
             widget.Show();
             _activeWidgets.Add(widgetId, widget);
 
-            // English: CRITICAL - Apply all 7 settings immediately to fix scaling and shaders
+            // English: Pass the state object!
             if (widget is BaseWidgetWindow baseW)
-            {
-                baseW.ApplySettings(
-                    state.Opacity,
-                    state.Scale,
-                    _config.LockWidgets,
-                    state.IsAlwaysOnTop,
-                    state.FontFamily,
-                    state.FontSize,
-                    _config.EnableShader
-                );
-            }
+                baseW.ApplySettings(state, _config.LockWidgets, _config.EnableShader);
         }
         ConfigManager.Save(_config);
-        info.NotifyStateChanged(); // English: Updates the Hub toggle state
+        info.NotifyStateChanged();
     }
 
     public static void ApplySystemSettings()
@@ -152,27 +136,20 @@ public static class WidgetHost
             if (kvp.Value is BaseWidgetWindow widget)
             {
                 var state = _config.Widgets[kvp.Key];
-                // English: Pass all 7 arguments to ensure sync
-                widget.ApplySettings(state.Opacity, state.Scale, _config.LockWidgets, state.IsAlwaysOnTop, state.FontFamily, state.FontSize, _config.EnableShader);
+                widget.ApplySettings(state, _config.LockWidgets, _config.EnableShader);
             }
         }
         ConfigManager.Save(_config);
     }
 
-    public static void UpdateWidgetVisuals(string id, double opacity, double scale, bool isTopmost, string fontFamily, double fontSize, bool enableShader)
+    // English: NEW Clean method! Hub updates the config directly, then calls this.
+    public static void RefreshWidgetVisuals(string id)
     {
         if (!_config.Widgets.ContainsKey(id)) return;
-
-        var s = _config.Widgets[id];
-        s.Opacity = opacity;
-        s.Scale = scale;
-        s.IsAlwaysOnTop = isTopmost;
-        s.FontFamily = fontFamily;
-        s.FontSize = fontSize;
-
+        
         if (_activeWidgets.TryGetValue(id, out var window) && window is BaseWidgetWindow widget)
         {
-            widget.ApplySettings(opacity, scale, _config.LockWidgets, isTopmost, fontFamily, fontSize, enableShader);
+            widget.ApplySettings(_config.Widgets[id], _config.LockWidgets, _config.EnableShader);
         }
         ConfigManager.Save(_config);
     }
@@ -197,8 +174,16 @@ public static class WidgetHost
             _activeWidgets.Remove(widgetId);
             ConfigManager.Save(_config);
 
-            // English: Forces the Hub toggle to switch OFF
             AvailableWidgets.FirstOrDefault(w => w.Id == widgetId)?.NotifyStateChanged();
+
+            // English: If it was the last widget and Hub is hidden, shutdown the app to free RAM
+            if (_activeWidgets.Count == 0)
+            {
+                if (Application.Current is App app && !app.IsHubVisible)
+                {
+                    Application.Current.Shutdown();
+                }
+            }
         }
     }
 

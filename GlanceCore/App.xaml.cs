@@ -2,21 +2,31 @@
 
 using System;
 using System.Linq;
-using System.Windows; // WPF
+using System.Windows;
 using System.Drawing;
 using System.Reflection;
+using System.Threading; // ДЛЯ MUTEX
 using GlanceCore.Core;
 using WinForms = System.Windows.Forms;
 
-// Явно указываем родителя, чтобы не было конфликта с WinForms.Application
 public partial class App : System.Windows.Application
 {
     private WinForms.NotifyIcon? _trayIcon;
     private Views.HubWindow? _hubWindow;
-
+    private static Mutex? _mutex; // ЗАЩИТА ОТ ДУБЛИКАТОВ
+    public bool IsHubVisible => _hubWindow != null && _hubWindow.IsVisible;
     protected override void OnStartup(StartupEventArgs e)
     {
+        // ИНИЦИАЛИЗАЦИЯ MUTEX (Защита от двойного запуска)
+        _mutex = new Mutex(true, "GlanceCore_SingleInstance_Mutex", out bool createdNew);
+        if (!createdNew)
+        {
+            System.Windows.Application.Current.Shutdown();
+            return;
+        }
+
         base.OnStartup(e);
+
         WidgetHost.Initialize();
         WidgetHost.RestoreActiveWidgets();
 

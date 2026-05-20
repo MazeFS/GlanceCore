@@ -4,13 +4,15 @@
         xmlns:widgets="clr-namespace:GlanceCore.Widgets"
         Title="Image Frame" WindowStyle="None" Background="Transparent" AllowsTransparency="True">
 
-	<!-- English: Fixed base size for scaling logic to work correctly -->
+	<!-- Жестко фиксируем базовый размер. ScaleTransform из BaseWidgetWindow сделает остальное -->
 	<Grid x:Name="MainRoot" Width="200" Height="200" Margin="15">
 		<Grid.Effect>
 			<DropShadowEffect BlurRadius="20" ShadowDepth="5" Opacity="0.5"/>
 		</Grid.Effect>
 
-		<Border CornerRadius="20" ClipToBounds="True" Background="#10FFFFFF">
+		<!-- ClipToBounds="True" обрезает картинку по скругленным углам -->
+		<Border CornerRadius="20" ClipToBounds="True" Background="#10FFFFFF" BorderBrush="{Binding BorderColorBrush}" BorderThickness="1.5">
+			<!-- Stretch="UniformToFill" заполняет рамку без искажения пропорций лица/фото -->
 			<Image x:Name="DisplayedImage" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality"/>
 		</Border>
 	</Grid>

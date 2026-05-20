@@ -3,6 +3,9 @@ namespace GlanceCore.Core;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+
+public enum WidgetStyleType { LiquidGlass, Minimalism, Retro }
+
 public class WidgetState
 {
     public double X { get; set; } = -1;
@@ -13,6 +16,14 @@ public class WidgetState
     public bool IsAlwaysOnTop { get; set; } = true;
     public string FontFamily { get; set; } = "Segoe UI Variable";
     public double FontSize { get; set; } = 12.0;
+    public double CustomWidth { get; set; } = -1;
+    public double CustomHeight { get; set; } = -1;
+    public string SkinId { get; set; } = "LiquidGlass"; // Default skin
+    public double CornerRadius { get; set; } = 24.0; // Скругление углов
+    public bool SwapCpuGpu { get; set; } = false;    // Поменять местами графики
+    public string TextColor { get; set; } = "#FFFFFF";
+    public string BgColor { get; set; } = "#00000000";
+    public string BorderColor { get; set; } = "#40FFFFFF";
     public string CustomData { get; set; } = "";
 }
 
