@@ -1,18 +1,19 @@
 ﻿namespace GlanceCore.Widgets.Hardware;
 
 using System;
-using System.ComponentModel;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using LibreHardwareMonitor.Hardware;
 
-public partial class HardwareWidget : GlanceCore.Widgets.BaseWidgetWindow, INotifyPropertyChanged
+public partial class HardwareWidget : GlanceCore.Widgets.BaseWidgetWindow
 {
+    // Нативные GDI функции для быстрого захвата экрана
     [DllImport("gdi32.dll")] static extern bool BitBlt(IntPtr d, int dx, int dy, int w, int h, IntPtr s, int sx, int sy, int r);
     [DllImport("user32.dll")] static extern IntPtr GetDesktopWindow();
     [DllImport("user32.dll")] static extern IntPtr GetWindowDC(IntPtr w);
@@ -22,201 +23,255 @@ public partial class HardwareWidget : GlanceCore.Widgets.BaseWidgetWindow, INoti
     [DllImport("gdi32.dll")] static extern IntPtr SelectObject(IntPtr dc, IntPtr obj);
     [DllImport("gdi32.dll")] static extern bool DeleteDC(IntPtr dc);
     [DllImport("gdi32.dll")] static extern bool DeleteObject(IntPtr obj);
-    [DllImport("user32.dll")] static extern uint SetWindowDisplayAffinity(IntPtr hwnd, uint dwAffinity);
-    private readonly System.Collections.Generic.Queue<double> _cpuHistory = new(new double[30]); // Храним 30 последних значений
-    private System.Windows.Media.PointCollection _cpuGraphPoints = new();
-    public System.Windows.Media.PointCollection CpuGraphPoints { get => _cpuGraphPoints; set { _cpuGraphPoints = value; OnPropertyChanged(); } }
-    private readonly Computer _computer;
-    private readonly DispatcherTimer _statsTimer;
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+    private class MEMORYSTATUSEX
+    {
+        public uint dwLength;
+        public uint dwMemoryLoad;
+        public ulong ullTotalPhys;
+        public ulong ullAvailPhys;
+        public ulong ullTotalPageFile;
+        public ulong ullAvailPageFile;
+        public ulong ullTotalVirtual;
+        public ulong ullAvailVirtual;
+        public ulong ullAvailExtendedVirtual;
+        public MEMORYSTATUSEX() { this.dwLength = (uint)Marshal.SizeOf(typeof(MEMORYSTATUSEX)); }
+    }
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    private static extern bool GlobalMemoryStatusEx([In, Out] MEMORYSTATUSEX lpBuffer);
+
     private readonly DispatcherTimer _captureTimer;
-    private string _tempText = "--°C"; public string TempText { get => _tempText; set { _tempText = value; OnPropertyChanged(); } }
-    private string _gpuTempText = "--°C"; public string GpuTempText { get => _gpuTempText; set { _gpuTempText = value; OnPropertyChanged(); } }
-    private string _ramText = "0%"; public string RamText { get => _ramText; set { _ramText = value; OnPropertyChanged(); } }
-    private double _ramValue = 0; public double RamValue { get => _ramValue; set { _ramValue = value; OnPropertyChanged(); } }
+    private readonly DispatcherTimer _statsTimer;
+
+    private PerformanceCounter? _cpuCounter;
+    private readonly List<PerformanceCounter> _gpuCounters = new();
+
+    private readonly Queue<double> _cpuHistory = new(new double[30]);
+    private readonly Queue<double> _gpuHistory = new(new double[30]);
+
     private string _cpuText = "0%"; public string CpuText { get => _cpuText; set { _cpuText = value; OnPropertyChanged(); } }
     private double _cpuValue = 0; public double CpuValue { get => _cpuValue; set { _cpuValue = value; OnPropertyChanged(); } }
+
     private string _gpuText = "0%"; public string GpuText { get => _gpuText; set { _gpuText = value; OnPropertyChanged(); } }
     private double _gpuValue = 0; public double GpuValue { get => _gpuValue; set { _gpuValue = value; OnPropertyChanged(); } }
 
-    private readonly System.Collections.Generic.Queue<double> _gpuHistory = new(new double[30]);
-    private System.Windows.Media.PointCollection _gpuGraphPoints = new();
-    public System.Windows.Media.PointCollection GpuGraphPoints { get => _gpuGraphPoints; set { _gpuGraphPoints = value; OnPropertyChanged(); } }
+    private string _tempText = "--°C"; public string TempText { get => _tempText; set { _tempText = value; OnPropertyChanged(); } }
+    private string _gpuTempText = "--°C"; public string GpuTempText { get => _gpuTempText; set { _gpuTempText = value; OnPropertyChanged(); } }
+
+    private string _ramText = "0%"; public string RamText { get => _ramText; set { _ramText = value; OnPropertyChanged(); } }
+    private double _ramValue = 0; public double RamValue { get => _ramValue; set { _ramValue = value; OnPropertyChanged(); } }
+
+    private PointCollection _cpuGraphPoints = new();
+    public PointCollection CpuGraphPoints { get => _cpuGraphPoints; set { _cpuGraphPoints = value; OnPropertyChanged(); } }
+
+    private PointCollection _gpuGraphPoints = new();
+    public PointCollection GpuGraphPoints { get => _gpuGraphPoints; set { _gpuGraphPoints = value; OnPropertyChanged(); } }
+
     public HardwareWidget()
     {
         InitializeComponent();
         this.SizeChanged += HardwareWidget_SizeChanged;
-        _computer = new Computer { IsCpuEnabled = true, IsGpuEnabled = true, IsMotherboardEnabled = true };
-        try { _computer.Open(); } catch { }
 
-        // English: Ensure capture timer is RUNNING
+        // Инициализируем таймер захвата, но НЕ запускаем его в конструкторе!
         _captureTimer = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(33) };
         _captureTimer.Tick += (s, e) => UpdateRealtimeBackground();
-        _captureTimer.Start();
 
-        _statsTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1.5) };
+        _statsTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1.0) };
         _statsTimer.Tick += async (s, e) => await UpdateStatsAsync();
-        _statsTimer.Start();
 
-        this.Loaded += (s, e) => {
-            var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
-            SetWindowDisplayAffinity(hwnd, 0x00000011);
-        };
+        Task.Run(() => {
+            InitializeCounters();
+            Dispatcher.Invoke(() => _statsTimer.Start());
+        });
     }
-    protected override void UpdateShaderIntensity()
+
+    private void InitializeCounters()
     {
-        if (GlassBase?.Effect is UI.Shaders.LiquidGlassEffect glass)
+        try { _cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total"); _cpuCounter.NextValue(); } catch { }
+        try
         {
-            // Чем меньше прозрачность, тем слабее искажение. 
-            // При Opacity = 0 искажение полностью исчезнет.
-            glass.Amount = -0.15 * BgOpacity;
+            var category = new PerformanceCounterCategory("GPU Engine");
+            var instances = category.GetInstanceNames();
+            foreach (var instance in instances)
+            {
+                if (instance.EndsWith("engtype_pid3D"))
+                    _gpuCounters.Add(new PerformanceCounter("GPU Engine", "Utilization Percentage", instance));
+            }
         }
+        catch { }
     }
-    private void HardwareWidget_SizeChanged(object sender, SizeChangedEventArgs e)
+
+    private async Task UpdateStatsAsync()
     {
-        if (MainRoot == null) return;
+        var stats = await Task.Run(() => {
+            double cpu = 0;
+            double gpu = 0;
+            double ram = 0;
 
-        // Получаем текущую высоту виджета
-        double h = MainRoot.ActualHeight;
+            try { if (_cpuCounter != null) cpu = _cpuCounter.NextValue(); } catch { }
+            try
+            {
+                var memStatus = new MEMORYSTATUSEX();
+                if (GlobalMemoryStatusEx(memStatus)) ram = memStatus.dwMemoryLoad;
+            }
+            catch { }
+            try
+            {
+                double gpuSum = 0;
+                foreach (var counter in _gpuCounters) { try { gpuSum += counter.NextValue(); } catch { } }
+                gpu = Math.Min(gpuSum, 100);
+            }
+            catch { }
 
-        // Логика адаптивности: чем меньше высота, тем больше блоков скрываем
-        // Пороги высоты подобраны под отступы XAML
-        BlockRam.Visibility = h >= 270 ? Visibility.Visible : Visibility.Collapsed;
-        BlockGpuTemp.Visibility = h >= 230 ? Visibility.Visible : Visibility.Collapsed;
-        BlockGpu.Visibility = h >= 190 ? Visibility.Visible : Visibility.Collapsed;
-        BlockCpuTemp.Visibility = h >= 140 ? Visibility.Visible : Visibility.Collapsed;
+            return (cpu, gpu, ram);
+        });
 
-        // Если высота совсем маленькая (меньше 100), скрываем даже заголовок SYSTEM
-        TitleText.Visibility = h >= 100 ? Visibility.Visible : Visibility.Collapsed;
+        CpuText = $"{(int)Math.Round(stats.cpu)}%"; CpuValue = stats.cpu;
+        GpuText = $"{(int)Math.Round(stats.gpu)}%"; GpuValue = stats.gpu;
+        RamText = $"{(int)stats.ram}%"; RamValue = stats.ram;
+
+        TempText = "--°C";
+        GpuTempText = "--°C";
+
+        _cpuHistory.Enqueue(stats.cpu);
+        if (_cpuHistory.Count > 30) _cpuHistory.Dequeue();
+        var cpuPoints = new PointCollection();
+        int xCpu = 0;
+        foreach (var val in _cpuHistory) { cpuPoints.Add(new Point(xCpu, 100 - val)); xCpu += 10; }
+        CpuGraphPoints = cpuPoints;
+
+        _gpuHistory.Enqueue(stats.gpu);
+        if (_gpuHistory.Count > 30) _gpuHistory.Dequeue();
+        var gpuPoints = new PointCollection();
+        int xGpu = 0;
+        foreach (var val in _gpuHistory) { gpuPoints.Add(new Point(xGpu, 100 - val)); xGpu += 10; }
+        GpuGraphPoints = gpuPoints;
     }
+
     public override void ApplyShaderSettings(bool enable)
+    {
+        _shaderShouldBeEnabled = enable;
+        ApplySkinSpecificVisuals();
+    }
+
+    // Идеальная синхронизация жизненного цикла с WeatherWidget
+    protected override void ApplySkinSpecificVisuals()
     {
         if (GlassBase == null || _captureTimer == null) return;
         var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
 
-        if (enable)
+        _captureTimer.Stop();
+        GlassBase.Effect = null;
+        SetWindowDisplayAffinity(hwnd, WDA_NONE);
+        WallpaperBrush.ImageSource = null;
+
+        if (_shaderShouldBeEnabled)
         {
-            // 1. Включаем невидимость
-            SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE);
+            if (CurrentStyle == Core.WidgetStyleType.Minimalism)
+            {
+                BackgroundLayer.CornerRadius = new CornerRadius(12);
+                GlassBase.Visibility = Visibility.Collapsed;
+                MinimalBase.Visibility = Visibility.Visible;
+                GlossBevel.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                // Liquid Glass
+                BackgroundLayer.CornerRadius = WidgetCornerRadius;
+                GlassBase.Visibility = Visibility.Visible;
+                MinimalBase.Visibility = Visibility.Collapsed;
+                GlossBevel.Visibility = Visibility.Visible;
 
-            // 2. Включаем шейдер
-            if (GlassBase.Effect == null)
-                GlassBase.Effect = new UI.Shaders.LiquidGlassEffect { Amount = -0.05 }; // Для Media поставь -0.15
+                // СНАЧАЛА полностью скрываем окно от скриншотов
+                SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE);
 
-            // 3. Запускаем захват экрана
-            _captureTimer.Start();
+                // ЗАТЕМ вешаем эффект преломления
+                GlassBase.Effect = new UI.Shaders.LiquidGlassEffect { Amount = -0.15 * BgOpacity };
+
+                // И только в самом конце запускаем таймер захвата!
+                _captureTimer.Start();
+            }
         }
         else
         {
-            // 1. Останавливаем захват экрана (чтобы не было туннеля)
-            _captureTimer.Stop();
+            GlassBase.Visibility = Visibility.Collapsed;
+            MinimalBase.Visibility = Visibility.Visible;
+            GlossBevel.Visibility = Visibility.Collapsed;
+        }
 
-            // 2. Убираем шейдер
-            GlassBase.Effect = null;
+        // Применяем порядок датчиков
+        var state = Core.WidgetHost.CurrentConfig.Widgets.GetValueOrDefault("Hardware_01");
+        if (state != null) ApplyOrder(state.HardwareOrder);
+    }
 
-            // 3. Разрешаем Windows видеть окно для скриншота
-            SetWindowDisplayAffinity(hwnd, WDA_NONE);
-
-            // 4. Очищаем фон, чтобы он стал прозрачным/черным для чистого скрина
-            WallpaperBrush.ImageSource = null;
+    protected override void UpdateShaderIntensity()
+    {
+        if (GlassBase?.Effect is UI.Shaders.LiquidGlassEffect glass)
+        {
+            glass.Amount = -0.15 * BgOpacity;
         }
     }
+
     private void UpdateRealtimeBackground()
     {
-        if (!this.IsVisible || this.ActualWidth <= 0) return;
+        if (!this.IsVisible || MainRoot == null || MainRoot.ActualWidth <= 0 || MainRoot.ActualHeight <= 0) return;
+        if (PresentationSource.FromVisual(MainRoot) == null) return;
+
         try
         {
-            var p = this.PointToScreen(new Point(0, 0));
+            var p = MainRoot.PointToScreen(new Point(0, 0));
+            int w = (int)MainRoot.ActualWidth;
+            int h = (int)MainRoot.ActualHeight;
+
             IntPtr hDesk = GetDesktopWindow(); IntPtr hSrc = GetWindowDC(hDesk);
-            IntPtr hDest = CreateCompatibleDC(hSrc); IntPtr hBmp = CreateCompatibleBitmap(hSrc, (int)ActualWidth, (int)ActualHeight);
+            IntPtr hDest = CreateCompatibleDC(hSrc); IntPtr hBmp = CreateCompatibleBitmap(hSrc, w, h);
             IntPtr hOld = SelectObject(hDest, hBmp);
-            BitBlt(hDest, 0, 0, (int)ActualWidth, (int)ActualHeight, hSrc, (int)p.X, (int)p.Y, 0x00CC0020);
+
+            BitBlt(hDest, 0, 0, w, h, hSrc, (int)p.X, (int)p.Y, 0x00CC0020);
+
             SelectObject(hDest, hOld);
-            var bmp = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(hBmp, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-            bmp.Freeze();
+            var bmp = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                hBmp, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+
             DeleteDC(hDest); ReleaseDC(hDesk, hSrc); DeleteObject(hBmp);
+
+            bmp.Freeze();
             WallpaperBrush.ImageSource = bmp;
         }
         catch { }
     }
-    protected override void ApplySkinSpecificVisuals()
+
+    private void HardwareWidget_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        base.ApplySkinSpecificVisuals();
-        var state = Core.WidgetHost.CurrentConfig.Widgets.GetValueOrDefault("Hardware_01");
-        if (state != null) ApplySwap(state.SwapCpuGpu);
+        if (MainRoot == null) return;
+        double h = MainRoot.ActualHeight;
+
+        BlockRam.Visibility = h >= 270 ? Visibility.Visible : Visibility.Collapsed;
+        BlockGpu.Visibility = h >= 190 ? Visibility.Visible : Visibility.Collapsed;
+        BlockCpuTemp.Visibility = h >= 140 ? Visibility.Visible : Visibility.Collapsed;
+        TitleText.Visibility = h >= 100 ? Visibility.Visible : Visibility.Collapsed;
     }
-    public void ApplySwap(bool swap)
+
+    public void ApplyOrder(List<string> order)
     {
-        System.Windows.Controls.Grid.SetRow(BlockCpu, swap ? 1 : 0);
-        System.Windows.Controls.Grid.SetRow(BlockGpu, swap ? 0 : 1);
-    }
-    private async Task UpdateStatsAsync()
-    {
-        // 1. СБОР ДАННЫХ (Фоновый поток)
-        var stats = await Task.Run(() => {
-            double cpu = 0, gpu = 0, cpuTemp = 0, gpuTemp = 0, ram = 0;
-            foreach (var hw in _computer.Hardware)
-            {
-                hw.Update();
-
-                // Нагрузка
-                var load = hw.Sensors.FirstOrDefault(s => s.SensorType == SensorType.Load && (s.Name.Contains("Total") || hw.Sensors.Count() == 1));
-                if (load?.Value != null)
-                {
-                    if (hw.HardwareType == HardwareType.Cpu) cpu = (double)load.Value;
-                    else if (hw.HardwareType.ToString().Contains("Gpu")) gpu = (double)load.Value;
-                    else if (hw.HardwareType == HardwareType.Memory) ram = (double)load.Value;
-                }
-
-                // Температуры (Агрессивный поиск)
-                var temp = hw.Sensors.FirstOrDefault(s => s.SensorType == SensorType.Temperature &&
-                    (s.Name.Contains("Core") || s.Name.Contains("Package") || s.Name.Contains("Tctl") || s.Name.Contains("CCD")));
-
-                if (temp == null) temp = hw.Sensors.FirstOrDefault(s => s.SensorType == SensorType.Temperature);
-
-                if (temp?.Value != null)
-                {
-                    if (hw.HardwareType == HardwareType.Cpu || hw.HardwareType == HardwareType.Motherboard)
-                        cpuTemp = (double)temp.Value;
-                    else if (hw.HardwareType.ToString().Contains("Gpu"))
-                        gpuTemp = (double)temp.Value;
-                }
-            }
-            return (cpu, gpu, cpuTemp, gpuTemp, ram);
-        });
-        // 2. ОБНОВЛЕНИЕ ТЕКСТА И ПОЛОСОК (Тут переменная stats уже существует!)
-        CpuText = $"{(int)stats.cpu}%"; CpuValue = stats.cpu;
-        GpuText = $"{(int)stats.gpu}%"; GpuValue = stats.gpu;
-        RamText = $"{(int)stats.ram}%"; RamValue = stats.ram;
-        TempText = stats.cpuTemp > 0 ? $"{(int)stats.cpuTemp}°C" : "--°C";
-        GpuTempText = stats.gpuTemp > 0 ? $"{(int)stats.gpuTemp}°C" : "--°C";
-
-        // 3. ГРАФИК CPU
-        _cpuHistory.Enqueue(stats.cpu);
-        if (_cpuHistory.Count > 30) _cpuHistory.Dequeue();
-
-        var cpuPoints = new System.Windows.Media.PointCollection();
-        int xCpu = 0;
-        foreach (var val in _cpuHistory)
+        if (SensorsPanel == null) return;
+        SensorsPanel.Children.Clear();
+        foreach (var item in order)
         {
-            cpuPoints.Add(new System.Windows.Point(xCpu, 100 - val));
-            xCpu += 10;
+            if (item == "CPU" && BlockCpu != null) SensorsPanel.Children.Add(BlockCpu);
+            if (item == "GPU" && BlockGpu != null) SensorsPanel.Children.Add(BlockGpu);
+            if (item == "RAM" && BlockRam != null) SensorsPanel.Children.Add(BlockRam);
         }
-        CpuGraphPoints = cpuPoints;
-
-        // 4. ГРАФИК GPU
-        _gpuHistory.Enqueue(stats.gpu);
-        if (_gpuHistory.Count > 30) _gpuHistory.Dequeue();
-
-        var gpuPoints = new System.Windows.Media.PointCollection();
-        int xGpu = 0;
-        foreach (var val in _gpuHistory)
-        {
-            gpuPoints.Add(new System.Windows.Point(xGpu, 100 - val));
-            xGpu += 10;
-        }
-        GpuGraphPoints = gpuPoints;
     }
-    private void CloseWidget_Click(object sender, RoutedEventArgs e) => GlanceCore.Core.WidgetHost.CloseWidgetExplicitly("Hardware_01");
-    public event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+    private void CloseWidget_Click(object sender, RoutedEventArgs e) => Core.WidgetHost.CloseWidgetExplicitly("Hardware_01");
+
+    protected override void OnClosed(EventArgs e)
+    {
+        _captureTimer.Stop();
+        _statsTimer.Stop();
+        base.OnClosed(e);
+    }
 }

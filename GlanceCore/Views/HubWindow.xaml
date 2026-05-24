@@ -524,15 +524,86 @@
                                                 <!-- СПЕЦИАЛЬНЫЕ НАСТРОЙКИ (Только для Hardware) -->
                                                 <StackPanel x:Name="HardwareSettingsPanel" Visibility="Collapsed">
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,10"/>
-                                                    <Grid Margin="0,10,0,0">
-                                                        <StackPanel>
-                                                            <TextBlock Text="Поменять CPU и GPU" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
-                                                            <TextBlock Text="GPU будет сверху, CPU снизу" Foreground="#80FFFFFF" FontSize="12"/>
+                                                    <TextBlock Text="Порядок датчиков" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <ListBox x:Name="ListHardwareOrder" Background="#20FFFFFF" Foreground="White" BorderThickness="0" Height="100" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                                            <ListBox.ItemContainerStyle>
+                                                                <Style TargetType="ListBoxItem">
+                                                                    <Setter Property="Padding" Value="10,6"/>
+                                                                    <Setter Property="Cursor" Value="Hand"/>
+                                                                    <Setter Property="Background" Value="Transparent"/>
+                                                                    <Setter Property="Template">
+                                                                        <Setter.Value>
+                                                                            <ControlTemplate TargetType="ListBoxItem">
+                                                                                <Border Background="{TemplateBinding Background}" CornerRadius="4" Margin="2">
+                                                                                    <ContentPresenter Margin="{TemplateBinding Padding}"/>
+                                                                                </Border>
+                                                                                <ControlTemplate.Triggers>
+                                                                                    <Trigger Property="IsSelected" Value="True">
+                                                                                        <Setter Property="Background" Value="#40FFFFFF"/>
+                                                                                    </Trigger>
+                                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                                        <Setter Property="Background" Value="#20FFFFFF"/>
+                                                                                    </Trigger>
+                                                                                </ControlTemplate.Triggers>
+                                                                            </ControlTemplate>
+                                                                        </Setter.Value>
+                                                                    </Setter>
+                                                                </Style>
+                                                            </ListBox.ItemContainerStyle>
+                                                        </ListBox>
+
+                                                        <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                                                            <Button Content="▲" Click="BtnMoveUp_Click" Width="32" Height="32" Margin="0,0,0,8" Background="#30FFFFFF" Foreground="White" BorderThickness="0" Cursor="Hand">
+                                                                <Button.Resources>
+                                                                    <Style TargetType="Border">
+                                                                        <Setter Property="CornerRadius" Value="6"/>
+                                                                    </Style>
+                                                                </Button.Resources>
+                                                            </Button>
+                                                            <Button Content="▼" Click="BtnMoveDown_Click" Width="32" Height="32" Background="#30FFFFFF" Foreground="White" BorderThickness="0" Cursor="Hand">
+                                                                <Button.Resources>
+                                                                    <Style TargetType="Border">
+                                                                        <Setter Property="CornerRadius" Value="6"/>
+                                                                    </Style>
+                                                                </Button.Resources>
+                                                            </Button>
                                                         </StackPanel>
-                                                        <CheckBox x:Name="TglSwapCpuGpu" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="TglSwapCpuGpu_Click"/>
                                                     </Grid>
                                                 </StackPanel>
-                                                
+
+                                                <!-- СПЕЦИАЛЬНЫЕ НАСТРОЙКИ (Только для Часов) -->
+                                                <StackPanel x:Name="TimeSettingsPanel" Visibility="Collapsed">
+                                                    <Border Height="1" Background="#15FFFFFF" Margin="0,10"/>
+
+                                                    <TextBlock Text="Разделитель" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                    <ComboBox x:Name="ComboTimeSeparator" SelectionChanged="TimeSettings_Changed" Background="#20FFFFFF" Foreground="Black" Margin="0,0,0,15">
+                                                        <ComboBoxItem Content=":" IsSelected="True"/>
+                                                        <ComboBoxItem Content="."/>
+                                                        <ComboBoxItem Content="/"/>
+                                                        <ComboBoxItem Content="-"/>
+                                                        <ComboBoxItem Content="Пробел"/>
+                                                    </ComboBox>
+
+                                                    <Grid Margin="0,0,0,15">
+                                                        <StackPanel>
+                                                            <TextBlock Text="Показывать секунды" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
+                                                        </StackPanel>
+                                                        <CheckBox x:Name="TglShowSeconds" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="TimeSettings_Changed"/>
+                                                    </Grid>
+
+                                                    <Grid Margin="0,0,0,5">
+                                                        <StackPanel>
+                                                            <TextBlock Text="Вертикальное расположение" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
+                                                        </StackPanel>
+                                                        <CheckBox x:Name="TglVerticalTime" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="TimeSettings_Changed"/>
+                                                    </Grid>
+                                                </StackPanel>
                                                 <!-- Группа шрифтов (скрывается для фото) -->
                                                 <StackPanel x:Name="TypographySettingsPanel">
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,10"/>

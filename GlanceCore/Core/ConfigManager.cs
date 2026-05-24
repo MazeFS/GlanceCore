@@ -18,15 +18,21 @@ public class WidgetState
     public double FontSize { get; set; } = 12.0;
     public double CustomWidth { get; set; } = -1;
     public double CustomHeight { get; set; } = -1;
-    public string SkinId { get; set; } = "LiquidGlass"; // Default skin
-    public double CornerRadius { get; set; } = 24.0; // Скругление углов
-    public bool SwapCpuGpu { get; set; } = false;    // Поменять местами графики
+    public string SkinId { get; set; } = "LiquidGlass";
+
     public string TextColor { get; set; } = "#FFFFFF";
     public string BgColor { get; set; } = "#00000000";
     public string BorderColor { get; set; } = "#40FFFFFF";
     public string CustomData { get; set; } = "";
-}
 
+    // НОВЫЕ СВОЙСТВА (Добавь их сюда!):
+    public double CornerRadius { get; set; } = 24.0;
+    public List<string> HardwareOrder { get; set; } = new List<string> { "CPU", "GPU", "RAM" };
+
+    public string TimeSeparator { get; set; } = ":";
+    public bool ShowSeconds { get; set; } = false;
+    public bool IsVerticalTime { get; set; } = false;
+}
 public class GlobalConfig
 {
     public bool RunAtStartup { get; set; } = false;

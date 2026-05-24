@@ -1,11 +1,12 @@
 ﻿namespace GlanceCore;
 
 using System;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Drawing;
 using System.Reflection;
-using System.Threading; // ДЛЯ MUTEX
+using System.Threading;
 using GlanceCore.Core;
 using WinForms = System.Windows.Forms;
 
@@ -13,12 +14,19 @@ public partial class App : System.Windows.Application
 {
     private WinForms.NotifyIcon? _trayIcon;
     private Views.HubWindow? _hubWindow;
-    private static Mutex? _mutex; // ЗАЩИТА ОТ ДУБЛИКАТОВ
+    private static Mutex? _mutex;
     public bool IsHubVisible => _hubWindow != null && _hubWindow.IsVisible;
+
+    public App()
+    {
+        // РЕГИСТРАЦИЯ ГЛОБАЛЬНЫХ ПЕРЕХВАТЧИКОВ ДЛЯ ДИАГНОСТИКИ СБОЕВ
+        this.DispatcherUnhandledException += App_DispatcherUnhandledException;
+        AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+    }
+
     protected override void OnStartup(StartupEventArgs e)
     {
-        // ИНИЦИАЛИЗАЦИЯ MUTEX (Защита от двойного запуска)
-        _mutex = new Mutex(true, "GlanceCore_SingleInstance_Mutex", out bool createdNew);
+        _mutex = new Mutex(false, "GlanceCore_SingleInstance_Mutex", out bool createdNew);
         if (!createdNew)
         {
             System.Windows.Application.Current.Shutdown();
@@ -27,28 +35,36 @@ public partial class App : System.Windows.Application
 
         base.OnStartup(e);
 
-        WidgetHost.Initialize();
-        WidgetHost.RestoreActiveWidgets();
-
-        _trayIcon = new WinForms.NotifyIcon
+        try
         {
-            Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location),
-            Visible = true,
-            Text = "GlanceCore"
-        };
+            WidgetHost.Initialize();
+            WidgetHost.RestoreActiveWidgets();
 
-        var contextMenu = new WinForms.ContextMenuStrip();
-        contextMenu.Items.Add("Настройки (Hub)", null, (s, ev) => ShowHub());
-        contextMenu.Items.Add("-");
-        contextMenu.Items.Add("Выход", null, (s, ev) => FullShutdown());
+            _trayIcon = new WinForms.NotifyIcon
+            {
+                Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location),
+                Visible = true,
+                Text = "GlanceCore"
+            };
 
-        _trayIcon.ContextMenuStrip = contextMenu;
-        _trayIcon.MouseDoubleClick += (s, ev) => { if (ev.Button == WinForms.MouseButtons.Left) ShowHub(); };
+            var contextMenu = new WinForms.ContextMenuStrip();
+            contextMenu.Items.Add("Настройки (Hub)", null, (s, ev) => ShowHub());
+            contextMenu.Items.Add("-");
+            contextMenu.Items.Add("Выход", null, (s, ev) => FullShutdown());
 
-        if (e.Args.Contains("--autostart"))
-            MemoryOptimizer.Trim();
-        else
-            new Views.SplashWindow().Show();
+            _trayIcon.ContextMenuStrip = contextMenu;
+            _trayIcon.MouseDoubleClick += (s, ev) => { if (ev.Button == WinForms.MouseButtons.Left) ShowHub(); };
+
+            if (e.Args.Contains("--autostart"))
+                MemoryOptimizer.Trim();
+            else
+                new Views.SplashWindow().Show();
+        }
+        catch (Exception ex)
+        {
+            // Перехватываем ошибку на этапе OnStartup
+            LogException(ex, "Критический сбой инициализации OnStartup");
+        }
     }
 
     public void ShowHub()
@@ -73,7 +89,42 @@ public partial class App : System.Windows.Application
             _trayIcon.Visible = false;
             _trayIcon.Dispose();
         }
-        // Явно указываем системный выход WPF
         System.Windows.Application.Current.Shutdown();
+    }
+
+    // --- СИСТЕМА ЗАПИСИ КРИТИЧЕСКИХ ОШИБОК ---
+    private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+        LogException(e.ExceptionObject as Exception, "Критический сбой домена .NET");
+    }
+
+    private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+    {
+        LogException(e.Exception, "Сбой главного потока UI интерфейса");
+        e.Handled = true; // Пытаемся предотвратить бесшумное закрытие
+    }
+
+    private void LogException(Exception? ex, string context)
+    {
+        if (ex == null) return;
+        try
+        {
+            // Путь к файлу лога в папке с установленной программой
+            string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "crash_log.txt");
+            string errorText = $"[{DateTime.Now}] Context: {context}\nException: {ex.ToString()}\n\n";
+
+            File.AppendAllText(logPath, errorText);
+
+            // Показываем красивое и информативное окно ошибки
+            MessageBox.Show(
+                $"Программа GlanceCore столкнулась с системной ошибкой и будет закрыта!\n\n" +
+                $"Тип ошибки: {ex.GetType().Name}\n" +
+                $"Описание: {ex.Message}\n\n" +
+                $"Подробный отчет сохранен в файл:\n{logPath}",
+                "Критическая ошибка GlanceCore",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+        catch { }
     }
 }

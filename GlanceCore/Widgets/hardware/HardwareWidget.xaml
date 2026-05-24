@@ -28,14 +28,20 @@
 		<!-- СЛОЙ 1: ФОН (Именно он реагирует на ползунок прозрачности BgOpacity) -->
 		<Border x:Name="BackgroundLayer" CornerRadius="{Binding WidgetCornerRadius}" BorderBrush="{Binding BorderColorBrush}" BorderThickness="1.5" ClipToBounds="True" Opacity="{Binding BgOpacity}">
 			<Grid>
+				<!-- Стекло -->
 				<Border x:Name="GlassBase" CornerRadius="{Binding WidgetCornerRadius}">
 					<Border.Background>
 						<ImageBrush x:Name="WallpaperBrush" Stretch="Fill"/>
 					</Border.Background>
 				</Border>
-				<Border x:Name="MinimalBase" Background="{Binding BgColorBrush}" CornerRadius="{Binding WidgetCornerRadius}"/>
-				<Border Background="#45000000" CornerRadius="{Binding WidgetCornerRadius}"/>
-				<!-- Тонировка -->
+
+				<!-- 2. Цветная тонировка из Хаба (Полупрозрачная, чтобы стекло просвечивало!) -->
+				<Border x:Name="MinimalBase" Background="{Binding BgColorBrush}" CornerRadius="{Binding WidgetCornerRadius}" Opacity="0.3"/>
+
+				<!-- 3. Базовое затемнение (Чтобы белый текст всегда читался на светлых обоях) -->
+				<Border Background="#30000000" CornerRadius="{Binding WidgetCornerRadius}"/>
+
+				<!-- 4. Блики по краям -->
 				<Border x:Name="GlossBevel" CornerRadius="{Binding WidgetCornerRadius}" BorderBrush="#35FFFFFF" BorderThickness="1.5" Margin="1">
 					<Border.Background>
 						<RadialGradientBrush Center="0.5,0" RadiusX="0.9" RadiusY="0.6">
@@ -52,16 +58,11 @@
 			<StackPanel VerticalAlignment="Center">
 				<TextBlock x:Name="TitleText" Text="SYSTEM" FontWeight="Black" Foreground="{Binding TextColorBrush}" HorizontalAlignment="Center" Margin="0,0,0,16"/>
 
-				<Grid x:Name="SensorsGrid">
-					<Grid.RowDefinitions>
-						<RowDefinition Height="Auto"/>
-						<!-- Слот 0 (Обычно CPU) -->
-						<RowDefinition Height="Auto"/>
-						<!-- Слот 1 (Обычно GPU) -->
-					</Grid.RowDefinitions>
+				<!-- ВОТ ЗДЕСЬ ИСПОЛЬЗУЕТСЯ SensorsPanel -->
+				<StackPanel x:Name="SensorsPanel">
 
 					<!-- БЛОК CPU -->
-					<StackPanel x:Name="BlockCpu" Grid.Row="0" Margin="0,0,0,12">
+					<StackPanel x:Name="BlockCpu" Margin="0,0,0,12">
 						<Grid Margin="0,0,0,6">
 							<TextBlock Text="CPU" Foreground="{Binding TextColorBrush}" Opacity="0.8" HorizontalAlignment="Left" FontWeight="Medium"/>
 							<TextBlock Text="{Binding CpuText}" Foreground="{Binding TextColorBrush}" HorizontalAlignment="Right" FontWeight="Bold"/>
@@ -77,7 +78,7 @@
 					</StackPanel>
 
 					<!-- БЛОК GPU -->
-					<StackPanel x:Name="BlockGpu" Grid.Row="1" Margin="0,0,0,12">
+					<StackPanel x:Name="BlockGpu" Margin="0,0,0,12">
 						<Grid Margin="0,0,0,6">
 							<TextBlock Text="GPU" Foreground="{Binding TextColorBrush}" Opacity="0.8" HorizontalAlignment="Left" FontWeight="Medium"/>
 							<TextBlock Text="{Binding GpuText}" Foreground="{Binding TextColorBrush}" HorizontalAlignment="Right" FontWeight="Bold"/>
@@ -86,20 +87,17 @@
 							<Polyline Points="{Binding GpuGraphPoints}" Stroke="#0A84FF" StrokeThickness="2" Stretch="Fill" StrokeLineJoin="Round"/>
 						</Grid>
 						<ProgressBar Style="{StaticResource IOSProgressBar}" Value="{Binding GpuValue}" Maximum="100" Height="6" Foreground="{Binding TextColorBrush}"/>
-						<Grid Margin="0,6,0,0" x:Name="BlockGpuTemp">
-							<TextBlock Text="TEMP" Foreground="{Binding TextColorBrush}" Opacity="0.6" FontSize="10" HorizontalAlignment="Left"/>
-							<TextBlock Text="{Binding GpuTempText}" Foreground="{Binding TextColorBrush}" Opacity="0.8" FontSize="10" HorizontalAlignment="Right" FontWeight="Bold"/>
-						</Grid>
 					</StackPanel>
-				</Grid>
 
-				<!-- БЛОК RAM -->
-				<StackPanel x:Name="BlockRam">
-					<Grid Margin="0,0,0,6">
-						<TextBlock Text="RAM" Foreground="{Binding TextColorBrush}" Opacity="0.8" HorizontalAlignment="Left" FontWeight="Medium"/>
-						<TextBlock Text="{Binding RamText}" Foreground="{Binding TextColorBrush}" HorizontalAlignment="Right" FontWeight="Bold"/>
-					</Grid>
-					<ProgressBar Style="{StaticResource IOSProgressBar}" Value="{Binding RamValue}" Maximum="100" Height="6" Foreground="{Binding TextColorBrush}"/>
+					<!-- БЛОК RAM -->
+					<StackPanel x:Name="BlockRam" Margin="0,0,0,12">
+						<Grid Margin="0,0,0,6">
+							<TextBlock Text="RAM" Foreground="{Binding TextColorBrush}" Opacity="0.8" HorizontalAlignment="Left" FontWeight="Medium"/>
+							<TextBlock Text="{Binding RamText}" Foreground="{Binding TextColorBrush}" HorizontalAlignment="Right" FontWeight="Bold"/>
+						</Grid>
+						<ProgressBar Style="{StaticResource IOSProgressBar}" Value="{Binding RamValue}" Maximum="100" Height="6" Foreground="{Binding TextColorBrush}"/>
+					</StackPanel>
+
 				</StackPanel>
 			</StackPanel>
 		</Grid>

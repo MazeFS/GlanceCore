@@ -24,7 +24,6 @@
 
 	<ItemGroup>
 		<PackageReference Include="MahApps.Metro.IconPacks.SimpleIcons" Version="6.2.1" />
-		<PackageReference Include="LibreHardwareMonitorLib" Version="0.9.6" />
 		<PackageReference Include="MahApps.Metro.IconPacks.Lucide" Version="6.2.1" />
 		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142" />
 		<PackageReference Include="Tinkoff.InvestApi" Version="0.6.21" />

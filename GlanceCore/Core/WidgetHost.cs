@@ -61,6 +61,17 @@ public static class WidgetHost
             WidgetType = typeof(ImageFrameWidget)
         });
 
+        // 5. Time Widget (Часы)
+        AvailableWidgets.Add(new WidgetInfo
+        {
+            Id = "Time_01",
+            Title = "Часы",
+            Description = "Текущее время",
+            PreviewImage = "/Resource/ScreenShots/HardwarePreview.png", // Можешь позже нарисовать свою картинку TimePreview.png
+            Width = 250,
+            WidgetType = typeof(GlanceCore.Widgets.Time.TimeWidget)
+        });
+
         // 4. Weather
         AvailableWidgets.Add(new WidgetInfo {
             Id = "Weather_01",

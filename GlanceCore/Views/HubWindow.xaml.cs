@@ -14,7 +14,24 @@ public partial class HubWindow : Window
 {
     private bool _isLoaded = false;
     private string _editingWidgetId = "";
+    private void TimeSettings_Changed(object sender, RoutedEventArgs e)
+    {
+        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId)) return;
+        var cfg = Core.WidgetHost.CurrentConfig;
+        if (cfg.Widgets.ContainsKey(_editingWidgetId))
+        {
+            var state = cfg.Widgets[_editingWidgetId];
 
+            state.ShowSeconds = TglShowSeconds.IsChecked == true;
+            state.IsVerticalTime = TglVerticalTime.IsChecked == true;
+
+            if (ComboTimeSeparator.SelectedItem is ComboBoxItem item)
+                state.TimeSeparator = item.Content.ToString() ?? ":";
+
+            Core.ConfigManager.Save(cfg);
+            Core.WidgetHost.RefreshWidgetVisuals(_editingWidgetId);
+        }
+    }
     public HubWindow()
     {
         InitializeComponent();
@@ -61,56 +78,34 @@ public partial class HubWindow : Window
     // --- WIDGET CONFIGURATION ---
     private void BtnWidgetSettings_Click(object sender, RoutedEventArgs e)
     {
-
         if (sender is Button btn && btn.Tag != null)
         {
             _editingWidgetId = btn.Tag.ToString()!;
             ConfigTitle.Text = $"Настройки: {_editingWidgetId.Replace("_01", "")}";
 
             _isLoaded = false;
-            var state = Core.WidgetHost.CurrentConfig.Widgets.GetValueOrDefault(_editingWidgetId, new Core.WidgetState());
+            var cfg = Core.WidgetHost.CurrentConfig;
+            var state = cfg.Widgets.GetValueOrDefault(_editingWidgetId, new Core.WidgetState());
 
-            // 1. УМНЫЕ ПАНЕЛИ (Адаптация под виджет)
-            if (_editingWidgetId == "Image_01")
-            {
-                BtnUploadImage.Visibility = Visibility.Visible;
-                TypographySettingsPanel.Visibility = Visibility.Collapsed;
-            }
-            else
-            {
-                BtnUploadImage.Visibility = Visibility.Collapsed;
-                TypographySettingsPanel.Visibility = Visibility.Visible;
-            }
+            // 1. АДАПТАЦИЯ ПАНЕЛЕЙ: Показываем нужные настройки
+            if (HardwareSettingsPanel != null) HardwareSettingsPanel.Visibility = _editingWidgetId == "Hardware_01" ? Visibility.Visible : Visibility.Collapsed;
 
-            // 2. ЗАГРУЗКА ЗНАЧЕНИЙ
+            // ВОТ ЭТА СТРОКА ВКЛЮЧАЕТ НАСТРОЙКИ ЧАСОВ:
+            if (TimeSettingsPanel != null) TimeSettingsPanel.Visibility = _editingWidgetId == "Time_01" ? Visibility.Visible : Visibility.Collapsed;
+
+            if (_editingWidgetId == "Image_01") { BtnUploadImage.Visibility = Visibility.Visible; TypographySettingsPanel.Visibility = Visibility.Collapsed; }
+            else { BtnUploadImage.Visibility = Visibility.Collapsed; TypographySettingsPanel.Visibility = Visibility.Visible; }
+
+            // 2. ЗАГРУЗКА БАЗОВЫХ ЗНАЧЕНИЙ (Ползунки)
             if (SldOpacity != null) SldOpacity.Value = state.Opacity;
             if (SldScale != null) SldScale.Value = state.Scale;
-            if (TglWidgetTopmost != null) TglWidgetTopmost.IsChecked = state.IsAlwaysOnTop;
-            if (SldFontSize != null) SldFontSize.Value = state.FontSize;
+            if (SldRadius != null) SldRadius.Value = state.CornerRadius;
             if (SldWidth != null) SldWidth.Value = state.CustomWidth > 0 ? state.CustomWidth : 220;
             if (SldHeight != null) SldHeight.Value = state.CustomHeight > 0 ? state.CustomHeight : 280;
+            if (TglWidgetTopmost != null) TglWidgetTopmost.IsChecked = state.IsAlwaysOnTop;
+            if (SldFontSize != null) SldFontSize.Value = state.FontSize;
 
-            if (ComboFont != null)
-            {
-                foreach (ComboBoxItem item in ComboFont.Items)
-                {
-                    if (item.Content.ToString() == state.FontFamily)
-                    {
-                        item.IsSelected = true;
-                        break;
-                    }
-                }
-            }
-            // (Внутри BtnWidgetSettings_Click, где загружаются слайдеры)
-            if (SldRadius != null) SldRadius.Value = state.CornerRadius;
-
-            // Показываем панель Hardware только для Hardware
-            if (HardwareSettingsPanel != null)
-                HardwareSettingsPanel.Visibility = _editingWidgetId == "Hardware_01" ? Visibility.Visible : Visibility.Collapsed;
-
-            if (TglSwapCpuGpu != null) TglSwapCpuGpu.IsChecked = state.SwapCpuGpu;
-
-            // Красим кружочки в текущие цвета
+            // Цвета
             try
             {
                 var conv = new System.Windows.Media.BrushConverter();
@@ -118,9 +113,77 @@ public partial class HubWindow : Window
                 if (CircleBgColor != null) CircleBgColor.Fill = (System.Windows.Media.Brush)conv.ConvertFromString(state.BgColor)!;
             }
             catch { }
+
+            // Шрифты
+            if (ComboFont != null)
+            {
+                foreach (ComboBoxItem item in ComboFont.Items)
+                    if (item.Content.ToString() == state.FontFamily) { item.IsSelected = true; break; }
+            }
+
+            // 3. ЗАГРУЗКА СПЕЦИФИЧНЫХ НАСТРОЕК (Hardware / Time)
+            if (_editingWidgetId == "Hardware_01" && ListHardwareOrder != null)
+            {
+                ListHardwareOrder.Items.Clear();
+                foreach (var item in state.HardwareOrder) ListHardwareOrder.Items.Add(item);
+            }
+            else if (_editingWidgetId == "Time_01")
+            {
+                if (TglShowSeconds != null) TglShowSeconds.IsChecked = state.ShowSeconds;
+                if (TglVerticalTime != null) TglVerticalTime.IsChecked = state.IsVerticalTime;
+
+                if (ComboTimeSeparator != null)
+                {
+                    foreach (ComboBoxItem item in ComboTimeSeparator.Items)
+                    {
+                        string targetSep = state.TimeSeparator == " " ? "Пробел" : state.TimeSeparator;
+                        if (item.Content.ToString() == targetSep) { item.IsSelected = true; break; }
+                    }
+                }
+            }
+
             _isLoaded = true;
             WidgetsPanel.Visibility = Visibility.Collapsed;
             WidgetConfigPanel.Visibility = Visibility.Visible;
+        }
+    }
+    // --- МЕТОДЫ СОРТИРОВКИ ДАТЧИКОВ HARDWARE ---
+    private void BtnMoveUp_Click(object sender, RoutedEventArgs e)
+    {
+        if (ListHardwareOrder != null && ListHardwareOrder.SelectedIndex > 0)
+        {
+            int idx = ListHardwareOrder.SelectedIndex;
+            var item = ListHardwareOrder.Items[idx];
+            ListHardwareOrder.Items.RemoveAt(idx);
+            ListHardwareOrder.Items.Insert(idx - 1, item);
+            ListHardwareOrder.SelectedIndex = idx - 1;
+            SaveHardwareOrder();
+        }
+    }
+
+    private void BtnMoveDown_Click(object sender, RoutedEventArgs e)
+    {
+        if (ListHardwareOrder != null && ListHardwareOrder.SelectedIndex >= 0 && ListHardwareOrder.SelectedIndex < ListHardwareOrder.Items.Count - 1)
+        {
+            int idx = ListHardwareOrder.SelectedIndex;
+            var item = ListHardwareOrder.Items[idx];
+            ListHardwareOrder.Items.RemoveAt(idx);
+            ListHardwareOrder.Items.Insert(idx + 1, item);
+            ListHardwareOrder.SelectedIndex = idx + 1;
+            SaveHardwareOrder();
+        }
+    }
+
+    private void SaveHardwareOrder()
+    {
+        if (ListHardwareOrder == null) return;
+
+        var cfg = Core.WidgetHost.CurrentConfig;
+        if (cfg.Widgets.ContainsKey(_editingWidgetId))
+        {
+            cfg.Widgets[_editingWidgetId].HardwareOrder = System.Linq.Enumerable.ToList(System.Linq.Enumerable.Cast<string>(ListHardwareOrder.Items));
+            Core.ConfigManager.Save(cfg);
+            Core.WidgetHost.RefreshWidgetVisuals(_editingWidgetId);
         }
     }
 
@@ -161,12 +224,28 @@ public partial class HubWindow : Window
                 string hex = $"#FF{dialog.Color.R:X2}{dialog.Color.G:X2}{dialog.Color.B:X2}";
 
                 var cfg = Core.WidgetHost.CurrentConfig;
-                if (!cfg.Widgets.ContainsKey(_editingWidgetId)) return;
+                // Защита от Null Reference (CS8602)
+                if (cfg == null || cfg.Widgets == null || !cfg.Widgets.ContainsKey(_editingWidgetId)) return;
 
-                if (target == "Text") cfg.Widgets[_editingWidgetId].TextColor = hex;
-                else if (target == "Bg") cfg.Widgets[_editingWidgetId].BgColor = hex;
+                var state = cfg.Widgets[_editingWidgetId];
+                if (state == null) return;
 
-                SetButtonEllipseColor(btn, hex);
+                var converter = new System.Windows.Media.BrushConverter();
+                var brush = converter.ConvertFromString(hex) as System.Windows.Media.Brush;
+                if (brush == null) return;
+
+                if (target == "Text")
+                {
+                    state.TextColor = hex;
+                    if (CircleTextColor != null) CircleTextColor.Fill = brush;
+                }
+                else if (target == "Bg")
+                {
+                    state.BgColor = hex;
+                    if (CircleBgColor != null) CircleBgColor.Fill = brush;
+                }
+
+                Core.ConfigManager.Save(cfg);
                 ApplyCurrentWidgetSettings();
             }
         }
@@ -235,25 +314,7 @@ public partial class HubWindow : Window
         Core.AutoStartManager.SetAutoStart(cfg.RunAtStartup);
         Core.WidgetHost.ApplySystemSettings();
     }
-    private void TglSwapCpuGpu_Click(object sender, RoutedEventArgs e)
-    {
-        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId)) return;
-        var cfg = Core.WidgetHost.CurrentConfig;
-        if (cfg.Widgets.ContainsKey(_editingWidgetId))
-        {
-            cfg.Widgets[_editingWidgetId].SwapCpuGpu = TglSwapCpuGpu.IsChecked == true;
-            Core.ConfigManager.Save(cfg);
 
-            // Вызываем метод смены мест напрямую в виджете
-            if (Core.WidgetHost.AvailableWidgets.Any(w => w.Id == _editingWidgetId))
-            {
-                // Для этого нужно получить окно из WidgetHost. 
-                // Так как _activeWidgets приватный, мы просто вызовем RefreshWidgetVisuals, 
-                // а в HardwareWidget.xaml.cs переопределим ApplySkinSpecificVisuals
-            }
-            Core.WidgetHost.RefreshWidgetVisuals(_editingWidgetId);
-        }
-    }
     // --- NAVIGATION AND WINDOW CONTROLS ---
     private void OpenLink_Click(object sender, RoutedEventArgs e)
     {
@@ -347,6 +408,7 @@ public partial class HubWindow : Window
 
     // Stub for unused event from old XAML to prevent compilation failure
     private void Style_Changed(object sender, SelectionChangedEventArgs e) { }
+
 }
 
 public class StyleItemModel

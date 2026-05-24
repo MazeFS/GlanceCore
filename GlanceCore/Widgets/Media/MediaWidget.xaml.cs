@@ -14,7 +14,7 @@ using System.Drawing;
 
 namespace GlanceCore.Widgets.Media;
 
-public partial class MediaWidget : BaseWidgetWindow, INotifyPropertyChanged
+public partial class MediaWidget : BaseWidgetWindow
 {
     [DllImport("gdi32.dll")] static extern bool BitBlt(IntPtr hdcDest, int xDest, int yDest, int wDest, int hDest, IntPtr hdcSource, int xSrc, int ySrc, int rop);
     [DllImport("user32.dll")] static extern IntPtr GetDesktopWindow();
@@ -25,7 +25,6 @@ public partial class MediaWidget : BaseWidgetWindow, INotifyPropertyChanged
     [DllImport("gdi32.dll")] static extern IntPtr SelectObject(IntPtr hDC, IntPtr hObject);
     [DllImport("gdi32.dll")] static extern bool DeleteDC(IntPtr hDC);
     [DllImport("gdi32.dll")] static extern bool DeleteObject(IntPtr hObject);
-    [DllImport("user32.dll")] static extern uint SetWindowDisplayAffinity(IntPtr hwnd, uint dwAffinity);
 
     private GlobalSystemMediaTransportControlsSessionManager? _sessionManager;
     private GlobalSystemMediaTransportControlsSession? _currentSession;
@@ -237,6 +236,4 @@ public partial class MediaWidget : BaseWidgetWindow, INotifyPropertyChanged
 
     private void CloseWidget_Click(object sender, RoutedEventArgs e) => Core.WidgetHost.CloseWidgetExplicitly("Media_01");
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 }

@@ -7,7 +7,7 @@ float4 main(float2 uv : TEXCOORD) : COLOR
     float dist = length(dir);
     
     // Искажение усиливается к краям (эффект лупы/линзы)
-    float distortion = pow(dist * 2.0, 2.0);
+    float distortion = pow(dist * 1.0, 1.0);
     
     float2 refractedUV = uv - (dir * distortion * amount);
     return tex2D(input, refractedUV);
