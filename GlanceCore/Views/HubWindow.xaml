@@ -27,6 +27,52 @@
         </Storyboard>
         <!-- Элегантный Apple-style Slider -->
 
+        <Style x:Key="GearBtnStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="Transparent" RenderTransformOrigin="0.5,0.5">
+                            <iconPacks:PackIconLucide x:Name="GearIcon" Kind="Settings" Width="16" Height="16" Foreground="#A0FFFFFF" RenderTransformOrigin="0.5,0.5">
+                                <iconPacks:PackIconLucide.RenderTransform>
+                                    <RotateTransform Angle="0"/>
+                                </iconPacks:PackIconLucide.RenderTransform>
+                            </iconPacks:PackIconLucide>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="GearIcon" Property="Foreground" Value="#8A2BE2"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="GearIcon" Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)" To="90" Duration="0:0:0.3">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <QuadraticEase EasingMode="EaseOut"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="GearIcon" Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)" To="0" Duration="0:0:0.3">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <QuadraticEase EasingMode="EaseOut"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style TargetType="ComboBoxItem">
             <Setter Property="Background" Value="#150E24"/>
             <Setter Property="Foreground" Value="White"/>
@@ -698,7 +744,51 @@
                                                         <CheckBox x:Name="TglVerticalTime" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="TimeSettings_Changed"/>
                                                     </Grid>
                                                 </StackPanel>
+                                                <StackPanel x:Name="AiSettingsPanel" Visibility="Collapsed">
+                                                    <Border Height="1" Background="#15FFFFFF" Margin="0,10"/>
 
+                                                    <TextBlock Text="API Endpoint" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                    <TextBox x:Name="TxtAiEndpoint" Height="30" Background="#20FFFFFF" Foreground="White" BorderThickness="0" Padding="8,0" VerticalContentAlignment="Center" TextChanged="AiSettings_Changed">
+                                                        <TextBox.Resources>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="CornerRadius" Value="6"/>
+                                                            </Style>
+                                                        </TextBox.Resources>
+                                                    </TextBox>
+
+                                                    <TextBlock Text="API Key (Пусто для Ollama)" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                    <TextBox x:Name="TxtAiKey" Height="30" Background="#20FFFFFF" Foreground="White" BorderThickness="0" Padding="8,0" VerticalContentAlignment="Center" TextChanged="AiSettings_Changed">
+                                                        <TextBox.Resources>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="CornerRadius" Value="6"/>
+                                                            </Style>
+                                                        </TextBox.Resources>
+                                                    </TextBox>
+
+                                                    <TextBlock Text="Имя модели (например, llama3)" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                    <TextBox x:Name="TxtAiModel" Height="30" Background="#20FFFFFF" Foreground="White" BorderThickness="0" Padding="8,0" VerticalContentAlignment="Center" TextChanged="AiSettings_Changed">
+                                                        <TextBox.Resources>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="CornerRadius" Value="6"/>
+                                                            </Style>
+                                                        </TextBox.Resources>
+                                                    </TextBox>
+
+                                                    <TextBlock Text="Системный промпт (Поведение)" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                    <TextBox x:Name="TxtAiPrompt" Height="60" AcceptsReturn="True" TextWrapping="Wrap" Background="#20FFFFFF" Foreground="White" BorderThickness="0" Padding="8,5" VerticalContentAlignment="Top" TextChanged="AiSettings_Changed">
+                                                        <TextBox.Resources>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="CornerRadius" Value="6"/>
+                                                            </Style>
+                                                        </TextBox.Resources>
+                                                    </TextBox>
+
+                                                    <Grid Margin="0,10,0,5">
+                                                        <TextBlock Text="Температура (Креативность)" Foreground="White" Opacity="0.6" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="{Binding Value, ElementName=SldAiTemp, StringFormat={}{0:F1}}" Foreground="White" Opacity="0.8" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                                    </Grid>
+                                                    <Slider x:Name="SldAiTemp" Minimum="0.0" Maximum="1.5" ValueChanged="AiSlider_Changed"/>
+                                                </StackPanel>
                                                 <StackPanel x:Name="TypographySettingsPanel">
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,10"/>
                                                     <TextBlock Text="Шрифт" Foreground="MediumPurple" Opacity="0.6" Margin="0,10,0,5"/>

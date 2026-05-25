@@ -37,13 +37,14 @@ public class GlobalConfig
 {
     public bool RunAtStartup { get; set; } = false;
     public bool LockWidgets { get; set; } = false;
-
-    // English: Standards names for HubWindow logic
     public bool EnableShader { get; set; } = true;
     public bool StreamerMode { get; set; } = false;
-
     public bool GameMode { get; set; } = true;
-    public bool DisableShaderForScreenshots { get; set; } = false;
+    public string AiEndpoint { get; set; } = "https://api.openai.com/v1";
+    public string AiApiKey { get; set; } = "";
+    public string AiModel { get; set; } = "llama3";
+    public string AiSystemPrompt { get; set; } = "You are a helpful assistant.";
+    public double AiTemperature { get; set; } = 0.7;
 
     public Dictionary<string, WidgetState> Widgets { get; set; } = new();
 }

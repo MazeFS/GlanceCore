@@ -1,20 +1,22 @@
 namespace GlanceCore.Views;
 
+using GlanceCore.Core;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media.Animation;
 using System.Windows.Media;
-using GlanceCore.Core;
-using System.Collections.Generic;
+using System.Windows.Media.Animation;
+using System.Windows.Threading;
 
 public partial class HubWindow : Window
 {
     private bool _isLoaded = false;
     private string _editingWidgetId = "";
     private bool _isUpdatingSize = false;
+    private DispatcherTimer? _win10CaptureTimer;
     private void TimeSettings_Changed(object sender, RoutedEventArgs e)
     {
         if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId)) return;
@@ -90,7 +92,7 @@ public partial class HubWindow : Window
 
             // 1. АДАПТАЦИЯ ПАНЕЛЕЙ: Показываем нужные настройки
             if (HardwareSettingsPanel != null) HardwareSettingsPanel.Visibility = _editingWidgetId == "Hardware_01" ? Visibility.Visible : Visibility.Collapsed;
-
+            if (AiSettingsPanel != null) AiSettingsPanel.Visibility = _editingWidgetId == "AI_01" ? Visibility.Visible : Visibility.Collapsed;
             // ВОТ ЭТА СТРОКА ВКЛЮЧАЕТ НАСТРОЙКИ ЧАСОВ:
             if (TimeSettingsPanel != null) TimeSettingsPanel.Visibility = _editingWidgetId == "Time_01" ? Visibility.Visible : Visibility.Collapsed;
 
@@ -299,7 +301,8 @@ public partial class HubWindow : Window
         if (TglWidgetTopmost != null) state.IsAlwaysOnTop = TglWidgetTopmost.IsChecked == true;
         if (SldFontSize != null) state.FontSize = SldFontSize.Value;
         if (SldRadius != null) state.CornerRadius = SldRadius.Value;
-
+        if (TxtAiKey != null) TxtAiKey.Text = cfg.AiApiKey;
+        if (TxtAiEndpoint != null) TxtAiEndpoint.Text = cfg.AiEndpoint;
         if (SldWidth != null) state.CustomWidth = SldWidth.Value;
         if (SldHeight != null) state.CustomHeight = SldHeight.Value;
 
@@ -315,14 +318,33 @@ public partial class HubWindow : Window
     {
         if (!_isLoaded) return;
         var cfg = Core.WidgetHost.CurrentConfig;
-        cfg.GameMode = TglGameMode.IsChecked == true;
         cfg.RunAtStartup = TglAutoStart.IsChecked == true;
         cfg.LockWidgets = TglLock.IsChecked == true;
         cfg.EnableShader = TglShader.IsChecked == true;
         cfg.StreamerMode = TglStreamerMode.IsChecked == true;
+        cfg.GameMode = TglGameMode.IsChecked == true;
 
         Core.AutoStartManager.SetAutoStart(cfg.RunAtStartup);
         Core.WidgetHost.ApplySystemSettings();
+    }
+
+    private void AiSettings_Changed(object sender, TextChangedEventArgs e)
+    {
+        if (!_isLoaded) return;
+        var cfg = Core.WidgetHost.CurrentConfig;
+        if (TxtAiEndpoint != null) cfg.AiEndpoint = TxtAiEndpoint.Text;
+        if (TxtAiKey != null) cfg.AiApiKey = TxtAiKey.Text;
+        if (TxtAiModel != null) cfg.AiModel = TxtAiModel.Text;
+        if (TxtAiPrompt != null) cfg.AiSystemPrompt = TxtAiPrompt.Text;
+        Core.ConfigManager.Save(cfg);
+    }
+
+    private void AiSlider_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (!_isLoaded) return;
+        var cfg = Core.WidgetHost.CurrentConfig;
+        if (SldAiTemp != null) cfg.AiTemperature = SldAiTemp.Value;
+        Core.ConfigManager.Save(cfg);
     }
 
     // --- NAVIGATION AND WINDOW CONTROLS ---

@@ -13,7 +13,6 @@ using System.Windows.Threading;
 
 public class BaseWidgetWindow : Window, INotifyPropertyChanged
 {
-    // --- GDI+ И DWM (ЕДИНАЯ БАЗА ДЛЯ ВСЕХ ПЛАГИНОВ) ---
     [DllImport("user32.dll")] protected static extern uint SetWindowDisplayAffinity(IntPtr hwnd, uint dwAffinity);
     protected const uint WDA_NONE = 0x00000000;
     protected const uint WDA_EXCLUDEFROMCAPTURE = 0x00000011;
@@ -28,14 +27,15 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
     [DllImport("gdi32.dll")] private static extern bool DeleteDC(IntPtr dc);
     [DllImport("gdi32.dll")] private static extern bool DeleteObject(IntPtr obj);
 
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    protected static extern int SystemParametersInfo(int uAction, int uParam, System.Text.StringBuilder lpvParam, int fuWinIni);
+
     protected bool _isLocked = false;
     protected bool _shaderShouldBeEnabled = true;
 
-    // Таймеры и динамический FPS
     protected DispatcherTimer? _captureTimer;
     private DispatcherTimer? _fpsResetTimer;
 
-    // Автоматический поиск XAML-элементов
     protected FrameworkElement? MainRoot => FindName("MainRoot") as FrameworkElement;
     protected ImageBrush? WallpaperBrush => FindName("WallpaperBrush") as ImageBrush;
     protected Border? GlassBase => FindName("GlassBase") as Border;
@@ -43,7 +43,6 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
     protected Border? GlossBevel => FindName("GlossBevel") as Border;
     protected Border? BackgroundLayer => FindName("BackgroundLayer") as Border;
 
-    // --- COLOR BINDINGS ---
     private CornerRadius _widgetCornerRadius = new CornerRadius(24);
     public CornerRadius WidgetCornerRadius { get => _widgetCornerRadius; set { _widgetCornerRadius = value; OnPropertyChanged(); } }
     private double _bgOpacity = 1.0;
@@ -63,7 +62,6 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
         ShowInTaskbar = false;
         SizeToContent = SizeToContent.WidthAndHeight;
 
-        // ПУНКТ 3: УМНЫЙ ТРОТТЛИНГ (15 FPS в простое, 60 FPS при движении)
         _captureTimer = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(66) };
         _captureTimer.Tick += (s, e) => UpdateRealtimeBackground();
 
@@ -74,6 +72,7 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
         };
 
         this.LocationChanged += (s, e) => {
+            if (Core.WidgetHost.CurrentConfig.Win10Compatibility) UpdateWin10WallpaperOffset();
             if (_captureTimer != null) _captureTimer.Interval = TimeSpan.FromMilliseconds(16);
             _fpsResetTimer?.Stop();
             _fpsResetTimer?.Start();
@@ -81,6 +80,8 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
 
         this.Loaded += (s, e) => ApplySkinSpecificVisuals();
     }
+
+
 
     protected void UpdateRealtimeBackground()
     {
@@ -118,9 +119,7 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
     {
         double width = MainRoot?.ActualWidth ?? 220.0;
         if (width <= 0) width = 220.0;
-
-        double baseAmount = -30.0 / width;
-        return Math.Clamp(baseAmount, -0.22, -0.06) * BgOpacity;
+        return Math.Clamp(-30.0 / width, -0.22, -0.06) * BgOpacity;
     }
 
     protected virtual void ApplySkinSpecificVisuals()
@@ -141,9 +140,9 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
             if (MinimalBase != null) MinimalBase.Visibility = Visibility.Collapsed;
             if (GlossBevel != null) GlossBevel.Visibility = Visibility.Visible;
 
-            bool isStreamerMode = Core.WidgetHost.CurrentConfig.StreamerMode;
+            bool isStreamer = Core.WidgetHost.CurrentConfig.StreamerMode;
 
-            if (isStreamerMode)
+            if (isStreamer)
             {
                 SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE);
                 Dispatcher.BeginInvoke(new Action(() => {
@@ -167,13 +166,7 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
         }
     }
 
-    protected virtual void UpdateShaderIntensity()
-    {
-        if (GlassBase?.Effect is UI.Shaders.LiquidGlassEffect glass)
-        {
-            glass.Amount = GetAdjustedAmount();
-        }
-    }
+
 
     public virtual void ApplySettings(Core.WidgetState state, bool isGlobalLocked, bool isGlobalShaderEnabled)
     {
@@ -203,6 +196,10 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
         ApplyShaderSettings(isGlobalShaderEnabled);
     }
 
+    protected virtual void UpdateShaderIntensity()
+    {
+        if (GlassBase?.Effect is UI.Shaders.LiquidGlassEffect glass) glass.Amount = GetAdjustedAmount();
+    }
 
     public virtual void RefreshCustomData() { }
 
