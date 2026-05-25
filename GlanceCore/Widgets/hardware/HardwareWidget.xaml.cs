@@ -36,6 +36,7 @@ public partial class HardwareWidget : GlanceCore.Widgets.BaseWidgetWindow
     private double _gpuValue = 0; public double GpuValue { get => _gpuValue; set { _gpuValue = value; OnPropertyChanged(); } }
     private string _ramText = "0%"; public string RamText { get => _ramText; set { _ramText = value; OnPropertyChanged(); } }
     private double _ramValue = 0; public double RamValue { get => _ramValue; set { _ramValue = value; OnPropertyChanged(); } }
+    private string _tempText = "--°C"; public string TempText { get => _tempText; set { _tempText = value; OnPropertyChanged(); } }
 
     private PointCollection _cpuGraphPoints = new(); public PointCollection CpuGraphPoints { get => _cpuGraphPoints; set { _cpuGraphPoints = value; OnPropertyChanged(); } }
     private PointCollection _gpuGraphPoints = new(); public PointCollection GpuGraphPoints { get => _gpuGraphPoints; set { _gpuGraphPoints = value; OnPropertyChanged(); } }

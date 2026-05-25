@@ -2,13 +2,13 @@
 
 using System;
 using System.Windows;
-using System.Windows.Media.Effects;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
 
 public class RetroPixelEffect : ShaderEffect
 {
     public static readonly DependencyProperty InputProperty = RegisterPixelShaderSamplerProperty("Input", typeof(RetroPixelEffect), 0);
-    public static readonly DependencyProperty PixelSizeProperty = DependencyProperty.Register("PixelSize", typeof(double), typeof(RetroPixelEffect), new UIPropertyMetadata(0.015, PixelShaderConstantCallback(0)));
+    public static readonly DependencyProperty PixelSizeProperty = DependencyProperty.Register("PixelSize", typeof(double), typeof(RetroPixelEffect), new UIPropertyMetadata(0.008, PixelShaderConstantCallback(0)));
     public static readonly DependencyProperty TimeProperty = DependencyProperty.Register("Time", typeof(double), typeof(RetroPixelEffect), new UIPropertyMetadata(0.0, PixelShaderConstantCallback(1)));
 
     public RetroPixelEffect()

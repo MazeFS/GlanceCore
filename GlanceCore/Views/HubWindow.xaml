@@ -587,7 +587,102 @@
                                         <Border Background="#15000000" CornerRadius="16" Padding="20" BorderBrush="#20FFFFFF" BorderThickness="1">
                                             <StackPanel>
                                                 <TextBlock x:Name="ConfigTitle" Text="Настройки" Foreground="White" FontSize="18" FontWeight="Bold" Margin="0,0,0,20"/>
+                                                <TextBlock Text="Стиль виджета" Foreground="White" Opacity="0.6" Margin="0,0,0,10"/>
+                                                <ListBox x:Name="CarouselSkins" SelectionChanged="CarouselSkins_SelectionChanged" Background="Transparent" BorderThickness="0" Margin="0,0,0,20" Height="140" HorizontalAlignment="Center" Width="480" VerticalAlignment="Center">
+                                                    <ListBox.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <Grid IsItemsHost="True" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </ItemsPanelTemplate>
+                                                    </ListBox.ItemsPanel>
+                                                    <ListBox.ItemContainerStyle>
+                                                        <Style TargetType="ListBoxItem">
+                                                            <Setter Property="Background" Value="Transparent"/>
+                                                            <Setter Property="BorderThickness" Value="0"/>
+                                                            <Setter Property="Cursor" Value="Hand"/>
+                                                            <Setter Property="Template">
+                                                                <Setter.Value>
+                                                                    <ControlTemplate TargetType="ListBoxItem">
+                                                                        <Border x:Name="Card" Width="180" Height="120" CornerRadius="16" BorderBrush="#20FFFFFF" BorderThickness="1.5" ClipToBounds="True">
+                                                                            <Grid>
+                                                                                <Grid x:Name="WallpaperMock" Opacity="0.75">
+                                                                                    <Grid.Background>
+                                                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                                            <GradientStop Color="#0F0C29" Offset="0"/>
+                                                                                            <GradientStop Color="#302B63" Offset="0.5"/>
+                                                                                            <GradientStop Color="#24243E" Offset="1"/>
+                                                                                        </LinearGradientBrush>
+                                                                                    </Grid.Background>
+                                                                                </Grid>
 
+                                                                                <Image x:Name="PreviewImage" Source="{Binding Image}" Stretch="Uniform" Width="140" Height="90" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.6" RenderTransformOrigin="0.5,0.5">
+                                                                                    <Image.RenderTransform>
+                                                                                        <ScaleTransform ScaleX="1.0" ScaleY="1.0"/>
+                                                                                    </Image.RenderTransform>
+                                                                                </Image>
+
+                                                                                <Border Background="#CC120A24" VerticalAlignment="Bottom" Height="25">
+                                                                                    <TextBlock Text="{Binding Name}" Foreground="White" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                                </Border>
+
+                                                                                <Border x:Name="ActiveRing" BorderBrush="#8A2BE2" BorderThickness="2" CornerRadius="16" Visibility="Collapsed"/>
+                                                                            </Grid>
+                                                                        </Border>
+                                                                        <ControlTemplate.Triggers>
+                                                                            <Trigger Property="IsSelected" Value="True">
+                                                                                <Setter TargetName="ActiveRing" Property="Visibility" Value="Visible"/>
+                                                                                <Setter TargetName="Card" Property="BorderBrush" Value="#8A2BE2"/>
+                                                                            </Trigger>
+                                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                                <Setter TargetName="Card" Property="BorderBrush" Value="#60FFFFFF"/>
+                                                                            </Trigger>
+                                                                            <EventTrigger RoutedEvent="MouseEnter">
+                                                                                <BeginStoryboard x:Name="ZoomStoryboard">
+                                                                                    <Storyboard>
+                                                                                        <DoubleAnimation Storyboard.TargetName="PreviewImage" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.2" BeginTime="0:0:1.5" Duration="0:0:0.3">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <QuadraticEase EasingMode="EaseOut"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                        <DoubleAnimation Storyboard.TargetName="PreviewImage" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.2" BeginTime="0:0:1.5" Duration="0:0:0.3">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <QuadraticEase EasingMode="EaseOut"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                        <DoubleAnimation Storyboard.TargetName="PreviewImage" Storyboard.TargetProperty="Opacity" To="1.0" BeginTime="0:0:1.5" Duration="0:0:0.3"/>
+                                                                                    </Storyboard>
+                                                                                </BeginStoryboard>
+                                                                            </EventTrigger>
+                                                                            <EventTrigger RoutedEvent="MouseLeave">
+                                                                                <StopStoryboard BeginStoryboardName="ZoomStoryboard"/>
+                                                                                <BeginStoryboard>
+                                                                                    <Storyboard>
+                                                                                        <DoubleAnimation Storyboard.TargetName="PreviewImage" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.0" Duration="0:0:0.25">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <QuadraticEase EasingMode="EaseOut"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                        <DoubleAnimation Storyboard.TargetName="PreviewImage" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.0" Duration="0:0:0.25">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <QuadraticEase EasingMode="EaseOut"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                        <DoubleAnimation Storyboard.TargetName="PreviewImage" Storyboard.TargetProperty="Opacity" To="0.6" Duration="0:0:0.25"/>
+                                                                                    </Storyboard>
+                                                                                </BeginStoryboard>
+                                                                            </EventTrigger>
+                                                                        </ControlTemplate.Triggers>
+                                                                    </ControlTemplate>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </Style>
+                                                    </ListBox.ItemContainerStyle>
+                                                    <ListBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <ContentPresenter/>
+                                                        </DataTemplate>
+                                                    </ListBox.ItemTemplate>
+                                                </ListBox>
+                                                <Border Height="1" Background="#15FFFFFF" Margin="0,0,0,20"/>
                                                 <Button x:Name="BtnUploadImage" Content="Выбрать фотографию..." Click="BtnUploadImage_Click" Visibility="Collapsed" Background="#30FFFFFF" Foreground="White" Padding="15,10" BorderThickness="0" Cursor="Hand" Margin="0,0,0,20">
                                                     <Button.Resources>
                                                         <Style TargetType="Border">

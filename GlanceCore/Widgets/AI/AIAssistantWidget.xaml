@@ -36,7 +36,7 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Text="AI Assistant" FontWeight="Bold" Foreground="{Binding TextColorBrush}" FontSize="{Binding FontSize}" Margin="0,0,0,10"/>
+			<TextBlock Text="AI Assistant" Effect="{Binding TextGlowEffect}" FontWeight="Bold" Foreground="{Binding TextColorBrush}" FontSize="{Binding FontSize}" Margin="0,0,0,10"/>
 
             <ScrollViewer x:Name="ChatScroll" Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10">
                 <TextBlock Text="{Binding ChatHistory}" Foreground="{Binding TextColorBrush}" FontSize="{Binding FontSize}" TextWrapping="Wrap" LineHeight="20"/>

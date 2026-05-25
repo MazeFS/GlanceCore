@@ -11,8 +11,17 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 
+
+public class SkinItemModel
+{
+    public string Id { get; set; } = "";
+    public string Name { get; set; } = "";
+    public string Image { get; set; } = "";
+    public string Color { get; set; } = "";
+}
 public partial class HubWindow : Window
 {
+
     private bool _isLoaded = false;
     private string _editingWidgetId = "";
     private bool _isUpdatingSize = false;
@@ -35,11 +44,19 @@ public partial class HubWindow : Window
             Core.WidgetHost.RefreshWidgetVisuals(_editingWidgetId);
         }
     }
+
     public HubWindow()
     {
         InitializeComponent();
+        CarouselSkins.ItemContainerGenerator.StatusChanged += (s, e) =>
+        {
+            if (CarouselSkins.ItemContainerGenerator.Status == System.Windows.Controls.Primitives.GeneratorStatus.ContainersGenerated)
+            {
+                Dispatcher.BeginInvoke(new Action(() => AnimateCarousel()), DispatcherPriority.Render);
+            }
+        };
         _isLoaded = false;
-
+        if (CarouselSkins != null) CarouselSkins.ItemsSource = AvailableSkins;
         // English: Bind the auto-generator to our restored registry
         if (WidgetsList != null)
         {
@@ -70,14 +87,103 @@ public partial class HubWindow : Window
         string widgetId = cb.Tag.ToString()!;
         Core.WidgetHost.ToggleWidget(widgetId);
     }
+    private void AnimateCarousel()
+    {
+        if (CarouselSkins == null || CarouselSkins.Items.Count == 0) return;
+        int selectedIndex = CarouselSkins.SelectedIndex;
+        if (selectedIndex < 0) return;
 
+        for (int i = 0; i < CarouselSkins.Items.Count; i++)
+        {
+            if (CarouselSkins.ItemContainerGenerator.ContainerFromIndex(i) is ListBoxItem container)
+            {
+                int offset = i - selectedIndex;
+
+                if (offset < -1) offset += 4;
+                if (offset > 2) offset -= 4;
+
+                double targetX = 0;
+                double targetScale = 1.0;
+                double targetOpacity = 1.0;
+                int targetZIndex = 2;
+
+                if (offset == 0)
+                {
+                    targetX = 0;
+                    targetScale = 1.15;
+                    targetOpacity = 1.0;
+                    targetZIndex = 3;
+                }
+                else if (offset == 1)
+                {
+                    targetX = 145;
+                    targetScale = 0.8;
+                    targetOpacity = 0.45;
+                    targetZIndex = 1;
+                }
+                else if (offset == -1)
+                {
+                    targetX = -145;
+                    targetScale = 0.8;
+                    targetOpacity = 0.45;
+                    targetZIndex = 1;
+                }
+                else
+                {
+                    targetX = 0;
+                    targetScale = 0.5;
+                    targetOpacity = 0.0;
+                    targetZIndex = 0;
+                }
+
+                System.Windows.Controls.Panel.SetZIndex(container, targetZIndex);
+
+                if (container.RenderTransform is not TransformGroup group || group.Children.Count < 2)
+                {
+                    var g = new TransformGroup();
+                    g.Children.Add(new TranslateTransform());
+                    g.Children.Add(new ScaleTransform());
+                    container.RenderTransform = g;
+                    container.RenderTransformOrigin = new Point(0.5, 0.5);
+                }
+
+                var tg = (TransformGroup)container.RenderTransform;
+                var translate = (TranslateTransform)tg.Children[0];
+                var scale = (ScaleTransform)tg.Children[1];
+
+                var animX = new DoubleAnimation(targetX, TimeSpan.FromMilliseconds(450)) { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } };
+                var animScaleX = new DoubleAnimation(targetScale, TimeSpan.FromMilliseconds(450)) { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } };
+                var animScaleY = new DoubleAnimation(targetScale, TimeSpan.FromMilliseconds(450)) { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } };
+                var animOpacity = new DoubleAnimation(targetOpacity, TimeSpan.FromMilliseconds(450)) { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } };
+
+                translate.BeginAnimation(TranslateTransform.XProperty, animX);
+                scale.BeginAnimation(ScaleTransform.ScaleXProperty, animScaleX);
+                scale.BeginAnimation(ScaleTransform.ScaleYProperty, animScaleY);
+                container.BeginAnimation(OpacityProperty, animOpacity);
+            }
+        }
+    }
     private void ToggleHardwareWidget_Click(object sender, RoutedEventArgs e)
     {
         if (!_isLoaded) return;
         // English: Call the unified non-generic method
         Core.WidgetHost.ToggleWidget("Hardware_01");
     }
-
+    private void CarouselSkins_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId)) return;
+        if (CarouselSkins.SelectedItem is SkinItemModel selectedSkin)
+        {
+            var cfg = Core.WidgetHost.CurrentConfig;
+            if (cfg.Widgets.ContainsKey(_editingWidgetId))
+            {
+                cfg.Widgets[_editingWidgetId].SkinId = selectedSkin.Id;
+                Core.ConfigManager.Save(cfg);
+                Core.WidgetHost.RefreshWidgetVisuals(_editingWidgetId);
+            }
+        }
+        AnimateCarousel();
+    }
     // --- WIDGET CONFIGURATION ---
     private void BtnWidgetSettings_Click(object sender, RoutedEventArgs e)
     {
@@ -89,7 +195,13 @@ public partial class HubWindow : Window
             _isLoaded = false;
             var cfg = Core.WidgetHost.CurrentConfig;
             var state = cfg.Widgets.GetValueOrDefault(_editingWidgetId, new Core.WidgetState());
-
+            if (CarouselSkins != null)
+            {
+                foreach (SkinItemModel item in CarouselSkins.Items)
+                {
+                    if (item.Id == state.SkinId) { CarouselSkins.SelectedItem = item; break; }
+                }
+            }
             // 1. АДАПТАЦИЯ ПАНЕЛЕЙ: Показываем нужные настройки
             if (HardwareSettingsPanel != null) HardwareSettingsPanel.Visibility = _editingWidgetId == "Hardware_01" ? Visibility.Visible : Visibility.Collapsed;
             if (AiSettingsPanel != null) AiSettingsPanel.Visibility = _editingWidgetId == "AI_01" ? Visibility.Visible : Visibility.Collapsed;
@@ -451,7 +563,16 @@ public partial class HubWindow : Window
     // Stub for unused event from old XAML to prevent compilation failure
     private void Style_Changed(object sender, SelectionChangedEventArgs e) { }
 
+    public System.Collections.ObjectModel.ObservableCollection<SkinItemModel> AvailableSkins { get; } = new()
+    {
+        new SkinItemModel { Id = "LiquidGlass", Name = "Liquid Glass", Image = "/Resource/Skins/Skin_LiquidGlass.png", Color = "#00BFFF" },
+        new SkinItemModel { Id = "Minimalism", Name = "Минимализм", Image = "/Resource/Skins/Skin_Minimalism.png", Color = "#A0FFFFFF" },
+        new SkinItemModel { Id = "Retro", Name = "Ретро 8-bit", Image = "/Resource/Skins/Skin_Retro.png", Color = "#FF8C00" },
+        new SkinItemModel { Id = "Neon", Name = "Кибер-Неон", Image = "/Resource/Skins/Skin_Neon.png", Color = "#FF00FF" }
+    };
 }
+
+
 
 public class StyleItemModel
 {

@@ -11,16 +11,18 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<!-- English: Include EVERYTHING in Resources folder correctly -->
 		<Resource Include="Resource\**\*" />
 		<None Remove="UI\Shaders\RetroPixel.ps" />
-		<!-- English: Explicitly include the shader bytecode -->
+		<None Remove="UI\Shaders\Neon.ps" />
+
 		<Resource Include="UI\Shaders\LiquidGlass.ps" />
 		<Resource Include="UI\Shaders\RetroPixel.ps" />
-	    <None Update="Skins\**\*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+		<Resource Include="UI\Shaders\Neon.ps" />
+
+		<None Update="Skins\**\*">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="MahApps.Metro.IconPacks.SimpleIcons" Version="6.2.1" />

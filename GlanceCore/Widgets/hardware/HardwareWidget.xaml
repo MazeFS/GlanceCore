@@ -56,9 +56,9 @@
 		<!-- СЛОЙ 2: КОНТЕНТ (Всегда 100% непрозрачный) -->
 		<Grid Margin="20" IsHitTestVisible="False">
 			<StackPanel VerticalAlignment="Center">
-				<TextBlock x:Name="TitleText" Text="SYSTEM" FontWeight="Black" Foreground="{Binding TextColorBrush}" HorizontalAlignment="Center" Margin="0,0,0,16"/>
+                <TextBlock x:Name="TitleText" Text="SYSTEM" Effect="{Binding TextGlowEffect}" FontWeight="Black" Foreground="{Binding TextColorBrush}" HorizontalAlignment="Center" Margin="0,0,0,16"/>
 
-				<!-- ВОТ ЗДЕСЬ ИСПОЛЬЗУЕТСЯ SensorsPanel -->
+                <!-- ВОТ ЗДЕСЬ ИСПОЛЬЗУЕТСЯ SensorsPanel -->
 				<StackPanel x:Name="SensorsPanel">
 
 					<!-- БЛОК CPU -->
