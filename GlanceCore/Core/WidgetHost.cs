@@ -4,19 +4,26 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Threading;
 using GlanceCore.Widgets;
 using GlanceCore.Widgets.Hardware;
 using GlanceCore.Widgets.Media;
 using GlanceCore.Widgets.ImageFrame;
 using GlanceCore.Widgets.Weather;
+using GlanceCore.Widgets.Time;
 
 public static class WidgetHost
 {
+    [DllImport("shell32.dll")]
+    private static extern int SHQueryUserNotificationState(out int pquns);
+
     private static GlobalConfig _config = new();
     private static readonly Dictionary<string, Window> _activeWidgets = new();
+    private static DispatcherTimer? _gameModeTimer;
+    private static bool _isGameModeActive = false;
 
-    // English: Global collection for Hub's ItemsControl binding
     public static ObservableCollection<WidgetInfo> AvailableWidgets { get; } = new();
     public static GlobalConfig CurrentConfig => _config;
 
@@ -24,74 +31,47 @@ public static class WidgetHost
     {
         _config = ConfigManager.Load();
         RegisterBuiltInWidgets();
+
+        _gameModeTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+        _gameModeTimer.Tick += (s, e) => CheckGameMode();
+        _gameModeTimer.Start();
+    }
+
+    private static void CheckGameMode()
+    {
+        if (!_config.GameMode) return;
+
+        SHQueryUserNotificationState(out int state);
+        bool isGaming = (state == 5 || state == 4);
+
+        if (isGaming != _isGameModeActive)
+        {
+            _isGameModeActive = isGaming;
+            foreach (var kvp in _activeWidgets)
+            {
+                if (kvp.Value is BaseWidgetWindow w && !w.Topmost)
+                {
+                    w.ApplyShaderSettings(!isGaming && _config.EnableShader);
+                }
+            }
+        }
     }
 
     private static void RegisterBuiltInWidgets()
     {
         AvailableWidgets.Clear();
-
-        // 1. Hardware Monitor
-        AvailableWidgets.Add(new WidgetInfo
-        {
-            Id = "Hardware_01",
-            Title = "Система",
-            Description = "Hardware Monitor",
-            PreviewImage = "/Resource/ScreenShots/HardwarePreview.png",
-            Width = 250, // БЫЛО 280, СТАЛО 220
-            WidgetType = typeof(HardwareWidget)
-        });
-
-        // 2. Media Player
-        AvailableWidgets.Add(new WidgetInfo {
-            Id = "Media_01",
-            Title = "Медиа-плеер",
-            Description = "Музыка и видео",
-            PreviewImage = "/Resource/ScreenShots/MediaPreview.png",
-            Width = 250,
-            WidgetType = typeof(MediaWidget)
-        });
-
-        // 3. Image Frame
-        AvailableWidgets.Add(new WidgetInfo {
-            Id = "Image_01",
-            Title = "Фоторамка",
-            Description = "Ваше фото",
-            PreviewImage = "/Resource/ScreenShots/ImagePreview.png",
-            Width = 250,
-            WidgetType = typeof(ImageFrameWidget)
-        });
-
-        // 5. Time Widget (Часы)
-        AvailableWidgets.Add(new WidgetInfo
-        {
-            Id = "Time_01",
-            Title = "Часы",
-            Description = "Текущее время",
-            PreviewImage = "/Resource/ScreenShots/HardwarePreview.png", // Можешь позже нарисовать свою картинку TimePreview.png
-            Width = 250,
-            WidgetType = typeof(GlanceCore.Widgets.Time.TimeWidget)
-        });
-
-        // 4. Weather
-        AvailableWidgets.Add(new WidgetInfo {
-            Id = "Weather_01",
-            Title = "Погода",
-            Description = "Open-Meteo",
-            PreviewImage = "/Resource/ScreenShots/WeatherPreview.png",
-            Width = 250,
-            WidgetType = typeof(WeatherWidget)
-        });
+        AvailableWidgets.Add(new WidgetInfo { Id = "Hardware_01", Title = "Система", Description = "Hardware Monitor", PreviewImage = "/Resource/ScreenShots/HardwarePreview.png", Width = 250, WidgetType = typeof(HardwareWidget) });
+        AvailableWidgets.Add(new WidgetInfo { Id = "Media_01", Title = "Медиа-плеер", Description = "Музыка и видео", PreviewImage = "/Resource/ScreenShots/MediaPreview.png", Width = 250, WidgetType = typeof(MediaWidget) });
+        AvailableWidgets.Add(new WidgetInfo { Id = "Image_01", Title = "Фоторамка", Description = "Ваше фото", PreviewImage = "/Resource/ScreenShots/ImagePreview.png", Width = 250, WidgetType = typeof(ImageFrameWidget) });
+        AvailableWidgets.Add(new WidgetInfo { Id = "Weather_01", Title = "Погода", Description = "Open-Meteo", PreviewImage = "/Resource/ScreenShots/WeatherPreview.png", Width = 250, WidgetType = typeof(WeatherWidget) });
+        AvailableWidgets.Add(new WidgetInfo { Id = "Time_01", Title = "Часы", Description = "Текущее время", PreviewImage = "/Resource/ScreenShots/HardwarePreview.png", Width = 250, WidgetType = typeof(TimeWidget) });
     }
 
-    // English: Restore widgets that were open in the last session
     public static void RestoreActiveWidgets()
     {
         foreach (var widget in AvailableWidgets)
         {
-            if (IsWidgetActive(widget.Id))
-            {
-                ToggleWidget(widget.Id);
-            }
+            if (IsWidgetActive(widget.Id)) ToggleWidget(widget.Id);
         }
     }
 
@@ -107,32 +87,22 @@ public static class WidgetHost
             _config.Widgets[widgetId].X = widget.Left;
             _config.Widgets[widgetId].Y = widget.Top;
             _config.Widgets[widgetId].IsEnabled = false;
-            
             widget.Close();
             _activeWidgets.Remove(widgetId);
         }
         else
         {
             widget = (Window)Activator.CreateInstance(info.WidgetType)!;
-
-            if (!_config.Widgets.ContainsKey(widgetId))
-                _config.Widgets[widgetId] = new WidgetState { IsEnabled = true };
-            else
-                _config.Widgets[widgetId].IsEnabled = true;
+            if (!_config.Widgets.ContainsKey(widgetId)) _config.Widgets[widgetId] = new WidgetState { IsEnabled = true };
+            else _config.Widgets[widgetId].IsEnabled = true;
 
             var state = _config.Widgets[widgetId];
-
             if (state.X != -1) { widget.Left = state.X; widget.Top = state.Y; }
-
-            widget.LocationChanged += (s, e) => {
-                state.X = widget.Left;
-                state.Y = widget.Top;
-            };
+            widget.LocationChanged += (s, e) => { state.X = widget.Left; state.Y = widget.Top; };
 
             widget.Show();
             _activeWidgets.Add(widgetId, widget);
 
-            // English: Pass the state object!
             if (widget is BaseWidgetWindow baseW)
                 baseW.ApplySettings(state, _config.LockWidgets, _config.EnableShader);
         }
@@ -153,11 +123,9 @@ public static class WidgetHost
         ConfigManager.Save(_config);
     }
 
-    // English: NEW Clean method! Hub updates the config directly, then calls this.
     public static void RefreshWidgetVisuals(string id)
     {
         if (!_config.Widgets.ContainsKey(id)) return;
-        
         if (_activeWidgets.TryGetValue(id, out var window) && window is BaseWidgetWindow widget)
         {
             widget.ApplySettings(_config.Widgets[id], _config.LockWidgets, _config.EnableShader);
@@ -168,9 +136,7 @@ public static class WidgetHost
     public static void RefreshWidgetCustomData(string id)
     {
         if (_activeWidgets.TryGetValue(id, out var window) && window is BaseWidgetWindow widget)
-        {
             widget.RefreshCustomData();
-        }
     }
 
     public static void CloseWidgetExplicitly(string widgetId)
@@ -184,17 +150,10 @@ public static class WidgetHost
             widget.Close();
             _activeWidgets.Remove(widgetId);
             ConfigManager.Save(_config);
-
             AvailableWidgets.FirstOrDefault(w => w.Id == widgetId)?.NotifyStateChanged();
 
-            // English: If it was the last widget and Hub is hidden, shutdown the app to free RAM
-            if (_activeWidgets.Count == 0)
-            {
-                if (Application.Current is App app && !app.IsHubVisible)
-                {
-                    Application.Current.Shutdown();
-                }
-            }
+            if (_activeWidgets.Count == 0 && Application.Current is App app && !app.IsHubVisible)
+                Application.Current.Shutdown();
         }
     }
 

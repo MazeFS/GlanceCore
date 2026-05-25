@@ -26,6 +26,79 @@
             <ColorAnimation Storyboard.TargetName="Color3" Storyboard.TargetProperty="Color" To="#151525" Duration="0:0:10" />
         </Storyboard>
         <!-- Элегантный Apple-style Slider -->
+
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Background" Value="#150E24"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border x:Name="ItemBorder" Background="{TemplateBinding Background}" CornerRadius="6" Margin="2">
+                            <ContentPresenter Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="#70521D8A"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="#9F521D8A"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ComboBox">
+            <Setter Property="Background" Value="#251535"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#4F2E7A"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Padding" Value="8,5"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton x:Name="ToggleButton" Grid.ColumnSpan="2" Focusable="false" IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border x:Name="Border" Background="#201030" BorderBrush="#4F2E7A" BorderThickness="1.5" CornerRadius="8">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="30"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Path Grid.Column="1" x:Name="Arrow" Fill="White" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 4 4 L 8 0 Z"/>
+                                            </Grid>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="true">
+                                                <Setter TargetName="Border" Property="Background" Value="#2F1840"/>
+                                                <Setter TargetName="Border" Property="BorderBrush" Value="#8A2BE2"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <ContentPresenter x:Name="ContentSite" IsHitTestVisible="False" Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" Margin="10,0,30,0" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                            <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Slide">
+                                <Grid x:Name="SubMenu" SnapsToDevicePixels="True" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border Background="#150E24" BorderBrush="#70521D8A" BorderThickness="1.5" CornerRadius="8" Margin="0,4,0,0">
+                                        <ScrollViewer Margin="4" SnapsToDevicePixels="True">
+                                            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                        </ScrollViewer>
+                                    </Border>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style TargetType="Slider">
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Template">
@@ -449,26 +522,27 @@
                                     </ScrollViewer>
                                 </Grid>
 
-                                <!-- ВКЛАДКА 2: НАСТРОЙКИ ВИДЖЕТА (Скрытая) -->
                                 <Grid x:Name="WidgetConfigPanel" Visibility="Collapsed">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
 
-                                    <Button Grid.Row="0" Content="Назад к списку" Click="BtnBackToWidgets_Click" 
-            Background="Transparent" Foreground="White" BorderThickness="0" 
-            Margin="0,0,0,15" HorizontalAlignment="Left" Cursor="Hand"/>
+                                    <Button Grid.Row="0" Click="BtnBackToWidgets_Click" Style="{StaticResource TransparentHoverButtonStyle}" Margin="0,0,0,20" HorizontalAlignment="Left">
+                                        <StackPanel Orientation="Horizontal" Background="Transparent" Cursor="Hand">
+                                            <Border Background="#20FFFFFF" CornerRadius="8" Padding="6">
+                                                <iconPacks:PackIconLucide Kind="ChevronLeft" Width="16" Height="16" Foreground="White" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <TextBlock Text="Назад к списку" Foreground="White" FontSize="15" FontWeight="SemiBold" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Button>
 
                                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                         <Border Background="#15000000" CornerRadius="16" Padding="20" BorderBrush="#20FFFFFF" BorderThickness="1">
                                             <StackPanel>
                                                 <TextBlock x:Name="ConfigTitle" Text="Настройки" Foreground="White" FontSize="18" FontWeight="Bold" Margin="0,0,0,20"/>
 
-                                                <!-- Кнопка загрузки для ImageFrame -->
-                                                <Button x:Name="BtnUploadImage" Content="Выбрать фотографию..." Click="BtnUploadImage_Click" 
-                        Visibility="Collapsed" Background="#30FFFFFF" Foreground="White" 
-                        Padding="15,10" BorderThickness="0" Cursor="Hand" Margin="0,0,0,20">
+                                                <Button x:Name="BtnUploadImage" Content="Выбрать фотографию..." Click="BtnUploadImage_Click" Visibility="Collapsed" Background="#30FFFFFF" Foreground="White" Padding="15,10" BorderThickness="0" Cursor="Hand" Margin="0,0,0,20">
                                                     <Button.Resources>
                                                         <Style TargetType="Border">
                                                             <Setter Property="CornerRadius" Value="8"/>
@@ -477,42 +551,69 @@
                                                 </Button>
 
                                                 <Grid Margin="0,0,0,15">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
                                                     <StackPanel>
                                                         <TextBlock Text="Поверх всех окон" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
                                                         <TextBlock Text="Виджет будет виден поверх других окон и программ" Foreground="#80FFFFFF" FontSize="12"/>
                                                     </StackPanel>
-                                                    <CheckBox x:Name="TglWidgetTopmost" Style="{StaticResource AppleSwitchStyle}" 
-              HorizontalAlignment="Right" VerticalAlignment="Center" Click="Topmost_Changed"/>
+                                                    <CheckBox x:Name="TglWidgetTopmost" Grid.Column="1" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="Topmost_Changed"/>
                                                 </Grid>
 
-                                                <TextBlock Text="Прозрачность" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
-                                                <Slider x:Name="SldOpacity" Minimum="0.1" Maximum="1.0" ValueChanged="Slider_Changed" Margin="0,0,0,15"/>
+                                                <TextBlock Text="Прозрачность фона" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                <Slider x:Name="SldOpacity" Minimum="0.0" Maximum="1.0" ValueChanged="Slider_Changed" Margin="0,0,0,15"/>
 
-                                                <TextBlock Text="Масштаб" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
-                                                <Slider x:Name="SldScale" Minimum="0.5" Maximum="1.5" ValueChanged="Slider_Changed" Margin="0,0,0,15"/>
-                                                <TextBlock Text="Ширина окна" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
-                                                <Slider x:Name="SldWidth" Minimum="100" Maximum="500" ValueChanged="Slider_Changed" Margin="0,0,0,15"/>
+                                                <TextBlock Text="Масштаб (Размер интерфейса)" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                <Slider x:Name="SldScale" Minimum="0.5" Maximum="2.0" ValueChanged="Slider_Changed" Margin="0,0,0,15"/>
 
-                                                <TextBlock Text="Высота окна" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
-                                                <Slider x:Name="SldHeight" Minimum="80" Maximum="600" ValueChanged="Slider_Changed" Margin="0,0,0,15"/>
-                                                <!-- СКРУГЛЕНИЕ УГЛОВ -->
+                                                <TextBlock Text="Ширина виджета (пиксели)" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                <Grid Margin="0,0,0,15">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Slider x:Name="SldWidth" Minimum="100" Maximum="500" ValueChanged="Slider_Changed" VerticalAlignment="Center"/>
+                                                    <TextBox x:Name="TxtWidth" Grid.Column="1" Width="60" Height="28" Margin="15,0,0,0" Background="#20FFFFFF" Foreground="White" BorderThickness="0" TextAlignment="Center" VerticalContentAlignment="Center" FontSize="13" FontWeight="SemiBold" TextChanged="SizeInput_TextChanged">
+                                                        <TextBox.Resources>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="CornerRadius" Value="6"/>
+                                                            </Style>
+                                                        </TextBox.Resources>
+                                                    </TextBox>
+                                                </Grid>
+
+                                                <TextBlock Text="Высота виджета (пиксели)" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                <Grid Margin="0,0,0,15">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Slider x:Name="SldHeight" Minimum="80" Maximum="600" ValueChanged="Slider_Changed" VerticalAlignment="Center"/>
+                                                    <TextBox x:Name="TxtHeight" Grid.Column="1" Width="60" Height="28" Margin="15,0,0,0" Background="#20FFFFFF" Foreground="White" BorderThickness="0" TextAlignment="Center" VerticalContentAlignment="Center" FontSize="13" FontWeight="SemiBold" TextChanged="SizeInput_TextChanged">
+                                                        <TextBox.Resources>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="CornerRadius" Value="6"/>
+                                                            </Style>
+                                                        </TextBox.Resources>
+                                                    </TextBox>
+                                                </Grid>
+
                                                 <TextBlock Text="Скругление углов (Corner Radius)" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
                                                 <Slider x:Name="SldRadius" Minimum="0" Maximum="100" ValueChanged="Slider_Changed" Margin="0,0,0,15"/>
 
-                                                <!-- ВЫБОР ЦВЕТА (Кружочки) -->
                                                 <Grid Margin="0,10,0,15">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="*"/>
                                                         <ColumnDefinition Width="*"/>
                                                     </Grid.ColumnDefinitions>
-
                                                     <StackPanel Grid.Column="0">
                                                         <TextBlock Text="Цвет текста" Foreground="White" Opacity="0.6" Margin="0,0,0,5"/>
                                                         <Button Tag="Text" Click="BtnPickColor_Click" Width="32" Height="32" HorizontalAlignment="Left" Style="{StaticResource TransparentHoverButtonStyle}" Cursor="Hand">
                                                             <Ellipse x:Name="CircleTextColor" Width="30" Height="30" Fill="White" Stroke="#40FFFFFF" StrokeThickness="2"/>
                                                         </Button>
                                                     </StackPanel>
-
                                                     <StackPanel Grid.Column="1">
                                                         <TextBlock Text="Цвет фона (Тонировка)" Foreground="White" Opacity="0.6" Margin="0,0,0,5"/>
                                                         <Button Tag="Bg" Click="BtnPickColor_Click" Width="32" Height="32" HorizontalAlignment="Left" Style="{StaticResource TransparentHoverButtonStyle}" Cursor="Hand">
@@ -521,7 +622,6 @@
                                                     </StackPanel>
                                                 </Grid>
 
-                                                <!-- СПЕЦИАЛЬНЫЕ НАСТРОЙКИ (Только для Hardware) -->
                                                 <StackPanel x:Name="HardwareSettingsPanel" Visibility="Collapsed">
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,10"/>
                                                     <TextBlock Text="Порядок датчиков" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
@@ -530,7 +630,6 @@
                                                             <ColumnDefinition Width="*"/>
                                                             <ColumnDefinition Width="Auto"/>
                                                         </Grid.ColumnDefinitions>
-
                                                         <ListBox x:Name="ListHardwareOrder" Background="#20FFFFFF" Foreground="White" BorderThickness="0" Height="100" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                                             <ListBox.ItemContainerStyle>
                                                                 <Style TargetType="ListBoxItem">
@@ -540,7 +639,7 @@
                                                                     <Setter Property="Template">
                                                                         <Setter.Value>
                                                                             <ControlTemplate TargetType="ListBoxItem">
-                                                                                <Border Background="{TemplateBinding Background}" CornerRadius="4" Margin="2">
+                                                                                <Border x:Name="ItemBorder" Background="{TemplateBinding Background}" CornerRadius="4" Margin="2">
                                                                                     <ContentPresenter Margin="{TemplateBinding Padding}"/>
                                                                                 </Border>
                                                                                 <ControlTemplate.Triggers>
@@ -557,7 +656,6 @@
                                                                 </Style>
                                                             </ListBox.ItemContainerStyle>
                                                         </ListBox>
-
                                                         <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
                                                             <Button Content="▲" Click="BtnMoveUp_Click" Width="32" Height="32" Margin="0,0,0,8" Background="#30FFFFFF" Foreground="White" BorderThickness="0" Cursor="Hand">
                                                                 <Button.Resources>
@@ -577,26 +675,22 @@
                                                     </Grid>
                                                 </StackPanel>
 
-                                                <!-- СПЕЦИАЛЬНЫЕ НАСТРОЙКИ (Только для Часов) -->
                                                 <StackPanel x:Name="TimeSettingsPanel" Visibility="Collapsed">
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,10"/>
-
                                                     <TextBlock Text="Разделитель" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
-                                                    <ComboBox x:Name="ComboTimeSeparator" SelectionChanged="TimeSettings_Changed" Background="#20FFFFFF" Foreground="Black" Margin="0,0,0,15">
+                                                    <ComboBox x:Name="ComboTimeSeparator" SelectionChanged="TimeSettings_Changed" Margin="0,0,0,15">
                                                         <ComboBoxItem Content=":" IsSelected="True"/>
                                                         <ComboBoxItem Content="."/>
                                                         <ComboBoxItem Content="/"/>
                                                         <ComboBoxItem Content="-"/>
                                                         <ComboBoxItem Content="Пробел"/>
                                                     </ComboBox>
-
                                                     <Grid Margin="0,0,0,15">
                                                         <StackPanel>
                                                             <TextBlock Text="Показывать секунды" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
                                                         </StackPanel>
                                                         <CheckBox x:Name="TglShowSeconds" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="TimeSettings_Changed"/>
                                                     </Grid>
-
                                                     <Grid Margin="0,0,0,5">
                                                         <StackPanel>
                                                             <TextBlock Text="Вертикальное расположение" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
@@ -604,17 +698,35 @@
                                                         <CheckBox x:Name="TglVerticalTime" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="TimeSettings_Changed"/>
                                                     </Grid>
                                                 </StackPanel>
-                                                <!-- Группа шрифтов (скрывается для фото) -->
+
                                                 <StackPanel x:Name="TypographySettingsPanel">
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,10"/>
-                                                    <TextBlock Text="Шрифт" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
-                                                    <ComboBox x:Name="ComboFont" SelectionChanged="ComboBox_SelectionChanged" Background="#20FFFFFF" Foreground="Black" Margin="0,0,0,15">
+                                                    <TextBlock Text="Шрифт" Foreground="MediumPurple" Opacity="0.6" Margin="0,10,0,5"/>
+                                                    <ComboBox x:Name="ComboFont" SelectionChanged="ComboBox_SelectionChanged" Background="#20FFFFFF" Foreground="White" BorderThickness="0" Height="32" Margin="0,0,0,15">
+                                                        <ComboBox.ItemContainerStyle>
+                                                            <Style TargetType="ComboBoxItem">
+                                                                <Setter Property="Background" Value="#150E24"/>
+                                                                <Setter Property="Foreground" Value="White"/>
+                                                                <Setter Property="Padding" Value="12,8"/>
+                                                                <Setter Property="Cursor" Value="Hand"/>
+                                                                <Style.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                        <Setter Property="Background" Value="#30FFFFFF"/>
+                                                                    </Trigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </ComboBox.ItemContainerStyle>
                                                         <ComboBoxItem Content="Segoe UI Variable" FontFamily="Segoe UI Variable" FontSize="14"/>
-                                                        <ComboBoxItem Content="Segoe Print" FontFamily="Segoe Print" FontSize="14"/>
+                                                        <ComboBoxItem Content="Segoe UI" FontFamily="Segoe UI" FontSize="14"/>
                                                         <ComboBoxItem Content="Consolas" FontFamily="Consolas" FontSize="14"/>
                                                         <ComboBoxItem Content="Arial" FontFamily="Arial" FontSize="14"/>
                                                         <ComboBoxItem Content="Cascadia Code" FontFamily="Cascadia Code" FontSize="14"/>
                                                         <ComboBoxItem Content="Comic Sans MS" FontFamily="Comic Sans MS" FontSize="14"/>
+                                                        <ComboBoxItem Content="Century Gothic" FontFamily="Century Gothic" FontSize="14"/>
+                                                        <ComboBoxItem Content="Impact" FontFamily="Impact" FontSize="14"/>
+                                                        <ComboBoxItem Content="Trebuchet MS" FontFamily="Trebuchet MS" FontSize="14"/>
+                                                        <ComboBoxItem Content="Verdana" FontFamily="Verdana" FontSize="14"/>
+                                                        <ComboBoxItem Content="Courier New" FontFamily="Courier New" FontSize="14"/>
                                                     </ComboBox>
                                                     <TextBlock Text="Размер текста" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
                                                     <Slider x:Name="SldFontSize" Minimum="8" Maximum="30" ValueChanged="Slider_Changed"/>
@@ -623,7 +735,7 @@
                                         </Border>
                                     </ScrollViewer>
                                 </Grid>
-
+                                
                                 <!-- ВКЛАДКА 3: МАГАЗИН -->
                                 <Grid x:Name="StorePanel" Visibility="Collapsed">
                                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -695,11 +807,8 @@
                                                 </Border>
                                             </Border>
 
-                                            <!-- СИСТЕМНЫЕ НАСТРОЙКИ -->
                                             <Border Background="#15000000" CornerRadius="16" Padding="20" BorderBrush="#20FFFFFF" BorderThickness="1">
                                                 <StackPanel>
-                                                    <!-- English: Changed invalid LetterSpacing to WPF-compliant CharacterSpacing -->
-                                                    <!-- English: Removed spacing properties to guarantee 100% clean compilation on .NET 10 -->
                                                     <TextBlock Text="СИСТЕМНЫЕ ПАРАМЕТРЫ" Foreground="White" Opacity="0.5" FontSize="11" FontWeight="Bold" Margin="0,0,0,15"/>
 
                                                     <Grid Margin="0,0,0,15">
@@ -726,6 +835,25 @@
                                                             <TextBlock Text="Искажение обоев рабочего стола (GPU)" Foreground="#80FFFFFF" FontSize="12"/>
                                                         </StackPanel>
                                                         <CheckBox x:Name="TglShader" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="SystemSettings_Changed"/>
+                                                    </Grid>
+
+                                                    <Border Height="1" Background="#15FFFFFF" Margin="0,18,0,18"/>
+
+                                                    <Grid Margin="0,5,0,0">
+                                                        <StackPanel>
+                                                            <TextBlock Text="Режим Стримера (Smart Freeze)" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="Заморозка фона для идеального захвата в OBS/Скриншотах" Foreground="#80FFFFFF" FontSize="12"/>
+                                                        </StackPanel>
+                                                        <CheckBox x:Name="TglStreamerMode" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="SystemSettings_Changed"/>
+                                                    </Grid>
+
+                                                    <Border Height="1" Background="#15FFFFFF" Margin="0,18,0,18"/>
+                                                    <Grid Margin="0,5,0,0">
+                                                        <StackPanel>
+                                                            <TextBlock Text="Игровой режим (Game On)" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="Авто-отключение шейдеров при запуске полноэкранных игр" Foreground="#80FFFFFF" FontSize="12"/>
+                                                        </StackPanel>
+                                                        <CheckBox x:Name="TglGameMode" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="SystemSettings_Changed"/>
                                                     </Grid>
                                                 </StackPanel>
                                             </Border>

@@ -111,19 +111,30 @@ public partial class HardwareWidget : GlanceCore.Widgets.BaseWidgetWindow
         if (state != null) ApplyOrder(state.HardwareOrder);
     }
 
-    public void ApplyOrder(List<string> order)
+    public override void ApplySettings(Core.WidgetState state, bool isGlobalLocked, bool isGlobalShaderEnabled)
     {
-        var panel = FindName("SensorsPanel") as System.Windows.Controls.StackPanel;
-        if (panel == null) return;
-        panel.Children.Clear();
-        foreach (var item in order)
-        {
-            if (item == "CPU" && FindName("BlockCpu") is UIElement c) panel.Children.Add(c);
-            if (item == "GPU" && FindName("BlockGpu") is UIElement g) panel.Children.Add(g);
-            if (item == "RAM" && FindName("BlockRam") is UIElement r) panel.Children.Add(r);
-        }
+        base.ApplySettings(state, isGlobalLocked, isGlobalShaderEnabled);
+
+        // Как только Хаб сохраняет новые настройки, мгновенно меняем порядок блоков!
+        if (state != null) ApplyOrder(state.HardwareOrder);
     }
 
+    // 2. БЕЗОТКАЗНЫЙ АЛГОРИТМ СОРТИРОВКИ
+    public void ApplyOrder(List<string> order)
+    {
+        // Используем прямые ссылки на объекты, созданные в XAML (BlockCpu, BlockGpu, BlockRam), 
+        // чтобы избежать потери элементов при откреплении от дерева
+        if (SensorsPanel == null || BlockCpu == null || BlockGpu == null || BlockRam == null) return;
+
+        SensorsPanel.Children.Clear(); // Очищаем панель
+
+        foreach (var item in order)
+        {
+            if (item == "CPU") SensorsPanel.Children.Add(BlockCpu);
+            else if (item == "GPU") SensorsPanel.Children.Add(BlockGpu);
+            else if (item == "RAM") SensorsPanel.Children.Add(BlockRam);
+        }
+    }
     protected override void OnClosed(EventArgs e)
     {
         _statsTimer.Stop();

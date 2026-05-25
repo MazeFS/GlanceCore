@@ -82,7 +82,7 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
         this.Loaded += (s, e) => ApplySkinSpecificVisuals();
     }
 
-    private void UpdateRealtimeBackground()
+    protected void UpdateRealtimeBackground()
     {
         if (!this.IsVisible || MainRoot == null || MainRoot.ActualWidth <= 0) return;
         if (PresentationSource.FromVisual(MainRoot) == null || WallpaperBrush == null) return;
@@ -114,6 +114,15 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
         ApplySkinSpecificVisuals();
     }
 
+    protected double GetAdjustedAmount()
+    {
+        double width = MainRoot?.ActualWidth ?? 220.0;
+        if (width <= 0) width = 220.0;
+
+        double baseAmount = -30.0 / width;
+        return Math.Clamp(baseAmount, -0.22, -0.06) * BgOpacity;
+    }
+
     protected virtual void ApplySkinSpecificVisuals()
     {
         if (GlassBase == null || _captureTimer == null) return;
@@ -132,9 +141,23 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
             if (MinimalBase != null) MinimalBase.Visibility = Visibility.Collapsed;
             if (GlossBevel != null) GlossBevel.Visibility = Visibility.Visible;
 
-            SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE);
-            GlassBase.Effect = new UI.Shaders.LiquidGlassEffect { Amount = -0.15 * BgOpacity };
-            _captureTimer.Start();
+            bool isStreamerMode = Core.WidgetHost.CurrentConfig.StreamerMode;
+
+            if (isStreamerMode)
+            {
+                SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE);
+                Dispatcher.BeginInvoke(new Action(() => {
+                    UpdateRealtimeBackground();
+                    SetWindowDisplayAffinity(hwnd, WDA_NONE);
+                    GlassBase.Effect = new UI.Shaders.LiquidGlassEffect { Amount = GetAdjustedAmount() };
+                }), DispatcherPriority.Render);
+            }
+            else
+            {
+                SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE);
+                GlassBase.Effect = new UI.Shaders.LiquidGlassEffect { Amount = GetAdjustedAmount() };
+                _captureTimer.Start();
+            }
         }
         else
         {
@@ -144,7 +167,15 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
         }
     }
 
-    public void ApplySettings(Core.WidgetState state, bool isGlobalLocked, bool isGlobalShaderEnabled)
+    protected virtual void UpdateShaderIntensity()
+    {
+        if (GlassBase?.Effect is UI.Shaders.LiquidGlassEffect glass)
+        {
+            glass.Amount = GetAdjustedAmount();
+        }
+    }
+
+    public virtual void ApplySettings(Core.WidgetState state, bool isGlobalLocked, bool isGlobalShaderEnabled)
     {
         this.BgOpacity = state.Opacity;
         this.Topmost = state.IsAlwaysOnTop;
@@ -172,10 +203,6 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
         ApplyShaderSettings(isGlobalShaderEnabled);
     }
 
-    protected virtual void UpdateShaderIntensity()
-    {
-        if (GlassBase?.Effect is UI.Shaders.LiquidGlassEffect glass) glass.Amount = -0.15 * BgOpacity;
-    }
 
     public virtual void RefreshCustomData() { }
 

@@ -40,6 +40,9 @@ public class GlobalConfig
 
     // English: Standards names for HubWindow logic
     public bool EnableShader { get; set; } = true;
+    public bool StreamerMode { get; set; } = false;
+
+    public bool GameMode { get; set; } = true;
     public bool DisableShaderForScreenshots { get; set; } = false;
 
     public Dictionary<string, WidgetState> Widgets { get; set; } = new();

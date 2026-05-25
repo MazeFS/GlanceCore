@@ -14,6 +14,7 @@ public partial class HubWindow : Window
 {
     private bool _isLoaded = false;
     private string _editingWidgetId = "";
+    private bool _isUpdatingSize = false;
     private void TimeSettings_Changed(object sender, RoutedEventArgs e)
     {
         if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId)) return;
@@ -97,13 +98,13 @@ public partial class HubWindow : Window
             else { BtnUploadImage.Visibility = Visibility.Collapsed; TypographySettingsPanel.Visibility = Visibility.Visible; }
 
             // 2. ЗАГРУЗКА БАЗОВЫХ ЗНАЧЕНИЙ (Ползунки)
-            if (SldOpacity != null) SldOpacity.Value = state.Opacity;
-            if (SldScale != null) SldScale.Value = state.Scale;
-            if (SldRadius != null) SldRadius.Value = state.CornerRadius;
+
+            _isUpdatingSize = true;
             if (SldWidth != null) SldWidth.Value = state.CustomWidth > 0 ? state.CustomWidth : 220;
             if (SldHeight != null) SldHeight.Value = state.CustomHeight > 0 ? state.CustomHeight : 280;
-            if (TglWidgetTopmost != null) TglWidgetTopmost.IsChecked = state.IsAlwaysOnTop;
-            if (SldFontSize != null) SldFontSize.Value = state.FontSize;
+            if (TxtWidth != null) TxtWidth.Text = state.CustomWidth > 0 ? ((int)state.CustomWidth).ToString() : "220";
+            if (TxtHeight != null) TxtHeight.Text = state.CustomHeight > 0 ? ((int)state.CustomHeight).ToString() : "280";
+            _isUpdatingSize = false;
 
             // Цвета
             try
@@ -265,7 +266,13 @@ public partial class HubWindow : Window
     // --- REAL-TIME SETTINGS APPLY ---
     private void Slider_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
-        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId)) return;
+        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId) || _isUpdatingSize) return;
+
+        _isUpdatingSize = true;
+        if (TxtWidth != null && SldWidth != null) TxtWidth.Text = ((int)SldWidth.Value).ToString();
+        if (TxtHeight != null && SldHeight != null) TxtHeight.Text = ((int)SldHeight.Value).ToString();
+        _isUpdatingSize = false;
+
         ApplyCurrentWidgetSettings();
     }
 
@@ -286,13 +293,15 @@ public partial class HubWindow : Window
         var cfg = Core.WidgetHost.CurrentConfig;
         if (!cfg.Widgets.ContainsKey(_editingWidgetId)) return;
         var state = cfg.Widgets[_editingWidgetId];
-        if (SldRadius != null) state.CornerRadius = SldRadius.Value;
-        if (SldWidth != null) state.CustomWidth = SldWidth.Value;
-        if (SldHeight != null) state.CustomHeight = SldHeight.Value;
+
         if (SldOpacity != null) state.Opacity = SldOpacity.Value;
         if (SldScale != null) state.Scale = SldScale.Value;
         if (TglWidgetTopmost != null) state.IsAlwaysOnTop = TglWidgetTopmost.IsChecked == true;
         if (SldFontSize != null) state.FontSize = SldFontSize.Value;
+        if (SldRadius != null) state.CornerRadius = SldRadius.Value;
+
+        if (SldWidth != null) state.CustomWidth = SldWidth.Value;
+        if (SldHeight != null) state.CustomHeight = SldHeight.Value;
 
         if (ComboFont != null)
         {
@@ -306,10 +315,11 @@ public partial class HubWindow : Window
     {
         if (!_isLoaded) return;
         var cfg = Core.WidgetHost.CurrentConfig;
-
+        cfg.GameMode = TglGameMode.IsChecked == true;
         cfg.RunAtStartup = TglAutoStart.IsChecked == true;
         cfg.LockWidgets = TglLock.IsChecked == true;
         cfg.EnableShader = TglShader.IsChecked == true;
+        cfg.StreamerMode = TglStreamerMode.IsChecked == true;
 
         Core.AutoStartManager.SetAutoStart(cfg.RunAtStartup);
         Core.WidgetHost.ApplySystemSettings();
@@ -324,7 +334,17 @@ public partial class HubWindow : Window
             catch { }
         }
     }
+    private void SizeInput_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId) || _isUpdatingSize) return;
 
+        _isUpdatingSize = true;
+        if (double.TryParse(TxtWidth.Text, out double w) && SldWidth != null) SldWidth.Value = w;
+        if (double.TryParse(TxtHeight.Text, out double h) && SldHeight != null) SldHeight.Value = h;
+        _isUpdatingSize = false;
+
+        ApplyCurrentWidgetSettings();
+    }
     private void BtnAbout_Click(object sender, RoutedEventArgs e)
     {
         if (!_isLoaded) return;

@@ -6,77 +6,58 @@
         Title="Weather" WindowStyle="None" Background="Transparent" AllowsTransparency="True"
         DataContext="{Binding RelativeSource={RelativeSource Self}}">
 
-	<Window.ContextMenu>
-		<ContextMenu Background="#1A1A1A" Foreground="White" BorderBrush="#40FFFFFF">
-			<MenuItem Header="Обновить погоду" Click="RefreshWeather_Click"/>
-			<Separator Background="#30FFFFFF"/>
-			<MenuItem Header="Закрыть виджет" Click="CloseWidget_Click"/>
-		</ContextMenu>
-	</Window.ContextMenu>
+    <Window.ContextMenu>
+        <ContextMenu Background="#1A1A1A" Foreground="White" BorderBrush="#40FFFFFF">
+            <MenuItem Header="Обновить погоду" Click="RefreshWeather_Click"/>
+            <Separator Background="#30FFFFFF"/>
+            <MenuItem Header="Закрыть виджет" Click="CloseWidget_Click"/>
+        </ContextMenu>
+    </Window.ContextMenu>
 
-	<!-- Базовый размер 280x140 для правильного ScaleTransform -->
-	<Grid x:Name="MainRoot" Width="280" Height="140" Margin="10">
-		<Grid.Effect>
-			<DropShadowEffect BlurRadius="25" ShadowDepth="8" Opacity="0.4" Color="Black"/>
-		</Grid.Effect>
+    <Grid x:Name="MainRoot" Width="280" Height="140" Margin="10">
+        <Grid.Effect>
+            <DropShadowEffect BlurRadius="25" ShadowDepth="8" Opacity="0.4" Color="Black"/>
+        </Grid.Effect>
 
-		<!-- Внешняя рамка -->
-		<Border x:Name="MainBorder" CornerRadius="28" BorderThickness="1.5" ClipToBounds="True" BorderBrush="{Binding BorderColorBrush}">
-			<Grid>
-				<!-- СЛОЙ 1: Стекло (для захвата обоев) -->
-				<Border x:Name="GlassBase" CornerRadius="28">
-					<Border.Background>
-						<ImageBrush x:Name="WallpaperBrush" Stretch="Fill"/>
-					</Border.Background>
-				</Border>
+        <Border x:Name="BackgroundLayer" CornerRadius="{Binding WidgetCornerRadius}" BorderBrush="{Binding BorderColorBrush}" BorderThickness="1.5" ClipToBounds="True" Opacity="{Binding BgOpacity}">
+            <Grid>
+                <Border x:Name="GlassBase" CornerRadius="{Binding WidgetCornerRadius}">
+                    <Border.Background>
+                        <ImageBrush x:Name="WallpaperBrush" Stretch="Fill"/>
+                    </Border.Background>
+                </Border>
+                <Border x:Name="MinimalBase" Background="{Binding BgColorBrush}" CornerRadius="{Binding WidgetCornerRadius}" Opacity="0.3"/>
+                <Border x:Name="WeatherTint" CornerRadius="{Binding WidgetCornerRadius}" Background="#40000000" Opacity="0.85" IsHitTestVisible="False"/>
+                <Border x:Name="GlossBevel" CornerRadius="{Binding WidgetCornerRadius}" BorderBrush="#35FFFFFF" BorderThickness="1.5" Margin="1" IsHitTestVisible="False">
+                    <Border.Background>
+                        <RadialGradientBrush Center="0.5,0" RadiusX="0.9" RadiusY="0.6">
+                            <GradientStop Color="#25FFFFFF" Offset="0"/>
+                            <GradientStop Color="Transparent" Offset="1"/>
+                        </RadialGradientBrush>
+                    </Border.Background>
+                </Border>
+            </Grid>
+        </Border>
 
-				<!-- СЛОЙ 1.5: Сплошной фон (Минимализм) -->
-				<Border x:Name="MinimalBase" Background="{Binding BgColorBrush}" CornerRadius="12" Visibility="Collapsed"/>
+        <Grid Margin="25,0" IsHitTestVisible="False">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-				<!-- СЛОЙ 2: Динамическая заливка погоды (Синий/Оранжевый) -->
-				<Border x:Name="WeatherTint" CornerRadius="28" Background="#40000000" Opacity="0.85" IsHitTestVisible="False"/>
+            <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,5,0,0">
+                <iconPacks:PackIconLucide Kind="{Binding CurrentIcon}" Width="46" Height="46" Foreground="{Binding TextColorBrush}" Margin="0,0,0,8" HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding WeatherDescription}" FontSize="{Binding FontSize}" FontWeight="SemiBold" Foreground="{Binding TextColorBrush}" Opacity="0.9" HorizontalAlignment="Center"/>
+            </StackPanel>
 
-				<!-- СЛОЙ 3: Верхний блик -->
-				<Border x:Name="GlossBevel" CornerRadius="28" BorderBrush="#35FFFFFF" BorderThickness="1.5" Margin="1" IsHitTestVisible="False">
-					<Border.Background>
-						<RadialGradientBrush Center="0.5,0" RadiusX="0.9" RadiusY="0.6">
-							<GradientStop Color="#25FFFFFF" Offset="0"/>
-							<GradientStop Color="Transparent" Offset="1"/>
-						</RadialGradientBrush>
-					</Border.Background>
-				</Border>
-
-				<!-- СЛОЙ 4: Контент -->
-				<Grid Margin="25,0" IsHitTestVisible="False">
-					<Grid.ColumnDefinitions>
-						<ColumnDefinition Width="Auto"/>
-						<!-- Лево: Иконка -->
-						<ColumnDefinition Width="*"/>
-						<!-- Право: Градусы -->
-					</Grid.ColumnDefinitions>
-
-					<StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,5,0,0">
-						<iconPacks:PackIconLucide Kind="{Binding CurrentIcon}" Width="46" Height="46" Foreground="{Binding TextColorBrush}" Margin="0,0,0,8" HorizontalAlignment="Center"/>
-						<TextBlock Text="{Binding WeatherDescription}"
-                                   FontSize="{Binding FontSize}"
-                                   FontWeight="SemiBold" Foreground="{Binding TextColorBrush}" Opacity="0.9" HorizontalAlignment="Center"/>
-					</StackPanel>
-
-					<StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
-						<TextBlock Text="{Binding Temperature}" FontSize="48" FontWeight="Light" Foreground="{Binding TextColorBrush}"
-                                   HorizontalAlignment="Right" Margin="0,-10,0,-5">
-							<TextBlock.Effect>
-								<DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" Color="Black"/>
-							</TextBlock.Effect>
-						</TextBlock>
-						<TextBlock Text="{Binding CityName}"
-           FontSize="{Binding FontSize}" FontWeight="Medium" Foreground="{Binding TextColorBrush}" Opacity="0.8"
-           HorizontalAlignment="Right"
-           TextTrimming="CharacterEllipsis"
-           MaxWidth="120"/>
-					</StackPanel>
-				</Grid>
-			</Grid>
-		</Border>
-	</Grid>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
+                <TextBlock Text="{Binding Temperature}" FontSize="48" FontWeight="Light" Foreground="{Binding TextColorBrush}" HorizontalAlignment="Right" Margin="0,-10,0,-5">
+                    <TextBlock.Effect>
+                        <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.5" Color="Black"/>
+                    </TextBlock.Effect>
+                </TextBlock>
+                <TextBlock Text="{Binding CityName}" FontSize="{Binding FontSize}" FontWeight="Medium" Foreground="{Binding TextColorBrush}" Opacity="0.8" HorizontalAlignment="Right" TextTrimming="CharacterEllipsis" MaxWidth="120"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
 </widgets:BaseWidgetWindow>
