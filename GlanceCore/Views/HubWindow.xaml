@@ -13,7 +13,7 @@
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         WindowStartupLocation="CenterScreen" ResizeMode="CanResize"
         FontFamily="Segoe UI Variable, Segoe UI, sans-serif"
-        TextElement.Foreground="#FFFFFF" SnapsToDevicePixels="True" UseLayoutRounding="True">
+        TextElement.Foreground="{DynamicResource ThemeText}">
 
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="8" GlassFrameThickness="-1"/>
@@ -281,7 +281,7 @@
             <Setter Property="Width" Value="46"/>
             <Setter Property="Height" Value="32"/>
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#E0E0E0"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeText}"/>
             <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
             <Setter Property="FontSize" Value="10"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
@@ -315,7 +315,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ThemeText}"/>
                                 <Setter Property="FontWeight" Value="SemiBold"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -417,14 +417,9 @@
         </EventTrigger>
     </Window.Triggers>
 
-    <Border CornerRadius="16" BorderBrush="#40FFFFFF" BorderThickness="1" ClipToBounds="True">
-        <Border.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                <GradientStop x:Name="Color1" Color="#0F0C29" Offset="0.0"/>
-                <GradientStop x:Name="Color2" Color="#302B63" Offset="0.5"/>
-                <GradientStop x:Name="Color3" Color="#24243E" Offset="1.0"/>
-            </LinearGradientBrush>
-        </Border.Background>
+
+    <Border CornerRadius="16" BorderBrush="#40FFFFFF" BorderThickness="1" ClipToBounds="True" Background="{DynamicResource ThemeBackgroundBrush}">
+
 
         <Grid>
             <Grid.RowDefinitions>
@@ -492,21 +487,21 @@
                         <!-- СОЦИАЛЬНЫЕ КНОПКИ (В самом низу Sidebar) -->
                         <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,15,0">
                             <Button Style="{StaticResource SocialBtnStyle}" Tag="https://discord.gg/" Click="OpenLink_Click" ToolTip="Discord">
-                                <iconPacks:PackIconSimpleIcons Kind="Discord" Width="14" Height="14"/>
+                                <iconPacks:PackIconSimpleIcons Kind="Discord" Width="14" Height="14" Foreground="{DynamicResource ThemeIconColor}"/>
                             </Button>
                             <Button Style="{StaticResource SocialBtnStyle}" Tag="https://reddit.com/" Click="OpenLink_Click" ToolTip="Reddit">
-                                <iconPacks:PackIconSimpleIcons Kind="Reddit" Width="14" Height="14"/>
+                                <iconPacks:PackIconSimpleIcons Kind="Reddit" Width="14" Height="14" Foreground="{DynamicResource ThemeIconColor}"/>
                             </Button>
                             <Button Style="{StaticResource SocialBtnStyle}" Tag="https://tiktok.com/" Click="OpenLink_Click" ToolTip="TikTok">
-                                <iconPacks:PackIconSimpleIcons Kind="TikTok" Width="14" Height="14"/>
+                                <iconPacks:PackIconSimpleIcons Kind="TikTok" Width="14" Height="14" Foreground="{DynamicResource ThemeIconColor}"/>
                             </Button>
                             <Button Style="{StaticResource SocialBtnStyle}" Tag="https://x.com/" Click="OpenLink_Click" ToolTip="X (Twitter)">
-                                <iconPacks:PackIconSimpleIcons Kind="X" Width="14" Height="14"/>
+                                <iconPacks:PackIconSimpleIcons Kind="X" Width="14" Height="14" Foreground="{DynamicResource ThemeIconColor}"/>
                             </Button>
 
                             <!-- КНОПКА ABOUT (Выделяется размером) -->
                             <Button Style="{StaticResource SocialBtnStyle}" Click="BtnAbout_Click" ToolTip="О программе" Margin="10,0,0,0">
-                                <iconPacks:PackIconLucide Kind="Info" Width="20" Height="20" Foreground="White"/>
+                                <iconPacks:PackIconLucide Kind="Info" Width="20" Height="20" Foreground="{DynamicResource ThemeIconColor}"/>
                             </Button>
                         </StackPanel>
                     </Grid>
@@ -524,7 +519,7 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" x:Name="TabTitleText" Text="Управление виджетами" Foreground="#E0E0E0" FontSize="22" FontWeight="Bold" Margin="0,0,0,20"/>
+                            <TextBlock Grid.Row="0" x:Name="TabTitleText" Text="Управление виджетами" Foreground="{DynamicResource ThemeText}" FontSize="22" FontWeight="Bold" Margin="0,0,0,20"/>
 
                             <Grid Grid.Row="1">
                                 <!-- ВКЛАДКА 1: ВИДЖЕТЫ -->
@@ -549,8 +544,8 @@
                                                             <Border Grid.Row="1" Height="60" Background="#15FFFFFF" BorderBrush="#15FFFFFF" BorderThickness="0,1,0,0" CornerRadius="0,0,19,19" Margin="-1,0,-1,-1">
                                                                 <Grid Margin="15,0">
                                                                     <StackPanel VerticalAlignment="Center">
-                                                                        <TextBlock Text="{Binding Title}" FontSize="15" FontWeight="Bold" Foreground="White" TextTrimming="CharacterEllipsis"/>
-                                                                        <TextBlock Text="{Binding Description}" FontSize="11" Foreground="#90FFFFFF" TextTrimming="CharacterEllipsis"/>
+                                                                        <TextBlock Text="{Binding Title}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource ThemeText}" TextTrimming="CharacterEllipsis"/>
+                                                                        <TextBlock Text="{Binding Description}" FontSize="11" Foreground="{DynamicResource ThemeTextMuted}" TextTrimming="CharacterEllipsis"/>
                                                                     </StackPanel>
                                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                                         <Button Tag="{Binding Id}" Click="BtnWidgetSettings_Click" Style="{StaticResource TransparentHoverButtonStyle}" Margin="0,0,12,0">
@@ -996,6 +991,88 @@
                                                 <StackPanel>
                                                     <TextBlock Text="СИСТЕМНЫЕ ПАРАМЕТРЫ" Foreground="White" Opacity="0.5" FontSize="11" FontWeight="Bold" Margin="0,0,0,15"/>
 
+
+                                                    <TextBlock Text="Тема оформления Hub" Foreground="{DynamicResource ThemeText}" Opacity="0.6" Margin="0,0,0,10"/>
+                                                    <ListBox x:Name="CarouselThemes" SelectionChanged="CarouselThemes_SelectionChanged" Background="Transparent" BorderThickness="0" Margin="0,0,0,20" Height="100" ScrollViewer.HorizontalScrollBarVisibility="Hidden">
+                                                        <ListBox.ItemsPanel>
+                                                            <ItemsPanelTemplate>
+                                                                <VirtualizingStackPanel Orientation="Horizontal"/>
+                                                            </ItemsPanelTemplate>
+                                                        </ListBox.ItemsPanel>
+                                                        <ListBox.ItemContainerStyle>
+                                                            <Style TargetType="ListBoxItem">
+                                                                <Setter Property="Margin" Value="0,0,15,0"/>
+                                                                <Setter Property="Cursor" Value="Hand"/>
+                                                                <Setter Property="Template">
+                                                                    <Setter.Value>
+                                                                        <ControlTemplate TargetType="ListBoxItem">
+                                                                            <Border x:Name="Card" Width="100" Height="75" Background="#150E24" CornerRadius="12" BorderBrush="#30FFFFFF" BorderThickness="1.5">
+                                                                                <Grid>
+                                                                                    <Border x:Name="ThemePreview" Height="26" CornerRadius="6" Margin="10,10,10,0" VerticalAlignment="Top" BorderThickness="1" BorderBrush="#20FFFFFF"/>
+                                                                                    <TextBlock Text="{Binding Name}" Foreground="{DynamicResource ThemeText}" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10"/>
+                                                                                    <Border x:Name="ActiveRing" BorderBrush="#8A2BE2" BorderThickness="2" CornerRadius="12" Visibility="Collapsed"/>
+                                                                                </Grid>
+                                                                            </Border>
+                                                                            <ControlTemplate.Triggers>
+                                                                                <Trigger Property="IsSelected" Value="True">
+                                                                                    <Setter TargetName="ActiveRing" Property="Visibility" Value="Visible"/>
+                                                                                    <Setter TargetName="Card" Property="BorderBrush" Value="#8A2BE2"/>
+                                                                                </Trigger>
+                                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                                    <Setter TargetName="Card" Property="BorderBrush" Value="#60FFFFFF"/>
+                                                                                </Trigger>
+                                                                                <DataTrigger Binding="{Binding Id}" Value="Original">
+                                                                                    <Setter TargetName="ThemePreview" Property="Background">
+                                                                                        <Setter.Value>
+                                                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                                                <GradientStop Color="#0F0C29" Offset="0"/>
+                                                                                                <GradientStop Color="#302B63" Offset="1"/>
+                                                                                            </LinearGradientBrush>
+                                                                                        </Setter.Value>
+                                                                                    </Setter>
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding Id}" Value="Dark">
+                                                                                    <Setter TargetName="ThemePreview" Property="Background">
+                                                                                        <Setter.Value>
+                                                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                                                <GradientStop Color="#0A0A0C" Offset="0"/>
+                                                                                                <GradientStop Color="#141518" Offset="1"/>
+                                                                                            </LinearGradientBrush>
+                                                                                        </Setter.Value>
+                                                                                    </Setter>
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding Id}" Value="Blue">
+                                                                                    <Setter TargetName="ThemePreview" Property="Background">
+                                                                                        <Setter.Value>
+                                                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                                                <GradientStop Color="#000428" Offset="0"/>
+                                                                                                <GradientStop Color="#004e92" Offset="1"/>
+                                                                                            </LinearGradientBrush>
+                                                                                        </Setter.Value>
+                                                                                    </Setter>
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding Id}" Value="Light">
+                                                                                    <Setter TargetName="ThemePreview" Property="Background">
+                                                                                        <Setter.Value>
+                                                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                                                <GradientStop Color="#E0EAFC" Offset="0"/>
+                                                                                                <GradientStop Color="#CFDEF3" Offset="1"/>
+                                                                                            </LinearGradientBrush>
+                                                                                        </Setter.Value>
+                                                                                    </Setter>
+                                                                                </DataTrigger>
+                                                                            </ControlTemplate.Triggers>
+                                                                        </ControlTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </Style>
+                                                        </ListBox.ItemContainerStyle>
+                                                        <ListBox.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <ContentPresenter/>
+                                                            </DataTemplate>
+                                                        </ListBox.ItemTemplate>
+                                                    </ListBox>
                                                     <Grid Margin="0,0,0,15">
                                                         <StackPanel>
                                                             <TextBlock Text="Автозапуск" Foreground="White" FontSize="15" FontWeight="SemiBold"/>

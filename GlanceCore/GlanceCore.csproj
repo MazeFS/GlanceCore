@@ -31,4 +31,8 @@
 		<PackageReference Include="Tinkoff.InvestApi" Version="0.6.21" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="UI\Dictionaries\Themes\" />
+	</ItemGroup>
+
 </Project>

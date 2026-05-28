@@ -1,18 +1,16 @@
 ﻿<Application x:Class="GlanceCore.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary>
-                    <Style TargetType="Control"> 
-                        <Setter Property="FocusVisualStyle" Value="{x:Null}"/> 
-                    </Style>
-                </ResourceDictionary>
-
                 <ResourceDictionary Source="pack://application:,,,/UI/Dictionaries/Theme.xaml"/>
+                <ResourceDictionary Source="/UI/Dictionaries/Themes/Original.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <Style TargetType="Control">
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

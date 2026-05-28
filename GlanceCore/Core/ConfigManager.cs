@@ -25,7 +25,6 @@ public class WidgetState
     public string BorderColor { get; set; } = "#40FFFFFF";
     public string CustomData { get; set; } = "";
 
-    // НОВЫЕ СВОЙСТВА (Добавь их сюда!):
     public double CornerRadius { get; set; } = 24.0;
     public List<string> HardwareOrder { get; set; } = new List<string> { "CPU", "GPU", "RAM" };
 
@@ -33,6 +32,7 @@ public class WidgetState
     public bool ShowSeconds { get; set; } = false;
     public bool IsVerticalTime { get; set; } = false;
 }
+
 public class GlobalConfig
 {
     public bool RunAtStartup { get; set; } = false;
@@ -40,6 +40,8 @@ public class GlobalConfig
     public bool EnableShader { get; set; } = true;
     public bool StreamerMode { get; set; } = false;
     public bool GameMode { get; set; } = true;
+    public string HubTheme { get; set; } = "Original";
+
     public string AiEndpoint { get; set; } = "https://api.openai.com/v1";
     public string AiApiKey { get; set; } = "";
     public string AiModel { get; set; } = "llama3";

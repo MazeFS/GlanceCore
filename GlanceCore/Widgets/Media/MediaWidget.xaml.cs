@@ -1,35 +1,19 @@
+namespace GlanceCore.Widgets.Media;
+
 using System;
-using System.ComponentModel;
 using System.IO;
-using System.Runtime.CompilerServices;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Windows.Media.Control;
-using GlanceCore.Widgets;
-using GlanceCore.UI.Shaders;
-using System.Runtime.InteropServices;
-using System.Drawing;
 
-namespace GlanceCore.Widgets.Media;
-
-public partial class MediaWidget : BaseWidgetWindow
+public partial class MediaWidget : GlanceCore.Widgets.BaseWidgetWindow
 {
-    [DllImport("gdi32.dll")] static extern bool BitBlt(IntPtr hdcDest, int xDest, int yDest, int wDest, int hDest, IntPtr hdcSource, int xSrc, int ySrc, int rop);
-    [DllImport("user32.dll")] static extern IntPtr GetDesktopWindow();
-    [DllImport("user32.dll")] static extern IntPtr GetWindowDC(IntPtr hWnd);
-    [DllImport("user32.dll")] static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
-    [DllImport("gdi32.dll")] static extern IntPtr CreateCompatibleDC(IntPtr hDC);
-    [DllImport("gdi32.dll")] static extern IntPtr CreateCompatibleBitmap(IntPtr hDC, int nWidth, int nHeight);
-    [DllImport("gdi32.dll")] static extern IntPtr SelectObject(IntPtr hDC, IntPtr hObject);
-    [DllImport("gdi32.dll")] static extern bool DeleteDC(IntPtr hDC);
-    [DllImport("gdi32.dll")] static extern bool DeleteObject(IntPtr hObject);
-
     private GlobalSystemMediaTransportControlsSessionManager? _sessionManager;
     private GlobalSystemMediaTransportControlsSession? _currentSession;
     private readonly DispatcherTimer _timelineTimer;
-    private readonly DispatcherTimer _captureTimer;
 
     private string _trackName = "No Media"; public string TrackName { get => _trackName; set { _trackName = value; OnPropertyChanged(); } }
     private string _artistName = "Waiting..."; public string ArtistName { get => _artistName; set { _artistName = value; OnPropertyChanged(); } }
@@ -41,67 +25,10 @@ public partial class MediaWidget : BaseWidgetWindow
     {
         InitializeComponent();
 
-        _captureTimer = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(33) };
-        _captureTimer.Tick += (s, e) => UpdateBackground();
-        _captureTimer.Start();
-
         _timelineTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _timelineTimer.Tick += TimelineTimer_Tick;
 
-        this.Loaded += (s, e) =>
-        {
-            var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
-            SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE);
-
-            var cfg = Core.WidgetHost.CurrentConfig;
-            var state = cfg.Widgets.GetValueOrDefault("Media_01", new Core.WidgetState());
-            ApplySettings(state, cfg.LockWidgets, cfg.EnableShader);
-        };
-
         InitializeMediaControlsAsync();
-    }
-
-    // English: Simplified ApplyShaderSettings for V1.0 Alpha stability
-    public override void ApplyShaderSettings(bool enable)
-    {
-        if (GlassBase == null || _captureTimer == null) return;
-        var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
-
-        _captureTimer.Stop();
-        GlassBase.Effect = null;
-        SetWindowDisplayAffinity(hwnd, WDA_NONE);
-
-        if (enable)
-        {
-            SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE);
-            _captureTimer.Start();
-            GlassBase.Effect = new LiquidGlassEffect { Amount = -0.15 };
-        }
-    }
-
-    private void UpdateBackground()
-    {
-        if (!this.IsVisible || this.ActualWidth <= 0 || this.ActualHeight <= 0) return;
-        try
-        {
-            System.Windows.Point p = this.PointToScreen(new System.Windows.Point(0, 0));
-            int w = (int)this.ActualWidth; int h = (int)this.ActualHeight;
-
-            IntPtr hDesk = GetDesktopWindow(); IntPtr hSrc = GetWindowDC(hDesk);
-            IntPtr hDest = CreateCompatibleDC(hSrc); IntPtr hBmp = CreateCompatibleBitmap(hSrc, w, h);
-            IntPtr hOld = SelectObject(hDest, hBmp);
-
-            BitBlt(hDest, 0, 0, w, h, hSrc, (int)p.X, (int)p.Y, 0x00CC0020);
-
-            SelectObject(hDest, hOld);
-            var bmpSource = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                hBmp, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-
-            DeleteDC(hDest); ReleaseDC(hDesk, hSrc); DeleteObject(hBmp);
-            bmpSource.Freeze();
-            WallpaperBrush.ImageSource = bmpSource;
-        }
-        catch { }
     }
 
     private async void InitializeMediaControlsAsync()
@@ -236,4 +163,9 @@ public partial class MediaWidget : BaseWidgetWindow
 
     private void CloseWidget_Click(object sender, RoutedEventArgs e) => Core.WidgetHost.CloseWidgetExplicitly("Media_01");
 
+    protected override void OnClosed(EventArgs e)
+    {
+        _timelineTimer.Stop();
+        base.OnClosed(e);
+    }
 }

@@ -22,10 +22,10 @@ public class SkinItemModel
 public partial class HubWindow : Window
 {
 
+
     private bool _isLoaded = false;
     private string _editingWidgetId = "";
     private bool _isUpdatingSize = false;
-    private DispatcherTimer? _win10CaptureTimer;
     private void TimeSettings_Changed(object sender, RoutedEventArgs e)
     {
         if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId)) return;
@@ -48,6 +48,45 @@ public partial class HubWindow : Window
     public HubWindow()
     {
         InitializeComponent();
+        _isLoaded = false;
+
+        var cfg = WidgetHost.CurrentConfig;
+
+        if (WidgetsList != null)
+        {
+            WidgetsList.ItemsSource = Core.WidgetHost.AvailableWidgets;
+        }
+
+        var hardwareToggle = this.FindName("HardwareToggle") as CheckBox;
+        if (hardwareToggle != null)
+        {
+            hardwareToggle.IsChecked = WidgetHost.IsWidgetActive("Hardware_01");
+        }
+
+        if (TglAutoStart != null) TglAutoStart.IsChecked = cfg.RunAtStartup;
+        if (TglLock != null) TglLock.IsChecked = cfg.LockWidgets;
+        if (TglShader != null) TglShader.IsChecked = cfg.EnableShader;
+        if (TglStreamerMode != null) TglStreamerMode.IsChecked = cfg.StreamerMode;
+        if (TglGameMode != null) TglGameMode.IsChecked = cfg.GameMode;
+
+        if (CarouselSkins != null)
+        {
+            CarouselSkins.ItemsSource = AvailableSkins;
+        }
+
+        if (CarouselThemes != null && cfg != null)
+        {
+            CarouselThemes.ItemsSource = AvailableHubThemes;
+            foreach (HubThemeModel item in CarouselThemes.Items)
+            {
+                if (item != null && item.Id == cfg.HubTheme)
+                {
+                    CarouselThemes.SelectedItem = item;
+                    break;
+                }
+            }
+        }
+
         CarouselSkins.ItemContainerGenerator.StatusChanged += (s, e) =>
         {
             if (CarouselSkins.ItemContainerGenerator.Status == System.Windows.Controls.Primitives.GeneratorStatus.ContainersGenerated)
@@ -55,26 +94,6 @@ public partial class HubWindow : Window
                 Dispatcher.BeginInvoke(new Action(() => AnimateCarousel()), DispatcherPriority.Render);
             }
         };
-        _isLoaded = false;
-        if (CarouselSkins != null) CarouselSkins.ItemsSource = AvailableSkins;
-        // English: Bind the auto-generator to our restored registry
-        if (WidgetsList != null)
-        {
-            WidgetsList.ItemsSource = Core.WidgetHost.AvailableWidgets;
-        }
-
-        // English: Sync standard toggles with saved configuration on startup
-        // Замени строку "HardwareToggle.IsChecked = ..." на этот безопасный поиск:
-        var hardwareToggle = this.FindName("HardwareToggle") as CheckBox;
-        if (hardwareToggle != null)
-        {
-            hardwareToggle.IsChecked = WidgetHost.IsWidgetActive("Hardware_01");
-        }
-
-        var cfg = WidgetHost.CurrentConfig;
-        if (TglAutoStart != null) TglAutoStart.IsChecked = cfg.RunAtStartup;
-        if (TglLock != null) TglLock.IsChecked = cfg.LockWidgets;
-        if (TglShader != null) TglShader.IsChecked = cfg.EnableShader;
 
         _isLoaded = true;
     }
@@ -184,6 +203,7 @@ public partial class HubWindow : Window
         }
         AnimateCarousel();
     }
+
     // --- WIDGET CONFIGURATION ---
     private void BtnWidgetSettings_Click(object sender, RoutedEventArgs e)
     {
@@ -563,6 +583,25 @@ public partial class HubWindow : Window
     // Stub for unused event from old XAML to prevent compilation failure
     private void Style_Changed(object sender, SelectionChangedEventArgs e) { }
 
+    public void CarouselThemes_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!_isLoaded || CarouselThemes == null) return;
+        if (CarouselThemes.SelectedItem is HubThemeModel selectedTheme)
+        {
+            if (selectedTheme == null) return;
+            string theme = selectedTheme.Id;
+            var cfg = Core.WidgetHost.CurrentConfig;
+            if (cfg != null)
+            {
+                cfg.HubTheme = theme;
+                Core.ConfigManager.Save(cfg);
+                App.ChangeTheme(theme);
+            }
+        }
+    }
+
+
+
     public System.Collections.ObjectModel.ObservableCollection<SkinItemModel> AvailableSkins { get; } = new()
     {
         new SkinItemModel { Id = "LiquidGlass", Name = "Liquid Glass", Image = "/Resource/Skins/Skin_LiquidGlass.png", Color = "#00BFFF" },
@@ -570,8 +609,20 @@ public partial class HubWindow : Window
         new SkinItemModel { Id = "Retro", Name = "Ретро 8-bit", Image = "/Resource/Skins/Skin_Retro.png", Color = "#FF8C00" },
         new SkinItemModel { Id = "Neon", Name = "Кибер-Неон", Image = "/Resource/Skins/Skin_Neon.png", Color = "#FF00FF" }
     };
+    public System.Collections.ObjectModel.ObservableCollection<HubThemeModel> AvailableHubThemes { get; } = new()
+    {
+        new HubThemeModel { Id = "Original", Name = "Оригинал" },
+        new HubThemeModel { Id = "Dark", Name = "Темная" },
+        new HubThemeModel { Id = "Blue", Name = "Синяя" },
+        new HubThemeModel { Id = "Light", Name = "Светлая" }
+    };
 }
 
+public class HubThemeModel
+{
+    public string Id { get; set; } = "";
+    public string Name { get; set; } = "";
+}
 
 
 public class StyleItemModel

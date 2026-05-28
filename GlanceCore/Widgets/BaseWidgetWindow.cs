@@ -47,13 +47,12 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
     protected DispatcherTimer? _captureTimer;
     private DispatcherTimer? _fpsResetTimer;
     private double _shaderTime = 0;
-    protected FrameworkElement? MainRoot => FindName("MainRoot") as FrameworkElement;
-    protected ImageBrush? WallpaperBrush => FindName("WallpaperBrush") as ImageBrush;
-    protected Border? GlassBase => FindName("GlassBase") as Border;
-
-    protected Border? MinimalBase => FindName("MinimalBase") as Border;
-    protected Border? GlossBevel => FindName("GlossBevel") as Border;
-    protected Border? BackgroundLayer => FindName("BackgroundLayer") as Border;
+    protected FrameworkElement? BaseMainRoot => FindName("MainRoot") as FrameworkElement;
+    protected ImageBrush? BaseWallpaperBrush => FindName("WallpaperBrush") as ImageBrush;
+    protected Border? BaseGlassBase => FindName("GlassBase") as Border;
+    protected Border? BaseMinimalBase => FindName("MinimalBase") as Border;
+    protected Border? BaseGlossBevel => FindName("GlossBevel") as Border;
+    protected Border? BaseBackgroundLayer => FindName("BackgroundLayer") as Border;
 
     private CornerRadius _widgetCornerRadius = new CornerRadius(24);
     public CornerRadius WidgetCornerRadius { get => _widgetCornerRadius; set { _widgetCornerRadius = value; OnPropertyChanged(); } }
@@ -69,11 +68,9 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
     public Effect? TextGlowEffect { get => _textGlowEffect; set { _textGlowEffect = value; OnPropertyChanged(); } }
     public BaseWidgetWindow()
     {
-        this.SizeChanged += (s, e) => UpdateClipping();
-        CompositionTarget.Rendering += OnCompositionTargetRendering;
         WindowStyle = WindowStyle.None;
         AllowsTransparency = true;
-        Background = Brushes.Transparent;
+        Background = new SolidColorBrush(Color.FromArgb(1, 0, 0, 0));
         ShowInTaskbar = false;
         SizeToContent = SizeToContent.WidthAndHeight;
 
@@ -92,126 +89,129 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
             _fpsResetTimer?.Start();
         };
 
+        this.SizeChanged += (s, e) => UpdateClipping();
         this.Loaded += (s, e) => ApplySkinSpecificVisuals();
     }
 
     protected void UpdateRealtimeBackground()
     {
-        if (!this.IsVisible || MainRoot == null || MainRoot.ActualWidth <= 0) return;
-        if (PresentationSource.FromVisual(MainRoot) == null || WallpaperBrush == null) return;
+        if (!this.IsVisible || BaseGlassBase == null || BaseGlassBase.ActualWidth <= 0) return;
+        if (PresentationSource.FromVisual(BaseGlassBase) == null || BaseWallpaperBrush == null) return;
         try
         {
-            var p = MainRoot.PointToScreen(new Point(0, 0));
-            int w = (int)MainRoot.ActualWidth; int h = (int)MainRoot.ActualHeight;
+            var p = BaseGlassBase.PointToScreen(new Point(0, 0));
+            var source = PresentationSource.FromVisual(this);
+            double dpiX = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
+            double dpiY = source?.CompositionTarget?.TransformToDevice.M22 ?? 1.0;
+            var rect = BaseGlassBase.TransformToAncestor(this).TransformBounds(new Rect(0, 0, BaseGlassBase.ActualWidth, BaseGlassBase.ActualHeight));
+            int w = (int)Math.Round(rect.Width * dpiX);
+            int h = (int)Math.Round(rect.Height * dpiY);
+            if (w <= 0 || h <= 0) return;
             IntPtr hDesk = GetDesktopWindow(); IntPtr hSrc = GetWindowDC(hDesk);
             IntPtr hDest = CreateCompatibleDC(hSrc); IntPtr hBmp = CreateCompatibleBitmap(hSrc, w, h);
             IntPtr hOld = SelectObject(hDest, hBmp);
-
             BitBlt(hDest, 0, 0, w, h, hSrc, (int)p.X, (int)p.Y, 0x00CC0020);
             SelectObject(hDest, hOld);
-
-            var bmp = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                hBmp, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            var bmp = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(hBmp, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
             bmp.Freeze();
             DeleteDC(hDest); ReleaseDC(hDesk, hSrc); DeleteObject(hBmp);
-            WallpaperBrush.ImageSource = bmp;
+            BaseWallpaperBrush.ImageSource = bmp;
         }
         catch { }
     }
     private void OnCompositionTargetRendering(object? sender, EventArgs e)
     {
         _shaderTime += 0.05;
-        if (GlassBase?.Effect is UI.Shaders.RetroPixelEffect retro) retro.Time = _shaderTime;
-        if (GlassBase?.Effect is UI.Shaders.NeonEffect neon) neon.Time = _shaderTime;
+        if (BaseGlassBase?.Effect is UI.Shaders.RetroPixelEffect retro) retro.Time = _shaderTime;
+        if (BaseGlassBase?.Effect is UI.Shaders.NeonEffect neon) neon.Time = _shaderTime;
     }
     protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e) { if (!_isLocked && e.ButtonState == MouseButtonState.Pressed) DragMove(); }
 
     public virtual void ApplyShaderSettings(bool enable)
     {
         _shaderShouldBeEnabled = enable;
+        if (BaseGlassBase == null) return;
         ApplySkinSpecificVisuals();
     }
 
     protected double GetAdjustedAmount()
     {
-        double width = MainRoot?.ActualWidth ?? 220.0;
+        double width = BaseMainRoot?.ActualWidth ?? 220.0;
         if (width <= 0) width = 220.0;
         return Math.Clamp(-30.0 / width, -0.22, -0.06) * BgOpacity;
     }
 
-private void UpdateClipping()
+    private void UpdateClipping()
     {
-        if (BackgroundLayer == null || MainRoot == null || MainRoot.ActualWidth <= 0) return;
-        
+        if (BaseBackgroundLayer == null || BaseMainRoot == null || BaseMainRoot.ActualWidth <= 0) return;
         var clip = new RectangleGeometry();
         clip.RadiusX = WidgetCornerRadius.TopLeft;
         clip.RadiusY = WidgetCornerRadius.TopLeft;
-        clip.Rect = new Rect(0, 0, MainRoot.ActualWidth, MainRoot.ActualHeight);
-        
-        BackgroundLayer.Clip = clip;
+        clip.Rect = new Rect(0, 0, BaseMainRoot.ActualWidth, BaseMainRoot.ActualHeight);
+        BaseBackgroundLayer.Clip = clip;
     }
-
     protected virtual void ApplySkinSpecificVisuals()
     {
-        if (GlassBase == null || _captureTimer == null) return;
+        if (BaseGlassBase == null || _captureTimer == null) return;
         var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
         if (hwnd == IntPtr.Zero) return;
 
         _captureTimer.Stop();
-        GlassBase.Effect = null;
+        BaseGlassBase.Effect = null;
         SetWindowDisplayAffinity(hwnd, WDA_NONE);
-        if (WallpaperBrush != null) WallpaperBrush.ImageSource = null;
+        if (BaseWallpaperBrush != null) BaseWallpaperBrush.ImageSource = null;
 
         string skinId = Core.WidgetHost.CurrentConfig.Widgets.GetValueOrDefault(GetWidgetId())?.SkinId ?? "LiquidGlass";
 
         if (_shaderShouldBeEnabled)
         {
-            if (BackgroundLayer != null) BackgroundLayer.CornerRadius = WidgetCornerRadius;
+            if (BaseBackgroundLayer != null) BaseBackgroundLayer.CornerRadius = WidgetCornerRadius;
 
             if (skinId == "Minimalism")
             {
                 TextGlowEffect = null;
-                GlassBase.Visibility = Visibility.Collapsed;
-                if (MinimalBase != null) MinimalBase.Visibility = Visibility.Visible;
-                if (GlossBevel != null) GlossBevel.Visibility = Visibility.Collapsed;
+                BaseGlassBase.Visibility = Visibility.Collapsed;
+                if (BaseMinimalBase != null) BaseMinimalBase.Visibility = Visibility.Visible;
+                if (BaseGlossBevel != null) BaseGlossBevel.Visibility = Visibility.Collapsed;
                 UpdateClipping();
                 return;
             }
 
-            GlassBase.Visibility = Visibility.Visible;
-            if (MinimalBase != null) MinimalBase.Visibility = Visibility.Collapsed;
-            if (GlossBevel != null) GlossBevel.Visibility = Visibility.Visible;
+            BaseGlassBase.Visibility = Visibility.Visible;
+            if (BaseMinimalBase != null) BaseMinimalBase.Visibility = Visibility.Collapsed;
+            if (BaseGlossBevel != null) BaseGlossBevel.Visibility = Visibility.Visible;
 
             bool isStreamer = Core.WidgetHost.CurrentConfig.StreamerMode;
-            SetWindowDisplayAffinity(hwnd, isStreamer ? WDA_NONE : WDA_EXCLUDEFROMCAPTURE);
 
             if (skinId == "Retro")
             {
                 TextGlowEffect = null;
-                GlassBase.Effect = new UI.Shaders.RetroPixelEffect { PixelSize = 0.008 };
+                BaseGlassBase.Effect = new UI.Shaders.RetroPixelEffect { PixelSize = 0.008 };
             }
             else if (skinId == "Neon")
             {
                 Color glowColor = Colors.Purple;
                 if (BgColorBrush is SolidColorBrush scb) glowColor = scb.Color;
-
-                GlassBase.Effect = new UI.Shaders.NeonEffect { NeonColor = glowColor };
-                TextGlowEffect = new DropShadowEffect { Color = glowColor, BlurRadius = 15, ShadowDepth = 0, Opacity = 0.9 };
+                BaseGlassBase.Effect = new UI.Shaders.NeonEffect { NeonColor = glowColor };
+                TextGlowEffect = new System.Windows.Media.Effects.DropShadowEffect { Color = glowColor, BlurRadius = 15, ShadowDepth = 0, Opacity = 0.9 };
             }
             else
             {
                 TextGlowEffect = null;
-                GlassBase.Effect = new UI.Shaders.LiquidGlassEffect { Amount = GetAdjustedAmount() };
+                BaseGlassBase.Effect = new UI.Shaders.LiquidGlassEffect { Amount = GetAdjustedAmount() };
             }
 
             if (isStreamer)
             {
+                SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE);
                 Dispatcher.BeginInvoke(new Action(() => {
                     UpdateRealtimeBackground();
+                    SetWindowDisplayAffinity(hwnd, WDA_NONE);
                 }), DispatcherPriority.Render);
             }
             else
             {
+                SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE);
                 _captureTimer.Start();
             }
 
@@ -220,9 +220,9 @@ private void UpdateClipping()
         else
         {
             TextGlowEffect = null;
-            GlassBase.Visibility = Visibility.Collapsed;
-            if (MinimalBase != null) MinimalBase.Visibility = Visibility.Visible;
-            if (GlossBevel != null) GlossBevel.Visibility = Visibility.Collapsed;
+            BaseGlassBase.Visibility = Visibility.Collapsed;
+            if (BaseMinimalBase != null) BaseMinimalBase.Visibility = Visibility.Visible;
+            if (BaseGlossBevel != null) BaseGlossBevel.Visibility = Visibility.Collapsed;
         }
     }
 
@@ -257,7 +257,7 @@ private void UpdateClipping()
 
     protected virtual void UpdateShaderIntensity()
     {
-        if (GlassBase?.Effect is UI.Shaders.LiquidGlassEffect glass) glass.Amount = GetAdjustedAmount();
+        if (BaseGlassBase?.Effect is UI.Shaders.LiquidGlassEffect glass) glass.Amount = GetAdjustedAmount();
     }
 
     public virtual void RefreshCustomData() { }
