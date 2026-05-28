@@ -44,7 +44,27 @@ public partial class HubWindow : Window
             Core.WidgetHost.RefreshWidgetVisuals(_editingWidgetId);
         }
     }
+    private void HubWindow_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Tab)
+        {
+            e.Handled = true;
+            BtnMenuToggle.IsChecked = !BtnMenuToggle.IsChecked;
+            ToggleSidebar();
+        }
+    }
 
+    private void HubWindow_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        if (Keyboard.Modifiers == ModifierKeys.Control && WidgetsPanel != null && WidgetsPanel.IsVisible && WidgetsPanel.IsMouseOver)
+        {
+            e.Handled = true;
+            double step = e.Delta > 0 ? 0.1 : -0.1;
+            double scale = Math.Clamp(WidgetsListScale.ScaleX + step, 0.6, 1.4);
+            WidgetsListScale.ScaleX = scale;
+            WidgetsListScale.ScaleY = scale;
+        }
+    }
     public HubWindow()
     {
         InitializeComponent();
@@ -68,7 +88,8 @@ public partial class HubWindow : Window
         if (TglShader != null) TglShader.IsChecked = cfg.EnableShader;
         if (TglStreamerMode != null) TglStreamerMode.IsChecked = cfg.StreamerMode;
         if (TglGameMode != null) TglGameMode.IsChecked = cfg.GameMode;
-
+        this.KeyDown += HubWindow_KeyDown;
+        this.PreviewMouseWheel += HubWindow_PreviewMouseWheel;
         if (CarouselSkins != null)
         {
             CarouselSkins.ItemsSource = AvailableSkins;
@@ -224,22 +245,42 @@ public partial class HubWindow : Window
             }
             // 1. АДАПТАЦИЯ ПАНЕЛЕЙ: Показываем нужные настройки
             if (HardwareSettingsPanel != null) HardwareSettingsPanel.Visibility = _editingWidgetId == "Hardware_01" ? Visibility.Visible : Visibility.Collapsed;
-            if (AiSettingsPanel != null) AiSettingsPanel.Visibility = _editingWidgetId == "AI_01" ? Visibility.Visible : Visibility.Collapsed;
-            // ВОТ ЭТА СТРОКА ВКЛЮЧАЕТ НАСТРОЙКИ ЧАСОВ:
             if (TimeSettingsPanel != null) TimeSettingsPanel.Visibility = _editingWidgetId == "Time_01" ? Visibility.Visible : Visibility.Collapsed;
+            if (AiSettingsPanel != null) AiSettingsPanel.Visibility = _editingWidgetId == "AI_01" ? Visibility.Visible : Visibility.Collapsed;
+            if (DateSettingsPanel != null) DateSettingsPanel.Visibility = _editingWidgetId == "Date_01" ? Visibility.Visible : Visibility.Collapsed;
 
             if (_editingWidgetId == "Image_01") { BtnUploadImage.Visibility = Visibility.Visible; TypographySettingsPanel.Visibility = Visibility.Collapsed; }
-            else { BtnUploadImage.Visibility = Visibility.Collapsed; TypographySettingsPanel.Visibility = Visibility.Visible; }
+            
 
-            // 2. ЗАГРУЗКА БАЗОВЫХ ЗНАЧЕНИЙ (Ползунки)
-
+        // 2. ЗАГРУЗКА БАЗОВЫХ ЗНАЧЕНИЙ (Ползунки)
+        else if (_editingWidgetId == "Date_01")
+        {
+            if (TglShowPlate != null) TglShowPlate.IsChecked = state.ShowPlate;
+            if (TglShowDay != null) TglShowDay.IsChecked = state.ShowDayOfWeek;
+            if (TglShowCalendarDate != null) TglShowCalendarDate.IsChecked = state.ShowDate;
+            if (TglShowClockTime != null) TglShowClockTime.IsChecked = state.ShowTime;
+        }
+            if (TglShowBorder != null) TglShowBorder.IsChecked = state.ShowBorder;
             _isUpdatingSize = true;
             if (SldWidth != null) SldWidth.Value = state.CustomWidth > 0 ? state.CustomWidth : 220;
             if (SldHeight != null) SldHeight.Value = state.CustomHeight > 0 ? state.CustomHeight : 280;
             if (TxtWidth != null) TxtWidth.Text = state.CustomWidth > 0 ? ((int)state.CustomWidth).ToString() : "220";
             if (TxtHeight != null) TxtHeight.Text = state.CustomHeight > 0 ? ((int)state.CustomHeight).ToString() : "280";
             _isUpdatingSize = false;
-
+            if (_editingWidgetId == "Image_01" || _editingWidgetId == "Date_01")
+            {
+                BtnUploadImage.Visibility = _editingWidgetId == "Image_01" ? Visibility.Visible : Visibility.Collapsed;
+                TypographySettingsPanel.Visibility = _editingWidgetId == "Image_01" ? Visibility.Collapsed : Visibility.Visible;
+                if (SldFontSize != null) SldFontSize.Visibility = Visibility.Collapsed;
+                if (LblFontSize != null) LblFontSize.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                BtnUploadImage.Visibility = Visibility.Collapsed;
+                TypographySettingsPanel.Visibility = Visibility.Visible;
+                if (SldFontSize != null) SldFontSize.Visibility = Visibility.Visible;
+                if (LblFontSize != null) LblFontSize.Visibility = Visibility.Visible;
+            }
             // Цвета
             try
             {
@@ -255,7 +296,25 @@ public partial class HubWindow : Window
                 foreach (ComboBoxItem item in ComboFont.Items)
                     if (item.Content.ToString() == state.FontFamily) { item.IsSelected = true; break; }
             }
+            else if (_editingWidgetId == "Date_01")
+            {
+                if (TglShowPlate != null) TglShowPlate.IsChecked = state.ShowPlate;
+                if (TglShowDay != null) TglShowDay.IsChecked = state.ShowDayOfWeek;
+                if (TglShowCalendarDate != null) TglShowCalendarDate.IsChecked = state.ShowDate;
+                if (TglShowClockTime != null) TglShowClockTime.IsChecked = state.ShowTime;
 
+                if (SldDateDayFontSize != null) SldDateDayFontSize.Value = state.DateDayFontSize;
+                if (SldDateDateFontSize != null) SldDateDateFontSize.Value = state.DateDateFontSize;
+                if (SldDateTimeFontSize != null) SldDateTimeFontSize.Value = state.DateTimeFontSize;
+                try
+                {
+                    var conv = new System.Windows.Media.BrushConverter();
+                    if (CircleDateDayColor != null && !string.IsNullOrEmpty(state.DateDayColor)) CircleDateDayColor.Fill = (Brush)conv.ConvertFromString(state.DateDayColor)!;
+                    if (CircleDateDateColor != null && !string.IsNullOrEmpty(state.DateDateColor)) CircleDateDateColor.Fill = (Brush)conv.ConvertFromString(state.DateDateColor)!;
+                    if (CircleDateTimeColor != null && !string.IsNullOrEmpty(state.DateTimeColor)) CircleDateTimeColor.Fill = (Brush)conv.ConvertFromString(state.DateTimeColor)!;
+                }
+                catch { }
+            }
             // 3. ЗАГРУЗКА СПЕЦИФИЧНЫХ НАСТРОЕК (Hardware / Time)
             if (_editingWidgetId == "Hardware_01" && ListHardwareOrder != null)
             {
@@ -282,6 +341,28 @@ public partial class HubWindow : Window
             WidgetConfigPanel.Visibility = Visibility.Visible;
         }
     }
+
+    private void DateSettings_Changed(object sender, RoutedEventArgs e)
+    {
+        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId)) return;
+        var cfg = Core.WidgetHost.CurrentConfig;
+        if (cfg.Widgets.ContainsKey(_editingWidgetId))
+        {
+            var state = cfg.Widgets[_editingWidgetId];
+            state.ShowPlate = TglShowPlate.IsChecked == true;
+            state.ShowDayOfWeek = TglShowDay.IsChecked == true;
+            state.ShowDate = TglShowCalendarDate.IsChecked == true;
+            state.ShowTime = TglShowClockTime.IsChecked == true;
+
+            if (SldDateDayFontSize != null) state.DateDayFontSize = SldDateDayFontSize.Value;
+            if (SldDateDateFontSize != null) state.DateDateFontSize = SldDateDateFontSize.Value;
+            if (SldDateTimeFontSize != null) state.DateTimeFontSize = SldDateTimeFontSize.Value;
+
+            Core.ConfigManager.Save(cfg);
+            Core.WidgetHost.RefreshWidgetVisuals(_editingWidgetId);
+        }
+    }
+
     // --- МЕТОДЫ СОРТИРОВКИ ДАТЧИКОВ HARDWARE ---
     private void BtnMoveUp_Click(object sender, RoutedEventArgs e)
     {
@@ -379,13 +460,43 @@ public partial class HubWindow : Window
                     state.BgColor = hex;
                     if (CircleBgColor != null) CircleBgColor.Fill = brush;
                 }
+                else if (target == "DateDay")
+                {
+                    state.DateDayColor = hex;
+                    if (CircleDateDayColor != null) CircleDateDayColor.Fill = brush;
+                }
+                else if (target == "DateDate")
+                {
+                    state.DateDateColor = hex;
+                    if (CircleDateDateColor != null) CircleDateDateColor.Fill = brush;
+                }
+                else if (target == "DateTime")
+                {
+                    state.DateTimeColor = hex;
+                    if (CircleDateTimeColor != null) CircleDateTimeColor.Fill = brush;
+                }
+                else if (target == "Bg")
+                {
+                    state.BgColor = hex;
+                    if (CircleBgColor != null) CircleBgColor.Fill = brush;
+                }
 
                 Core.ConfigManager.Save(cfg);
                 ApplyCurrentWidgetSettings();
             }
         }
     }
-
+    private void TglShowBorder_Click(object sender, RoutedEventArgs e)
+    {
+        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId)) return;
+        var cfg = Core.WidgetHost.CurrentConfig;
+        if (cfg.Widgets.ContainsKey(_editingWidgetId))
+        {
+            cfg.Widgets[_editingWidgetId].ShowBorder = TglShowBorder.IsChecked == true;
+            Core.ConfigManager.Save(cfg);
+            Core.WidgetHost.RefreshWidgetVisuals(_editingWidgetId);
+        }
+    }
     private void SetButtonEllipseColor(Button btn, string hex)
     {
         try
@@ -570,6 +681,7 @@ public partial class HubWindow : Window
         else
         {
             this.Hide();
+            Core.MemoryOptimizer.Trim();
         }
     }
 

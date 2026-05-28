@@ -60,7 +60,8 @@ public static class WidgetHost
     private static void RegisterBuiltInWidgets()
     {
         AvailableWidgets.Clear();
-        AvailableWidgets.Add(new WidgetInfo { Id = "AI_01", Title = "AI Ассистент", Description = "API и Локальные модели", PreviewImage = "/Resource/ScreenShots/HardwarePreview.png", Width = 300, WidgetType = typeof(GlanceCore.Widgets.AI.AIAssistantWidget) });
+        AvailableWidgets.Add(new WidgetInfo { Id = "Date_01", Title = "Дата и время", Description = "Календарь", PreviewImage = "/Resource/ScreenShots/HardwarePreview.png", Width = 250, WidgetType = typeof(GlanceCore.Widgets.Date.DateWidget) });
+        AvailableWidgets.Add(new WidgetInfo { Id = "AI_01", Title = "AI Ассистент", Description = "API и Локальные модели", PreviewImage = "/Resource/ScreenShots/HardwarePreview.png", Width = 250, WidgetType = typeof(GlanceCore.Widgets.AI.AIAssistantWidget) });
         AvailableWidgets.Add(new WidgetInfo { Id = "Hardware_01", Title = "Система", Description = "Hardware Monitor", PreviewImage = "/Resource/ScreenShots/HardwarePreview.png", Width = 250, WidgetType = typeof(HardwareWidget) });
         AvailableWidgets.Add(new WidgetInfo { Id = "Media_01", Title = "Медиа-плеер", Description = "Музыка и видео", PreviewImage = "/Resource/ScreenShots/MediaPreview.png", Width = 250, WidgetType = typeof(MediaWidget) });
         AvailableWidgets.Add(new WidgetInfo { Id = "Image_01", Title = "Фоторамка", Description = "Ваше фото", PreviewImage = "/Resource/ScreenShots/ImagePreview.png", Width = 250, WidgetType = typeof(ImageFrameWidget) });
@@ -109,6 +110,7 @@ public static class WidgetHost
         }
         ConfigManager.Save(_config);
         info.NotifyStateChanged();
+        MemoryOptimizer.Trim();
     }
 
     public static void ApplySystemSettings()
@@ -156,6 +158,7 @@ public static class WidgetHost
             if (_activeWidgets.Count == 0 && Application.Current is App app && !app.IsHubVisible)
                 Application.Current.Shutdown();
         }
+        MemoryOptimizer.Trim();
     }
 
     public static void Shutdown()

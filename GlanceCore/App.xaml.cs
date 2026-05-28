@@ -79,6 +79,9 @@ public partial class App : System.Windows.Application
             MemoryOptimizer.Trim();
         else
             new Views.SplashWindow().Show();
+        var trimTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
+        trimTimer.Tick += (s, ev) => MemoryOptimizer.Trim();
+        trimTimer.Start();
     }
 
     private static void StartNamedPipeServer()

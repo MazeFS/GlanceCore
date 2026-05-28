@@ -245,7 +245,10 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
             BorderColorBrush = (Brush)converter.ConvertFromString(state.BorderColor)!;
         }
         catch { }
-
+        if (BaseBackgroundLayer != null)
+        {
+            BaseBackgroundLayer.BorderThickness = state.ShowBorder ? new Thickness(1.5) : new Thickness(0);
+        }
         if (this.Content is FrameworkElement content)
         {
             if (state.CustomWidth > 0) content.Width = state.CustomWidth;

@@ -44,7 +44,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="GearIcon" Property="Foreground" Value="#8A2BE2"/>
+                                <Setter TargetName="GearIcon" Property="Foreground" Value="White"/>
                                 <Trigger.EnterActions>
                                     <BeginStoryboard>
                                         <Storyboard>
@@ -526,6 +526,9 @@
                                 <Grid x:Name="WidgetsPanel" Visibility="Visible">
                                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                         <ItemsControl x:Name="WidgetsList" Margin="0,0,10,0">
+                                            <ItemsControl.LayoutTransform>
+                                                <ScaleTransform x:Name="WidgetsListScale" ScaleX="1.0" ScaleY="1.0"/>
+                                            </ItemsControl.LayoutTransform>
                                             <ItemsControl.ItemsPanel>
                                                 <ItemsPanelTemplate>
                                                     <WrapPanel />
@@ -548,9 +551,7 @@
                                                                         <TextBlock Text="{Binding Description}" FontSize="11" Foreground="{DynamicResource ThemeTextMuted}" TextTrimming="CharacterEllipsis"/>
                                                                     </StackPanel>
                                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                                                        <Button Tag="{Binding Id}" Click="BtnWidgetSettings_Click" Style="{StaticResource TransparentHoverButtonStyle}" Margin="0,0,12,0">
-                                                                            <iconPacks:PackIconLucide Kind="Settings" Width="16" Height="16" Foreground="#A0FFFFFF"/>
-                                                                        </Button>
+                                                                        <Button Tag="{Binding Id}" Click="BtnWidgetSettings_Click" Style="{StaticResource GearBtnStyle}" Margin="0,0,12,0" VerticalAlignment="Center"/>
                                                                         <CheckBox Tag="{Binding Id}" IsChecked="{Binding IsActive, Mode=OneWay}" Style="{StaticResource AppleSwitchStyle}" Click="ToggleDynamicWidget_Click"/>
                                                                     </StackPanel>
                                                                 </Grid>
@@ -738,7 +739,13 @@
 
                                                 <TextBlock Text="Скругление углов (Corner Radius)" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
                                                 <Slider x:Name="SldRadius" Minimum="0" Maximum="100" ValueChanged="Slider_Changed" Margin="0,0,0,15"/>
-
+                                                <Grid Margin="0,10,0,15">
+                                                    <StackPanel>
+                                                        <TextBlock Text="Показывать обводку" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
+                                                        <TextBlock Text="Включить внешние границы виджета" Foreground="#80FFFFFF" FontSize="12"/>
+                                                    </StackPanel>
+                                                    <CheckBox x:Name="TglShowBorder" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="TglShowBorder_Click"/>
+                                                </Grid>
                                                 <Grid Margin="0,10,0,15">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="*"/>
@@ -834,6 +841,68 @@
                                                         <CheckBox x:Name="TglVerticalTime" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="TimeSettings_Changed"/>
                                                     </Grid>
                                                 </StackPanel>
+                                                <StackPanel x:Name="DateSettingsPanel" Visibility="Collapsed">
+                                                    <Border Height="1" Background="#15FFFFFF" Margin="0,10"/>
+
+                                                    <TextBlock Text="Размер шрифта дня недели" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                    <Slider x:Name="SldDateDayFontSize" Minimum="8" Maximum="40" ValueChanged="DateSettings_Changed" Margin="0,0,0,15"/>
+
+                                                    <TextBlock Text="Размер шрифта календарной даты" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                    <Slider x:Name="SldDateDateFontSize" Minimum="8" Maximum="40" ValueChanged="DateSettings_Changed" Margin="0,0,0,15"/>
+
+                                                    <TextBlock Text="Размер шрифта часов" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                    <Slider x:Name="SldDateTimeFontSize" Minimum="8" Maximum="80" ValueChanged="DateSettings_Changed" Margin="0,0,0,15"/>
+                                                    <Grid Margin="0,10,0,15">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel Grid.Column="0">
+                                                            <TextBlock Text="Цвет дня" Foreground="White" Opacity="0.6" Margin="0,0,0,5" FontSize="11"/>
+                                                            <Button Tag="DateDay" Click="BtnPickColor_Click" Width="32" Height="32" HorizontalAlignment="Left" Style="{StaticResource TransparentHoverButtonStyle}" Cursor="Hand">
+                                                                <Ellipse x:Name="CircleDateDayColor" Width="30" Height="30" Fill="White" Stroke="#40FFFFFF" StrokeThickness="2"/>
+                                                            </Button>
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="1">
+                                                            <TextBlock Text="Цвет даты" Foreground="White" Opacity="0.6" Margin="0,0,0,5" FontSize="11"/>
+                                                            <Button Tag="DateDate" Click="BtnPickColor_Click" Width="32" Height="32" HorizontalAlignment="Left" Style="{StaticResource TransparentHoverButtonStyle}" Cursor="Hand">
+                                                                <Ellipse x:Name="CircleDateDateColor" Width="30" Height="30" Fill="White" Stroke="#40FFFFFF" StrokeThickness="2"/>
+                                                            </Button>
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="2">
+                                                            <TextBlock Text="Цвет часов" Foreground="White" Opacity="0.6" Margin="0,0,0,5" FontSize="11"/>
+                                                            <Button Tag="DateTime" Click="BtnPickColor_Click" Width="32" Height="32" HorizontalAlignment="Left" Style="{StaticResource TransparentHoverButtonStyle}" Cursor="Hand">
+                                                                <Ellipse x:Name="CircleDateTimeColor" Width="30" Height="30" Fill="White" Stroke="#40FFFFFF" StrokeThickness="2"/>
+                                                            </Button>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                    <Grid Margin="0,10,0,15">
+                                                        <StackPanel>
+                                                            <TextBlock Text="Фоновая подложка" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="Включить отображение стеклянного фона" Foreground="#80FFFFFF" FontSize="12"/>
+                                                        </StackPanel>
+                                                        <CheckBox x:Name="TglShowPlate" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="DateSettings_Changed"/>
+                                                    </Grid>
+                                                    <Grid Margin="0,0,0,15">
+                                                        <StackPanel>
+                                                            <TextBlock Text="Показывать день недели" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
+                                                        </StackPanel>
+                                                        <CheckBox x:Name="TglShowDay" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="DateSettings_Changed"/>
+                                                    </Grid>
+                                                    <Grid Margin="0,0,0,15">
+                                                        <StackPanel>
+                                                            <TextBlock Text="Показывать календарную дату" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
+                                                        </StackPanel>
+                                                        <CheckBox x:Name="TglShowCalendarDate" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="DateSettings_Changed"/>
+                                                    </Grid>
+                                                    <Grid Margin="0,0,0,5">
+                                                        <StackPanel>
+                                                            <TextBlock Text="Показывать часы" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
+                                                        </StackPanel>
+                                                        <CheckBox x:Name="TglShowClockTime" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="DateSettings_Changed"/>
+                                                    </Grid>
+                                                </StackPanel>
                                                 <StackPanel x:Name="AiSettingsPanel" Visibility="Collapsed">
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,10"/>
 
@@ -908,7 +977,7 @@
                                                         <ComboBoxItem Content="Verdana" FontFamily="Verdana" FontSize="14"/>
                                                         <ComboBoxItem Content="Courier New" FontFamily="Courier New" FontSize="14"/>
                                                     </ComboBox>
-                                                    <TextBlock Text="Размер текста" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                    <TextBlock x:Name="LblFontSize" Text="Размер текста" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
                                                     <Slider x:Name="SldFontSize" Minimum="8" Maximum="30" ValueChanged="Slider_Changed"/>
                                                 </StackPanel>
                                             </StackPanel>
@@ -929,68 +998,9 @@
                                 <Grid x:Name="SettingsPanel" Visibility="Collapsed">
                                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                         <StackPanel Margin="0,0,10,0">
-
-                                            <!-- 🌟 ПРЕМИАЛЬНАЯ КАРТОЧКА ДОНАТА 🌟 -->
-                                            <Border CornerRadius="20" Padding="2" Margin="0,0,0,25">
-                                                <!-- Анимированная неоновая обводка -->
-                                                <Border.Background>
-                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                        <GradientStop Color="#FFFFD700" Offset="0"/>
-                                                        <!-- Золото -->
-                                                        <GradientStop Color="#FFFF5E3A" Offset="0.5"/>
-                                                        <!-- Оранж Boosty -->
-                                                        <GradientStop Color="#FFB24592" Offset="1"/>
-                                                        <!-- Пурпур -->
-                                                    </LinearGradientBrush>
-                                                </Border.Background>
-                                                <Border.Effect>
-                                                    <DropShadowEffect BlurRadius="15" ShadowDepth="0" Color="#FF5E3A" Opacity="0.4"/>
-                                                </Border.Effect>
-
-                                                <!-- Внутреннее темное стекло -->
-                                                <Border Background="#E0101015" CornerRadius="18" Padding="25">
-                                                    <Grid>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                        </Grid.ColumnDefinitions>
-
-                                                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,20,0">
-                                                            <TextBlock Text="Поддержите создателя GlanceCore ☕" Foreground="White" FontSize="18" FontWeight="Bold" Margin="0,0,0,5"/>
-                                                            <TextBlock Text="Проект создается одним человеком в свободное время. Ваш донат напрямую ускоряет выход новых виджетов, стилей и функций." 
-                                       Foreground="#B0FFFFFF" FontSize="12" TextWrapping="Wrap" LineHeight="18"/>
-                                                        </StackPanel>
-
-                                                        <!-- Кнопки доната -->
-                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                            <Button Content="Buy Me a Coffee" Tag="https://www.buymeacoffee.com/" Click="OpenLink_Click" 
-                                    Background="#FFDD00" Foreground="Black" FontWeight="Bold" FontSize="13" 
-                                    Padding="20,10" BorderThickness="0" Cursor="Hand" Margin="0,0,0,10" FocusVisualStyle="{x:Null}">
-                                                                <Button.Resources>
-                                                                    <Style TargetType="Border">
-                                                                        <Setter Property="CornerRadius" Value="10"/>
-                                                                    </Style>
-                                                                </Button.Resources>
-                                                            </Button>
-
-                                                            <Button Content="Поддержать на Boosty" Tag="https://boosty.to/" Click="OpenLink_Click" 
-                                    Background="#F15F2C" Foreground="White" FontWeight="Bold" FontSize="13" 
-                                    Padding="20,10" BorderThickness="0" Cursor="Hand" FocusVisualStyle="{x:Null}">
-                                                                <Button.Resources>
-                                                                    <Style TargetType="Border">
-                                                                        <Setter Property="CornerRadius" Value="10"/>
-                                                                    </Style>
-                                                                </Button.Resources>
-                                                            </Button>
-                                                        </StackPanel>
-                                                    </Grid>
-                                                </Border>
-                                            </Border>
-
                                             <Border Background="#15000000" CornerRadius="16" Padding="20" BorderBrush="#20FFFFFF" BorderThickness="1">
                                                 <StackPanel>
-                                                    <TextBlock Text="СИСТЕМНЫЕ ПАРАМЕТРЫ" Foreground="White" Opacity="0.5" FontSize="11" FontWeight="Bold" Margin="0,0,0,15"/>
-
+                                                    <TextBlock Text="СИСТЕМНЫЕ ПАРАМЕТРЫ" Foreground="{DynamicResource ThemeText}" Opacity="0.5" FontSize="11" FontWeight="Bold" Margin="0,0,0,15"/>
 
                                                     <TextBlock Text="Тема оформления Hub" Foreground="{DynamicResource ThemeText}" Opacity="0.6" Margin="0,0,0,10"/>
                                                     <ListBox x:Name="CarouselThemes" SelectionChanged="CarouselThemes_SelectionChanged" Background="Transparent" BorderThickness="0" Margin="0,0,0,20" Height="100" ScrollViewer.HorizontalScrollBarVisibility="Hidden">
@@ -1073,53 +1083,88 @@
                                                             </DataTemplate>
                                                         </ListBox.ItemTemplate>
                                                     </ListBox>
+
                                                     <Grid Margin="0,0,0,15">
                                                         <StackPanel>
-                                                            <TextBlock Text="Автозапуск" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
-                                                            <TextBlock Text="Запускать вместе с Windows" Foreground="#80FFFFFF" FontSize="12"/>
+                                                            <TextBlock Text="Автозапуск" Foreground="{DynamicResource ThemeText}" FontSize="15" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="Запускать вместе с Windows" Foreground="{DynamicResource ThemeTextMuted}" FontSize="12"/>
                                                         </StackPanel>
                                                         <CheckBox x:Name="TglAutoStart" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="SystemSettings_Changed"/>
                                                     </Grid>
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,0,0,15"/>
-
                                                     <Grid Margin="0,0,0,15">
                                                         <StackPanel>
-                                                            <TextBlock Text="Блокировка позиций" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
-                                                            <TextBlock Text="Запретить перетаскивание виджетов мышью" Foreground="#80FFFFFF" FontSize="12"/>
+                                                            <TextBlock Text="Блокировка позиций" Foreground="{DynamicResource ThemeText}" FontSize="15" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="Запретить перетаскивание виджетов мышью" Foreground="{DynamicResource ThemeTextMuted}" FontSize="12"/>
                                                         </StackPanel>
                                                         <CheckBox x:Name="TglLock" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="SystemSettings_Changed"/>
                                                     </Grid>
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,0,0,15"/>
-
-                                                    <Grid>
+                                                    <Grid Margin="0,0,0,15">
                                                         <StackPanel>
-                                                            <TextBlock Text="Liquid Glass (Шейдер)" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
-                                                            <TextBlock Text="Искажение обоев рабочего стола (GPU)" Foreground="#80FFFFFF" FontSize="12"/>
+                                                            <TextBlock Text="Liquid Glass (Шейдер)" Foreground="{DynamicResource ThemeText}" FontSize="15" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="Искажение обоев рабочего стола (GPU)" Foreground="{DynamicResource ThemeTextMuted}" FontSize="12"/>
                                                         </StackPanel>
                                                         <CheckBox x:Name="TglShader" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="SystemSettings_Changed"/>
                                                     </Grid>
-
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,18,0,18"/>
-
                                                     <Grid Margin="0,5,0,0">
                                                         <StackPanel>
-                                                            <TextBlock Text="Режим Стримера (Smart Freeze)" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
-                                                            <TextBlock Text="Заморозка фона для идеального захвата в OBS/Скриншотах" Foreground="#80FFFFFF" FontSize="12"/>
+                                                            <TextBlock Text="Режим Стримера (Smart Freeze)" Foreground="{DynamicResource ThemeText}" FontSize="15" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="Заморозка фона для идеального захвата в OBS/Скриншотах" Foreground="{DynamicResource ThemeTextMuted}" FontSize="12"/>
                                                         </StackPanel>
                                                         <CheckBox x:Name="TglStreamerMode" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="SystemSettings_Changed"/>
                                                     </Grid>
-
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,18,0,18"/>
                                                     <Grid Margin="0,5,0,0">
                                                         <StackPanel>
-                                                            <TextBlock Text="Игровой режим (Game On)" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
-                                                            <TextBlock Text="Авто-отключение шейдеров при запуске полноэкранных игр" Foreground="#80FFFFFF" FontSize="12"/>
+                                                            <TextBlock Text="Игровой режим (Game On)" Foreground="{DynamicResource ThemeText}" FontSize="15" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="Авто-отключение шейдеров при запуске полноэкранных игр" Foreground="{DynamicResource ThemeTextMuted}" FontSize="12"/>
                                                         </StackPanel>
                                                         <CheckBox x:Name="TglGameMode" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="SystemSettings_Changed"/>
                                                     </Grid>
                                                 </StackPanel>
                                             </Border>
-
+                                            <Border CornerRadius="20" Padding="2" Margin="0,25,0,0">
+                                                <Border.Background>
+                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                        <GradientStop Color="#FFFFD700" Offset="0"/>
+                                                        <GradientStop Color="#FFFF5E3A" Offset="0.5"/>
+                                                        <GradientStop Color="#FFB24592" Offset="1"/>
+                                                    </LinearGradientBrush>
+                                                </Border.Background>
+                                                <Border.Effect>
+                                                    <DropShadowEffect BlurRadius="15" ShadowDepth="0" Color="#FF5E3A" Opacity="0.4"/>
+                                                </Border.Effect>
+                                                <Border Background="#E0101015" CornerRadius="18" Padding="25">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,20,0">
+                                                            <TextBlock Text="Поддержите создателя GlanceCore ☕" Foreground="White" FontSize="18" FontWeight="Bold" Margin="0,0,0,5"/>
+                                                            <TextBlock Text="Проект создается одним человеком в свободное время. Ваш донат напрямую ускоряет выход новых виджетов, стилей и функций." Foreground="#B0FFFFFF" FontSize="12" TextWrapping="Wrap" LineHeight="18"/>
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                            <Button Content="Buy Me a Coffee" Tag="https://www.buymeacoffee.com/" Click="OpenLink_Click" Background="#FFDD00" Foreground="Black" FontWeight="Bold" FontSize="13" Padding="20,10" BorderThickness="0" Cursor="Hand" Margin="0,0,0,10" FocusVisualStyle="{x:Null}">
+                                                                <Button.Resources>
+                                                                    <Style TargetType="Border">
+                                                                        <Setter Property="CornerRadius" Value="10"/>
+                                                                    </Style>
+                                                                </Button.Resources>
+                                                            </Button>
+                                                            <Button Content="Поддержать на Boosty" Tag="https://boosty.to/" Click="OpenLink_Click" Background="#F15F2C" Foreground="White" FontWeight="Bold" FontSize="13" Padding="20,10" BorderThickness="0" Cursor="Hand" FocusVisualStyle="{x:Null}">
+                                                                <Button.Resources>
+                                                                    <Style TargetType="Border">
+                                                                        <Setter Property="CornerRadius" Value="10"/>
+                                                                    </Style>
+                                                                </Button.Resources>
+                                                            </Button>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Border>
+                                            </Border>
                                         </StackPanel>
                                     </ScrollViewer>
                                 </Grid>

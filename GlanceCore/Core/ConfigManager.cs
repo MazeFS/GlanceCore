@@ -27,9 +27,19 @@ public class WidgetState
 
     public double CornerRadius { get; set; } = 24.0;
     public List<string> HardwareOrder { get; set; } = new List<string> { "CPU", "GPU", "RAM" };
-
+    public bool ShowDayOfWeek { get; set; } = true;
+    public bool ShowDate { get; set; } = true;
+    public bool ShowTime { get; set; } = true;
+    public bool ShowPlate { get; set; } = false;
     public string TimeSeparator { get; set; } = ":";
     public bool ShowSeconds { get; set; } = false;
+    public double DateDayFontSize { get; set; } = 12.0;
+    public double DateDateFontSize { get; set; } = 12.0;
+    public double DateTimeFontSize { get; set; } = 20.0;
+    public bool ShowBorder { get; set; } = true;
+    public string DateDayColor { get; set; } = "#FFFFFF";
+    public string DateDateColor { get; set; } = "#FFFFFF";
+    public string DateTimeColor { get; set; } = "#FFFFFF";
     public bool IsVerticalTime { get; set; } = false;
 }
 
