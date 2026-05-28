@@ -33,6 +33,7 @@
 
 	<ItemGroup>
 	  <Folder Include="UI\Dictionaries\Themes\" />
+	  <Folder Include="UI\Dictionaries\Languages\" />
 	</ItemGroup>
 
 </Project>

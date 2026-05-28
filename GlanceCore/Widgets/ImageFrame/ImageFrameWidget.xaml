@@ -4,16 +4,33 @@
         xmlns:widgets="clr-namespace:GlanceCore.Widgets"
         Title="Image Frame" WindowStyle="None" Background="Transparent" AllowsTransparency="True">
 
-	<!-- Жестко фиксируем базовый размер. ScaleTransform из BaseWidgetWindow сделает остальное -->
 	<Grid x:Name="MainRoot" Width="200" Height="200" Margin="15">
 		<Grid.Effect>
 			<DropShadowEffect BlurRadius="20" ShadowDepth="5" Opacity="0.5"/>
 		</Grid.Effect>
 
-		<!-- ClipToBounds="True" обрезает картинку по скругленным углам -->
-		<Border CornerRadius="20" ClipToBounds="True" Background="#10FFFFFF" BorderBrush="{Binding BorderColorBrush}" BorderThickness="1.5">
-			<!-- Stretch="UniformToFill" заполняет рамку без искажения пропорций лица/фото -->
-			<Image x:Name="DisplayedImage" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality"/>
+		<Border x:Name="BackgroundLayer" CornerRadius="{Binding WidgetCornerRadius}" BorderBrush="{Binding BorderColorBrush}" BorderThickness="1.5" ClipToBounds="True" Opacity="{Binding BgOpacity}">
+			<Grid>
+				<Border x:Name="GlassBase" CornerRadius="{Binding WidgetCornerRadius}">
+					<Border.Background>
+						<ImageBrush x:Name="WallpaperBrush" Stretch="Fill"/>
+					</Border.Background>
+				</Border>
+				<Border x:Name="MinimalBase" Background="{Binding BgColorBrush}" CornerRadius="{Binding WidgetCornerRadius}" Opacity="0.3"/>
+
+				<Border CornerRadius="{Binding WidgetCornerRadius}" ClipToBounds="True">
+					<Image x:Name="DisplayedImage" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality"/>
+				</Border>
+
+				<Border x:Name="GlossBevel" CornerRadius="{Binding WidgetCornerRadius}" BorderBrush="#35FFFFFF" BorderThickness="1.5" Margin="1" IsHitTestVisible="False">
+					<Border.Background>
+						<RadialGradientBrush Center="0.5,0" RadiusX="0.9" RadiusY="0.6">
+							<GradientStop Color="#25FFFFFF" Offset="0"/>
+							<GradientStop Color="Transparent" Offset="1"/>
+						</RadialGradientBrush>
+					</Border.Background>
+				</Border>
+			</Grid>
 		</Border>
 	</Grid>
 </widgets:BaseWidgetWindow>

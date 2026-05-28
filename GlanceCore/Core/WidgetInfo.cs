@@ -21,7 +21,7 @@ public class WidgetInfo : INotifyPropertyChanged
     }
 
     public void NotifyStateChanged() => OnPropertyChanged(nameof(IsActive));
-
+    public object? PluginInstance { get; set; }
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged([CallerMemberName] string? name = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

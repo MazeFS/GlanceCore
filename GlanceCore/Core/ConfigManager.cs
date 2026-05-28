@@ -41,6 +41,8 @@ public class WidgetState
     public string DateDateColor { get; set; } = "#FFFFFF";
     public string DateTimeColor { get; set; } = "#FFFFFF";
     public bool IsVerticalTime { get; set; } = false;
+
+    public string WeatherCity { get; set; } = "";
 }
 
 public class GlobalConfig
@@ -50,8 +52,10 @@ public class GlobalConfig
     public bool EnableShader { get; set; } = true;
     public bool StreamerMode { get; set; } = false;
     public bool GameMode { get; set; } = true;
+    public string Language { get; set; } = "RU";
     public string HubTheme { get; set; } = "Original";
-
+    public int IdleFps { get; set; } = 15;
+    public int MovingFps { get; set; } = 60;
     public string AiEndpoint { get; set; } = "https://api.openai.com/v1";
     public string AiApiKey { get; set; } = "";
     public string AiModel { get; set; } = "llama3";

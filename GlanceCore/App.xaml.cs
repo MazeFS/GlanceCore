@@ -148,7 +148,13 @@ public partial class App : System.Windows.Application
         if (_trayIcon != null) { _trayIcon.Visible = false; _trayIcon.Dispose(); }
         System.Windows.Application.Current.Shutdown();
     }
-
+    public static void ChangeLanguage(string langCode)
+    {
+        var newDict = new ResourceDictionary { Source = new Uri($"pack://application:,,,/UI/Dictionaries/Languages/Lang_{langCode}.xaml") };
+        var oldDict = Current.Resources.MergedDictionaries.FirstOrDefault(d => d.Source != null && d.Source.OriginalString.Contains("/Languages/"));
+        if (oldDict != null) Current.Resources.MergedDictionaries.Remove(oldDict);
+        Current.Resources.MergedDictionaries.Add(newDict);
+    }
     public static void ChangeTheme(string themeName)
     {
         var newDict = new ResourceDictionary { Source = new Uri($"/UI/Dictionaries/Themes/{themeName}.xaml", UriKind.Relative) };

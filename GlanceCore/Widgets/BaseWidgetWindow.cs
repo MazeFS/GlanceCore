@@ -74,17 +74,23 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
         ShowInTaskbar = false;
         SizeToContent = SizeToContent.WidthAndHeight;
 
-        _captureTimer = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(66) };
+        int idleFps = Core.WidgetHost.CurrentConfig.IdleFps;
+        if (idleFps <= 0) idleFps = 15;
+        _captureTimer = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(1000.0 / idleFps) };
         _captureTimer.Tick += (s, e) => UpdateRealtimeBackground();
 
         _fpsResetTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
         _fpsResetTimer.Tick += (s, e) => {
-            if (_captureTimer != null) _captureTimer.Interval = TimeSpan.FromMilliseconds(66);
+            int currentIdleFps = Core.WidgetHost.CurrentConfig.IdleFps;
+            if (currentIdleFps <= 0) currentIdleFps = 15;
+            if (_captureTimer != null) _captureTimer.Interval = TimeSpan.FromMilliseconds(1000.0 / currentIdleFps);
             _fpsResetTimer.Stop();
         };
 
         this.LocationChanged += (s, e) => {
-            if (_captureTimer != null) _captureTimer.Interval = TimeSpan.FromMilliseconds(16);
+            int movingFps = Core.WidgetHost.CurrentConfig.MovingFps;
+            if (movingFps <= 0) movingFps = 60;
+            if (_captureTimer != null) _captureTimer.Interval = TimeSpan.FromMilliseconds(1000.0 / movingFps);
             _fpsResetTimer?.Stop();
             _fpsResetTimer?.Start();
         };

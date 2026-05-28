@@ -13,7 +13,6 @@ public partial class WeatherWidget : GlanceCore.Widgets.BaseWidgetWindow
     private readonly DispatcherTimer _weatherTimer;
     private static readonly HttpClient _http = new();
 
-    // --- БИНДИНГИ ---
     private string _temperature = "--°"; public string Temperature { get => _temperature; set { _temperature = value; OnPropertyChanged(); } }
     private string _cityName = "Поиск..."; public string CityName { get => _cityName; set { _cityName = value; OnPropertyChanged(); } }
     private string _weatherDesc = "Загрузка"; public string WeatherDescription { get => _weatherDesc; set { _weatherDesc = value; OnPropertyChanged(); } }
@@ -27,11 +26,15 @@ public partial class WeatherWidget : GlanceCore.Widgets.BaseWidgetWindow
         _weatherTimer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(30) };
         _weatherTimer.Tick += async (s, e) => await FetchWeatherAsync();
 
-        // Запускаем сбор погоды только после загрузки окна
         this.Loaded += (s, e) => {
             _weatherTimer.Start();
             _ = FetchWeatherAsync();
         };
+    }
+
+    public override void RefreshCustomData()
+    {
+        _ = FetchWeatherAsync();
     }
 
     private async Task FetchWeatherAsync()
@@ -41,21 +44,42 @@ public partial class WeatherWidget : GlanceCore.Widgets.BaseWidgetWindow
             _http.DefaultRequestHeaders.Clear();
             _http.DefaultRequestHeaders.Add("User-Agent", "GlanceCore/1.0");
 
-            double lat = 54.71, lon = 20.51; // Fallback location
+            var state = Core.WidgetHost.CurrentConfig.Widgets.GetValueOrDefault("Weather_01");
+            double lat = 54.71, lon = 20.51;
             string city = "Калининград";
 
-            try
+            if (state != null && !string.IsNullOrEmpty(state.WeatherCity))
             {
-                var ipJson = await _http.GetStringAsync("https://ipapi.co/json/");
-                using var ipDoc = JsonDocument.Parse(ipJson);
-                if (ipDoc.RootElement.TryGetProperty("latitude", out var latProp))
+                try
                 {
-                    lat = latProp.GetDouble();
-                    lon = ipDoc.RootElement.GetProperty("longitude").GetDouble();
-                    city = ipDoc.RootElement.GetProperty("city").GetString() ?? "Unknown";
+                    string geoUrl = $"https://geocoding-api.open-meteo.com/v1/search?name={Uri.EscapeDataString(state.WeatherCity)}&count=1&language=en&format=json";
+                    var geoJson = await _http.GetStringAsync(geoUrl);
+                    using var geoDoc = JsonDocument.Parse(geoJson);
+                    if (geoDoc.RootElement.TryGetProperty("results", out var results) && results.GetArrayLength() > 0)
+                    {
+                        var firstResult = results[0];
+                        lat = firstResult.GetProperty("latitude").GetDouble();
+                        lon = firstResult.GetProperty("longitude").GetDouble();
+                        city = firstResult.GetProperty("name").GetString() ?? state.WeatherCity;
+                    }
                 }
+                catch { }
             }
-            catch { }
+            else
+            {
+                try
+                {
+                    var ipJson = await _http.GetStringAsync("https://ipapi.co/json/");
+                    using var ipDoc = JsonDocument.Parse(ipJson);
+                    if (ipDoc.RootElement.TryGetProperty("latitude", out var latProp))
+                    {
+                        lat = latProp.GetDouble();
+                        lon = ipDoc.RootElement.GetProperty("longitude").GetDouble();
+                        city = ipDoc.RootElement.GetProperty("city").GetString() ?? "Unknown";
+                    }
+                }
+                catch { }
+            }
 
             Dispatcher.Invoke(() => CityName = city);
 

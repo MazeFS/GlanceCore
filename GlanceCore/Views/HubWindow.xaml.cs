@@ -26,9 +26,10 @@ public partial class HubWindow : Window
     private bool _isLoaded = false;
     private string _editingWidgetId = "";
     private bool _isUpdatingSize = false;
+    private bool _isApplyingSettings = false;
     private void TimeSettings_Changed(object sender, RoutedEventArgs e)
     {
-        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId)) return;
+        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId) || _isApplyingSettings) return;
         var cfg = Core.WidgetHost.CurrentConfig;
         if (cfg.Widgets.ContainsKey(_editingWidgetId))
         {
@@ -88,6 +89,8 @@ public partial class HubWindow : Window
         if (TglShader != null) TglShader.IsChecked = cfg.EnableShader;
         if (TglStreamerMode != null) TglStreamerMode.IsChecked = cfg.StreamerMode;
         if (TglGameMode != null) TglGameMode.IsChecked = cfg.GameMode;
+        if (SldIdleFps != null) SldIdleFps.Value = cfg.IdleFps;
+        if (SldMovingFps != null) SldMovingFps.Value = cfg.MovingFps;
         this.KeyDown += HubWindow_KeyDown;
         this.PreviewMouseWheel += HubWindow_PreviewMouseWheel;
         if (CarouselSkins != null)
@@ -230,6 +233,7 @@ public partial class HubWindow : Window
     {
         if (sender is Button btn && btn.Tag != null)
         {
+            _isApplyingSettings = true;
             _editingWidgetId = btn.Tag.ToString()!;
             ConfigTitle.Text = $"Настройки: {_editingWidgetId.Replace("_01", "")}";
 
@@ -248,12 +252,24 @@ public partial class HubWindow : Window
             if (TimeSettingsPanel != null) TimeSettingsPanel.Visibility = _editingWidgetId == "Time_01" ? Visibility.Visible : Visibility.Collapsed;
             if (AiSettingsPanel != null) AiSettingsPanel.Visibility = _editingWidgetId == "AI_01" ? Visibility.Visible : Visibility.Collapsed;
             if (DateSettingsPanel != null) DateSettingsPanel.Visibility = _editingWidgetId == "Date_01" ? Visibility.Visible : Visibility.Collapsed;
-
+            if (WeatherSettingsPanel != null) WeatherSettingsPanel.Visibility = _editingWidgetId == "Weather_01" ? Visibility.Visible : Visibility.Collapsed;
+            else if (_editingWidgetId == "Weather_01")
+            {
+                if (TxtWeatherCity != null) TxtWeatherCity.Text = state.WeatherCity;
+            }
             if (_editingWidgetId == "Image_01") { BtnUploadImage.Visibility = Visibility.Visible; TypographySettingsPanel.Visibility = Visibility.Collapsed; }
-            
+            if (PluginSettingsContainer != null)
+            {
+                PluginSettingsContainer.Content = null;
+                var widgetInfo = Core.WidgetHost.AvailableWidgets.FirstOrDefault(w => w.Id == _editingWidgetId);
+                if (widgetInfo?.PluginInstance is GlanceCore.Plugins.IWidgetPlugin plugin)
+                {
+                    PluginSettingsContainer.Content = plugin.GetSettingsUI();
+                }
+            }
 
-        // 2. ЗАГРУЗКА БАЗОВЫХ ЗНАЧЕНИЙ (Ползунки)
-        else if (_editingWidgetId == "Date_01")
+            // 2. ЗАГРУЗКА БАЗОВЫХ ЗНАЧЕНИЙ (Ползунки)
+            else if (_editingWidgetId == "Date_01")
         {
             if (TglShowPlate != null) TglShowPlate.IsChecked = state.ShowPlate;
             if (TglShowDay != null) TglShowDay.IsChecked = state.ShowDayOfWeek;
@@ -339,12 +355,23 @@ public partial class HubWindow : Window
             _isLoaded = true;
             WidgetsPanel.Visibility = Visibility.Collapsed;
             WidgetConfigPanel.Visibility = Visibility.Visible;
+            _isApplyingSettings = false;
         }
     }
-
+    private void WeatherSettings_Changed(object sender, TextChangedEventArgs e)
+    {
+        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId) || _isApplyingSettings) return;
+        var cfg = Core.WidgetHost.CurrentConfig;
+        if (cfg.Widgets.ContainsKey(_editingWidgetId))
+        {
+            cfg.Widgets[_editingWidgetId].WeatherCity = TxtWeatherCity.Text;
+            Core.ConfigManager.Save(cfg);
+            Core.WidgetHost.RefreshWidgetCustomData(_editingWidgetId);
+        }
+    }
     private void DateSettings_Changed(object sender, RoutedEventArgs e)
     {
-        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId)) return;
+        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId) || _isApplyingSettings) return;
         var cfg = Core.WidgetHost.CurrentConfig;
         if (cfg.Widgets.ContainsKey(_editingWidgetId))
         {
@@ -389,7 +416,33 @@ public partial class HubWindow : Window
             SaveHardwareOrder();
         }
     }
+    private void ComboLang_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!_isLoaded) return;
+        if (ComboLang.SelectedItem is ComboBoxItem item && item.Tag != null)
+        {
+            string lang = item.Tag.ToString()!;
+            var cfg = Core.WidgetHost.CurrentConfig;
+            cfg.Language = lang;
+            Core.ConfigManager.Save(cfg);
+            App.ChangeLanguage(lang);
+        }
+    }
+    private void TxtSearchWidgets_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (WidgetsList == null) return;
+        string query = TxtSearchWidgets.Text.ToLower();
 
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            WidgetsList.ItemsSource = Core.WidgetHost.AvailableWidgets;
+        }
+        else
+        {
+            WidgetsList.ItemsSource = Core.WidgetHost.AvailableWidgets.Where(w =>
+                w.Title.ToLower().Contains(query) || w.Description.ToLower().Contains(query)).ToList();
+        }
+    }
     private void SaveHardwareOrder()
     {
         if (ListHardwareOrder == null) return;
@@ -488,7 +541,7 @@ public partial class HubWindow : Window
     }
     private void TglShowBorder_Click(object sender, RoutedEventArgs e)
     {
-        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId)) return;
+        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId) || _isApplyingSettings) return;
         var cfg = Core.WidgetHost.CurrentConfig;
         if (cfg.Widgets.ContainsKey(_editingWidgetId))
         {
@@ -523,13 +576,13 @@ public partial class HubWindow : Window
 
     private void Topmost_Changed(object sender, RoutedEventArgs e)
     {
-        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId)) return;
+        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId) || _isApplyingSettings) return;
         ApplyCurrentWidgetSettings();
     }
 
     private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId)) return;
+        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId) || _isApplyingSettings) return;
         ApplyCurrentWidgetSettings();
     }
 
@@ -559,21 +612,23 @@ public partial class HubWindow : Window
 
     private void SystemSettings_Changed(object sender, RoutedEventArgs e)
     {
-        if (!_isLoaded) return;
+
+        if (!_isLoaded || _isApplyingSettings) return;
         var cfg = Core.WidgetHost.CurrentConfig;
         cfg.RunAtStartup = TglAutoStart.IsChecked == true;
         cfg.LockWidgets = TglLock.IsChecked == true;
         cfg.EnableShader = TglShader.IsChecked == true;
         cfg.StreamerMode = TglStreamerMode.IsChecked == true;
         cfg.GameMode = TglGameMode.IsChecked == true;
-
+        cfg.IdleFps = (int)SldIdleFps.Value;
+        cfg.MovingFps = (int)SldMovingFps.Value;
         Core.AutoStartManager.SetAutoStart(cfg.RunAtStartup);
         Core.WidgetHost.ApplySystemSettings();
     }
 
     private void AiSettings_Changed(object sender, TextChangedEventArgs e)
     {
-        if (!_isLoaded) return;
+        if (!_isLoaded || _isApplyingSettings) return;
         var cfg = Core.WidgetHost.CurrentConfig;
         if (TxtAiEndpoint != null) cfg.AiEndpoint = TxtAiEndpoint.Text;
         if (TxtAiKey != null) cfg.AiApiKey = TxtAiKey.Text;
@@ -584,7 +639,7 @@ public partial class HubWindow : Window
 
     private void AiSlider_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
-        if (!_isLoaded) return;
+        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId) || _isUpdatingSize || _isApplyingSettings) return;
         var cfg = Core.WidgetHost.CurrentConfig;
         if (SldAiTemp != null) cfg.AiTemperature = SldAiTemp.Value;
         Core.ConfigManager.Save(cfg);
@@ -601,7 +656,7 @@ public partial class HubWindow : Window
     }
     private void SizeInput_TextChanged(object sender, TextChangedEventArgs e)
     {
-        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId) || _isUpdatingSize) return;
+        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId) || _isUpdatingSize || _isApplyingSettings) return;
 
         _isUpdatingSize = true;
         if (double.TryParse(TxtWidth.Text, out double w) && SldWidth != null) SldWidth.Value = w;
@@ -655,10 +710,9 @@ public partial class HubWindow : Window
             if (AboutPanel != null) AboutPanel.Visibility = Visibility.Collapsed;
 
             string tab = rb.Name;
-            if (tab == "TabWidgets") { TabTitleText.Text = "Управление виджетами"; WidgetsPanel.Visibility = Visibility.Visible; }
-            else if (tab == "TabStore") { TabTitleText.Text = "Магазин плагинов"; StorePanel.Visibility = Visibility.Visible; }
-            else if (tab == "TabSettings") { TabTitleText.Text = "Настройки системы"; SettingsPanel.Visibility = Visibility.Visible; }
-
+            if (tab == "TabWidgets") { TabTitleText.Text = "Управление виджетами"; WidgetsPanel.Visibility = Visibility.Visible; if (SearchBoxBorder != null) SearchBoxBorder.Visibility = Visibility.Visible; }
+            else if (tab == "TabStore") { TabTitleText.Text = "Магазин плагинов"; StorePanel.Visibility = Visibility.Visible; if (SearchBoxBorder != null) SearchBoxBorder.Visibility = Visibility.Collapsed; }
+            else if (tab == "TabSettings") { TabTitleText.Text = "Настройки системы"; SettingsPanel.Visibility = Visibility.Visible; if (SearchBoxBorder != null) SearchBoxBorder.Visibility = Visibility.Collapsed; }
 
             ActiveTabContent.BeginAnimation(OpacityProperty, new DoubleAnimation(1, TimeSpan.FromSeconds(0.2)));
             var zoom = new DoubleAnimation(0.96, 1, TimeSpan.FromSeconds(0.3)) { EasingFunction = new BackEase { Amplitude = 0.3 } };

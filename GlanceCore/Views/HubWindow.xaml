@@ -194,20 +194,48 @@
         <!-- Стиль для социальных кнопок -->
         <Style x:Key="SocialBtnStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#60FFFFFF"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeIconColor}"/>
+            <Setter Property="Opacity" Value="0.6"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="Transparent" Padding="5">
+                        <Border x:Name="Root" Background="Transparent" Padding="5" RenderTransformOrigin="0.5,0.5">
+                            <Border.RenderTransform>
+                                <ScaleTransform ScaleX="1.0" ScaleY="1.0"/>
+                            </Border.RenderTransform>
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="Opacity" Value="1.0"/>
                             </Trigger>
+                            <EventTrigger RoutedEvent="MouseEnter">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Root" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.2" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="Root" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.2" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <EventTrigger RoutedEvent="MouseLeave">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Root" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.0" Duration="0:0:0.2"/>
+                                        <DoubleAnimation Storyboard.TargetName="Root" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.0" Duration="0:0:0.2"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
@@ -465,19 +493,19 @@
                             <StackPanel x:Name="MenuStack" Margin="0,0,15,0">
                                 <RadioButton x:Name="TabWidgets" Style="{StaticResource HubTabStyle}" IsChecked="True" Checked="Tab_Checked">
                                     <Grid>
-                                        <TextBlock Text="Виджеты" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{DynamicResource Lang_Menu_Widgets}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                         <iconPacks:PackIconLucide Kind="LayoutDashboard" Width="14" Height="14" HorizontalAlignment="Right" VerticalAlignment="Center" Opacity="0.7"/>
                                     </Grid>
                                 </RadioButton>
                                 <RadioButton x:Name="TabStore" Style="{StaticResource HubTabStyle}" Checked="Tab_Checked">
                                     <Grid>
-                                        <TextBlock Text="Магазин" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{DynamicResource Lang_Menu_Store}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                         <iconPacks:PackIconLucide Kind="ShoppingBag" Width="14" Height="14" HorizontalAlignment="Right" VerticalAlignment="Center" Opacity="0.7"/>
                                     </Grid>
                                 </RadioButton>
                                 <RadioButton x:Name="TabSettings" Style="{StaticResource HubTabStyle}" Checked="Tab_Checked">
                                     <Grid>
-                                        <TextBlock Text="Настройки" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{DynamicResource Lang_Menu_Settings}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                         <iconPacks:PackIconLucide Kind="Settings" Width="14" Height="14" HorizontalAlignment="Right" VerticalAlignment="Center" Opacity="0.7"/>
                                     </Grid>
                                 </RadioButton>
@@ -519,7 +547,23 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" x:Name="TabTitleText" Text="Управление виджетами" Foreground="{DynamicResource ThemeText}" FontSize="22" FontWeight="Bold" Margin="0,0,0,20"/>
+                            <Grid Grid.Row="0" Margin="0,0,0,20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="TabTitleText" Text="{DynamicResource Lang_Menu_Widgets}" Foreground="{DynamicResource ThemeText}" FontSize="22" FontWeight="Bold" VerticalAlignment="Center"/>
+                                <Border x:Name="SearchBoxBorder" Grid.Column="1" Background="{DynamicResource ThemeControlBg}" CornerRadius="8" Padding="10,6" Width="180">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <iconPacks:PackIconLucide Kind="Search" Width="14" Height="14" Foreground="{DynamicResource ThemeTextMuted}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                        <TextBox x:Name="TxtSearchWidgets" Grid.Column="1" Background="Transparent" Foreground="{DynamicResource ThemeText}" BorderThickness="0" VerticalContentAlignment="Center" TextChanged="TxtSearchWidgets_TextChanged" CaretBrush="{DynamicResource ThemeText}"/>
+                                    </Grid>
+                                </Border>
+                            </Grid>
 
                             <Grid Grid.Row="1">
                                 <!-- ВКЛАДКА 1: ВИДЖЕТЫ -->
@@ -841,6 +885,7 @@
                                                         <CheckBox x:Name="TglVerticalTime" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="TimeSettings_Changed"/>
                                                     </Grid>
                                                 </StackPanel>
+                                                <ContentControl x:Name="PluginSettingsContainer" Margin="0,10,0,0"/>
                                                 <StackPanel x:Name="DateSettingsPanel" Visibility="Collapsed">
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,10"/>
 
@@ -948,6 +993,17 @@
                                                     </Grid>
                                                     <Slider x:Name="SldAiTemp" Minimum="0.0" Maximum="1.5" ValueChanged="AiSlider_Changed"/>
                                                 </StackPanel>
+                                                <StackPanel x:Name="WeatherSettingsPanel" Visibility="Collapsed">
+                                                    <Border Height="1" Background="#15FFFFFF" Margin="0,10"/>
+                                                    <TextBlock Text="Город (Оставьте пустым для авто-IP)" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                    <TextBox x:Name="TxtWeatherCity" Height="30" Background="#20FFFFFF" Foreground="White" BorderThickness="0" Padding="8,0" VerticalContentAlignment="Center" TextChanged="WeatherSettings_Changed">
+                                                        <TextBox.Resources>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="CornerRadius" Value="6"/>
+                                                            </Style>
+                                                        </TextBox.Resources>
+                                                    </TextBox>
+                                                </StackPanel>
                                                 <StackPanel x:Name="TypographySettingsPanel">
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,10"/>
                                                     <TextBlock Text="Шрифт" Foreground="MediumPurple" Opacity="0.6" Margin="0,10,0,5"/>
@@ -1001,7 +1057,11 @@
                                             <Border Background="#15000000" CornerRadius="16" Padding="20" BorderBrush="#20FFFFFF" BorderThickness="1">
                                                 <StackPanel>
                                                     <TextBlock Text="СИСТЕМНЫЕ ПАРАМЕТРЫ" Foreground="{DynamicResource ThemeText}" Opacity="0.5" FontSize="11" FontWeight="Bold" Margin="0,0,0,15"/>
-
+                                                    <TextBlock Text="Язык (Language)" Foreground="{DynamicResource ThemeText}" Opacity="0.6" Margin="0,0,0,5"/>
+                                                    <ComboBox x:Name="ComboLang" SelectionChanged="ComboLang_SelectionChanged" Height="32" VerticalContentAlignment="Center" Margin="0,0,0,20">
+                                                        <ComboBoxItem Content="Русский" Tag="RU"/>
+                                                        <ComboBoxItem Content="English" Tag="EN"/>
+                                                    </ComboBox>
                                                     <TextBlock Text="Тема оформления Hub" Foreground="{DynamicResource ThemeText}" Opacity="0.6" Margin="0,0,0,10"/>
                                                     <ListBox x:Name="CarouselThemes" SelectionChanged="CarouselThemes_SelectionChanged" Background="Transparent" BorderThickness="0" Margin="0,0,0,20" Height="100" ScrollViewer.HorizontalScrollBarVisibility="Hidden">
                                                         <ListBox.ItemsPanel>
@@ -1123,6 +1183,18 @@
                                                         </StackPanel>
                                                         <CheckBox x:Name="TglGameMode" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="SystemSettings_Changed"/>
                                                     </Grid>
+                                                    <Border Height="1" Background="#15FFFFFF" Margin="0,18,0,18"/>
+                                                    <Grid>
+                                                        <TextBlock Text="Частота кадров в покое (FPS)" Foreground="{DynamicResource ThemeText}" Opacity="0.6" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="{Binding Value, ElementName=SldIdleFps, StringFormat={}{0:F0}}" Foreground="{DynamicResource ThemeText}" Opacity="0.8" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                                    </Grid>
+                                                    <Slider x:Name="SldIdleFps" Minimum="5" Maximum="30" ValueChanged="SystemSettings_Changed" Margin="0,5,0,15"/>
+
+                                                    <Grid>
+                                                        <TextBlock Text="Частота кадров при переносе (FPS)" Foreground="{DynamicResource ThemeText}" Opacity="0.6" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="{Binding Value, ElementName=SldMovingFps, StringFormat={}{0:F0}}" Foreground="{DynamicResource ThemeText}" Opacity="0.8" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                                    </Grid>
+                                                    <Slider x:Name="SldMovingFps" Minimum="24" Maximum="120" ValueChanged="SystemSettings_Changed" Margin="0,5,0,15"/>
                                                 </StackPanel>
                                             </Border>
                                             <Border CornerRadius="20" Padding="2" Margin="0,25,0,0">
