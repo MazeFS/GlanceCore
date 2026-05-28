@@ -75,7 +75,7 @@ public partial class HubWindow : Window
 
         if (WidgetsList != null)
         {
-            WidgetsList.ItemsSource = Core.WidgetHost.AvailableWidgets;
+            UpdatePagination();
         }
 
         var hardwareToggle = this.FindName("HardwareToggle") as CheckBox;
@@ -118,7 +118,11 @@ public partial class HubWindow : Window
                 Dispatcher.BeginInvoke(new Action(() => AnimateCarousel()), DispatcherPriority.Render);
             }
         };
-
+        if (ComboLang != null)
+        {
+            foreach (ComboBoxItem item in ComboLang.Items)
+                if (item.Tag?.ToString() == cfg.Language) { item.IsSelected = true; break; }
+        }
         _isLoaded = true;
     }
 
@@ -253,6 +257,8 @@ public partial class HubWindow : Window
             if (AiSettingsPanel != null) AiSettingsPanel.Visibility = _editingWidgetId == "AI_01" ? Visibility.Visible : Visibility.Collapsed;
             if (DateSettingsPanel != null) DateSettingsPanel.Visibility = _editingWidgetId == "Date_01" ? Visibility.Visible : Visibility.Collapsed;
             if (WeatherSettingsPanel != null) WeatherSettingsPanel.Visibility = _editingWidgetId == "Weather_01" ? Visibility.Visible : Visibility.Collapsed;
+            if (MediaSettingsPanel != null) MediaSettingsPanel.Visibility = _editingWidgetId == "Media_01" ? Visibility.Visible : Visibility.Collapsed;
+            if (TglShowHardwareGraphs != null) TglShowHardwareGraphs.IsChecked = cfg.Widgets.GetValueOrDefault("Hardware_01")?.ShowHardwareGraphs ?? true;
             else if (_editingWidgetId == "Weather_01")
             {
                 if (TxtWeatherCity != null) TxtWeatherCity.Text = state.WeatherCity;
@@ -264,7 +270,10 @@ public partial class HubWindow : Window
                 var widgetInfo = Core.WidgetHost.AvailableWidgets.FirstOrDefault(w => w.Id == _editingWidgetId);
                 if (widgetInfo?.PluginInstance is GlanceCore.Plugins.IWidgetPlugin plugin)
                 {
-                    PluginSettingsContainer.Content = plugin.GetSettingsUI();
+                    PluginSettingsContainer.Content = plugin.GetSettingsUI(state, () =>
+                    {
+                        Core.WidgetHost.RefreshWidgetVisuals(_editingWidgetId);
+                    });
                 }
             }
 
@@ -276,12 +285,16 @@ public partial class HubWindow : Window
             if (TglShowCalendarDate != null) TglShowCalendarDate.IsChecked = state.ShowDate;
             if (TglShowClockTime != null) TglShowClockTime.IsChecked = state.ShowTime;
         }
-            if (TglShowBorder != null) TglShowBorder.IsChecked = state.ShowBorder;
+            
             _isUpdatingSize = true;
             if (SldWidth != null) SldWidth.Value = state.CustomWidth > 0 ? state.CustomWidth : 220;
             if (SldHeight != null) SldHeight.Value = state.CustomHeight > 0 ? state.CustomHeight : 280;
             if (TxtWidth != null) TxtWidth.Text = state.CustomWidth > 0 ? ((int)state.CustomWidth).ToString() : "220";
             if (TxtHeight != null) TxtHeight.Text = state.CustomHeight > 0 ? ((int)state.CustomHeight).ToString() : "280";
+            _isUpdatingSize = true;
+            if (TxtOpacity != null) TxtOpacity.Text = Math.Round(state.Opacity, 2).ToString();
+            if (TxtScale != null) TxtScale.Text = Math.Round(state.Scale, 2).ToString();
+            if (TxtRadius != null) TxtRadius.Text = state.CornerRadius.ToString();
             _isUpdatingSize = false;
             if (_editingWidgetId == "Image_01" || _editingWidgetId == "Date_01")
             {
@@ -331,6 +344,7 @@ public partial class HubWindow : Window
                 }
                 catch { }
             }
+
             // 3. ЗАГРУЗКА СПЕЦИФИЧНЫХ НАСТРОЕК (Hardware / Time)
             if (_editingWidgetId == "Hardware_01" && ListHardwareOrder != null)
             {
@@ -351,7 +365,10 @@ public partial class HubWindow : Window
                     }
                 }
             }
-
+            else if (_editingWidgetId == "Media_01")
+            {
+                if (TglShowMediaTimer != null) TglShowMediaTimer.IsChecked = state.ShowMediaTimer;
+            }
             _isLoaded = true;
             WidgetsPanel.Visibility = Visibility.Collapsed;
             WidgetConfigPanel.Visibility = Visibility.Visible;
@@ -367,6 +384,35 @@ public partial class HubWindow : Window
             cfg.Widgets[_editingWidgetId].WeatherCity = TxtWeatherCity.Text;
             Core.ConfigManager.Save(cfg);
             Core.WidgetHost.RefreshWidgetCustomData(_editingWidgetId);
+        }
+    }
+    private void MediaSettings_Changed(object sender, RoutedEventArgs e)
+    {
+        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId)) return;
+        var cfg = Core.WidgetHost.CurrentConfig;
+        if (cfg.Widgets.ContainsKey(_editingWidgetId))
+        {
+            cfg.Widgets[_editingWidgetId].ShowMediaTimer = TglShowMediaTimer.IsChecked == true;
+            Core.ConfigManager.Save(cfg);
+            Core.WidgetHost.RefreshWidgetVisuals(_editingWidgetId);
+        }
+    }
+    private void BtnBackToWidgets_Click(object sender, RoutedEventArgs e)
+    {
+        WidgetConfigPanel.Visibility = Visibility.Collapsed;
+        WidgetsPanel.Visibility = Visibility.Visible;
+        if (SearchBoxBorder != null) SearchBoxBorder.Visibility = Visibility.Visible;
+    }
+    private void HardwareSettings_Changed(object sender, RoutedEventArgs e)
+    {
+        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId)) return;
+        var cfg = Core.WidgetHost.CurrentConfig;
+        if (cfg.Widgets.ContainsKey(_editingWidgetId))
+        {
+            var state = cfg.Widgets[_editingWidgetId];
+            if (TglShowHardwareGraphs != null) state.ShowHardwareGraphs = TglShowHardwareGraphs.IsChecked == true;
+            Core.ConfigManager.Save(cfg);
+            Core.WidgetHost.RefreshWidgetVisuals(_editingWidgetId);
         }
     }
     private void DateSettings_Changed(object sender, RoutedEventArgs e)
@@ -430,18 +476,9 @@ public partial class HubWindow : Window
     }
     private void TxtSearchWidgets_TextChanged(object sender, TextChangedEventArgs e)
     {
-        if (WidgetsList == null) return;
-        string query = TxtSearchWidgets.Text.ToLower();
-
-        if (string.IsNullOrWhiteSpace(query))
-        {
-            WidgetsList.ItemsSource = Core.WidgetHost.AvailableWidgets;
-        }
-        else
-        {
-            WidgetsList.ItemsSource = Core.WidgetHost.AvailableWidgets.Where(w =>
-                w.Title.ToLower().Contains(query) || w.Description.ToLower().Contains(query)).ToList();
-        }
+        _currentSearchQuery = TxtSearchWidgets.Text.ToLower();
+        _currentPage = 1;
+        UpdatePagination();
     }
     private void SaveHardwareOrder()
     {
@@ -454,12 +491,6 @@ public partial class HubWindow : Window
             Core.ConfigManager.Save(cfg);
             Core.WidgetHost.RefreshWidgetVisuals(_editingWidgetId);
         }
-    }
-
-    private void BtnBackToWidgets_Click(object sender, RoutedEventArgs e)
-    {
-        WidgetConfigPanel.Visibility = Visibility.Collapsed;
-        WidgetsPanel.Visibility = Visibility.Visible;
     }
 
     private void BtnUploadImage_Click(object sender, RoutedEventArgs e)
@@ -518,6 +549,11 @@ public partial class HubWindow : Window
                     state.DateDayColor = hex;
                     if (CircleDateDayColor != null) CircleDateDayColor.Fill = brush;
                 }
+                else if (target == "Border")
+                {
+                    state.BorderColor = hex;
+                    if (CircleBorderColor != null) CircleBorderColor.Fill = brush;
+                }
                 else if (target == "DateDate")
                 {
                     state.DateDateColor = hex;
@@ -545,7 +581,6 @@ public partial class HubWindow : Window
         var cfg = Core.WidgetHost.CurrentConfig;
         if (cfg.Widgets.ContainsKey(_editingWidgetId))
         {
-            cfg.Widgets[_editingWidgetId].ShowBorder = TglShowBorder.IsChecked == true;
             Core.ConfigManager.Save(cfg);
             Core.WidgetHost.RefreshWidgetVisuals(_editingWidgetId);
         }
@@ -564,11 +599,14 @@ public partial class HubWindow : Window
     // --- REAL-TIME SETTINGS APPLY ---
     private void Slider_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
-        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId) || _isUpdatingSize) return;
+        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId) || _isUpdatingSize || _isApplyingSettings) return;
 
         _isUpdatingSize = true;
         if (TxtWidth != null && SldWidth != null) TxtWidth.Text = ((int)SldWidth.Value).ToString();
         if (TxtHeight != null && SldHeight != null) TxtHeight.Text = ((int)SldHeight.Value).ToString();
+        if (TxtOpacity != null && SldOpacity != null) TxtOpacity.Text = Math.Round(SldOpacity.Value, 2).ToString();
+        if (TxtScale != null && SldScale != null) TxtScale.Text = Math.Round(SldScale.Value, 2).ToString();
+        if (TxtRadius != null && SldRadius != null) TxtRadius.Text = ((int)SldRadius.Value).ToString();
         _isUpdatingSize = false;
 
         ApplyCurrentWidgetSettings();
@@ -601,6 +639,7 @@ public partial class HubWindow : Window
         if (TxtAiEndpoint != null) TxtAiEndpoint.Text = cfg.AiEndpoint;
         if (SldWidth != null) state.CustomWidth = SldWidth.Value;
         if (SldHeight != null) state.CustomHeight = SldHeight.Value;
+        if (TglShowBorder != null) state.ShowBorder = TglShowBorder.IsChecked == true;
 
         if (ComboFont != null)
         {
@@ -659,12 +698,51 @@ public partial class HubWindow : Window
         if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId) || _isUpdatingSize || _isApplyingSettings) return;
 
         _isUpdatingSize = true;
-        if (double.TryParse(TxtWidth.Text, out double w) && SldWidth != null) SldWidth.Value = w;
-        if (double.TryParse(TxtHeight.Text, out double h) && SldHeight != null) SldHeight.Value = h;
+
+        double ParseInput(string text, double fallback)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return fallback;
+            string normalized = text.Replace(",", ".");
+            if (double.TryParse(normalized, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double result))
+                return result;
+            return fallback;
+        }
+
+        if (SldWidth != null) SldWidth.Value = ParseInput(TxtWidth.Text, SldWidth.Value);
+        if (SldHeight != null) SldHeight.Value = ParseInput(TxtHeight.Text, SldHeight.Value);
+        if (SldOpacity != null) SldOpacity.Value = ParseInput(TxtOpacity.Text, SldOpacity.Value);
+        if (SldScale != null) SldScale.Value = ParseInput(TxtScale.Text, SldScale.Value);
+        if (SldRadius != null) SldRadius.Value = ParseInput(TxtRadius.Text, SldRadius.Value);
+
         _isUpdatingSize = false;
 
         ApplyCurrentWidgetSettings();
     }
+
+    private int _currentPage = 1;
+    private const int _itemsPerPage = 10;
+    private string _currentSearchQuery = "";
+
+    private void UpdatePagination()
+    {
+        if (WidgetsList == null || TxtPageInfo == null) return;
+        var source = Core.WidgetHost.AvailableWidgets.AsEnumerable();
+        if (!string.IsNullOrWhiteSpace(_currentSearchQuery))
+            source = source.Where(w => w.Title.ToLower().Contains(_currentSearchQuery) || w.Description.ToLower().Contains(_currentSearchQuery));
+
+        var list = source.ToList();
+        int totalPages = (int)Math.Ceiling(list.Count / (double)_itemsPerPage);
+        if (totalPages == 0) totalPages = 1;
+        if (_currentPage > totalPages) _currentPage = totalPages;
+        if (_currentPage < 1) _currentPage = 1;
+
+        TxtPageInfo.Text = $"{_currentPage} / {totalPages}";
+        WidgetsList.ItemsSource = list.Skip((_currentPage - 1) * _itemsPerPage).Take(_itemsPerPage).ToList();
+    }
+
+
+    private void BtnPrevPage_Click(object sender, RoutedEventArgs e) { if (_currentPage > 1) { _currentPage--; UpdatePagination(); } }
+    private void BtnNextPage_Click(object sender, RoutedEventArgs e) { _currentPage++; UpdatePagination(); }
     private void BtnAbout_Click(object sender, RoutedEventArgs e)
     {
         if (!_isLoaded) return;

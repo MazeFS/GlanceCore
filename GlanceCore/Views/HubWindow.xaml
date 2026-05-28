@@ -567,44 +567,66 @@
 
                             <Grid Grid.Row="1">
                                 <!-- ВКЛАДКА 1: ВИДЖЕТЫ -->
+
                                 <Grid x:Name="WidgetsPanel" Visibility="Visible">
                                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                                        <ItemsControl x:Name="WidgetsList" Margin="0,0,10,0">
-                                            <ItemsControl.LayoutTransform>
-                                                <ScaleTransform x:Name="WidgetsListScale" ScaleX="1.0" ScaleY="1.0"/>
-                                            </ItemsControl.LayoutTransform>
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <WrapPanel />
-                                                </ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Border Width="{Binding Width}" Height="180" CornerRadius="20" Margin="0,0,15,20" BorderBrush="#20FFFFFF" BorderThickness="1" ClipToBounds="True" Background="#05FFFFFF">
-                                                        <Grid>
-                                                            <Grid.RowDefinitions>
-                                                                <RowDefinition Height="*"/>
-                                                                <RowDefinition Height="Auto"/>
-                                                            </Grid.RowDefinitions>
-                                                            <Image Grid.Row="0" Source="{Binding PreviewImage}" Stretch="Uniform" Opacity="0.8"/>
-                                                            <Border Grid.Row="0" Background="#10000000"/>
-                                                            <Border Grid.Row="1" Height="60" Background="#15FFFFFF" BorderBrush="#15FFFFFF" BorderThickness="0,1,0,0" CornerRadius="0,0,19,19" Margin="-1,0,-1,-1">
-                                                                <Grid Margin="15,0">
-                                                                    <StackPanel VerticalAlignment="Center">
-                                                                        <TextBlock Text="{Binding Title}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource ThemeText}" TextTrimming="CharacterEllipsis"/>
-                                                                        <TextBlock Text="{Binding Description}" FontSize="11" Foreground="{DynamicResource ThemeTextMuted}" TextTrimming="CharacterEllipsis"/>
-                                                                    </StackPanel>
-                                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                                                        <Button Tag="{Binding Id}" Click="BtnWidgetSettings_Click" Style="{StaticResource GearBtnStyle}" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                                                                        <CheckBox Tag="{Binding Id}" IsChecked="{Binding IsActive, Mode=OneWay}" Style="{StaticResource AppleSwitchStyle}" Click="ToggleDynamicWidget_Click"/>
-                                                                    </StackPanel>
-                                                                </Grid>
-                                                            </Border>
-                                                        </Grid>
-                                                    </Border>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
+                                        <StackPanel>
+                                            <ItemsControl x:Name="WidgetsList" Margin="0,0,10,0">
+                                                <ItemsControl.LayoutTransform>
+                                                    <ScaleTransform x:Name="WidgetsListScale" ScaleX="1.0" ScaleY="1.0"/>
+                                                </ItemsControl.LayoutTransform>
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <WrapPanel />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Width="{Binding Width}" Height="180" CornerRadius="20" Margin="0,0,15,20" BorderBrush="#20FFFFFF" BorderThickness="1" ClipToBounds="True" Background="#05FFFFFF">
+                                                            <Grid>
+                                                                <Grid.RowDefinitions>
+                                                                    <RowDefinition Height="*"/>
+                                                                    <RowDefinition Height="Auto"/>
+                                                                </Grid.RowDefinitions>
+                                                                <Image Grid.Row="0" Source="{Binding PreviewImage}" Stretch="Uniform" Opacity="0.8"/>
+                                                                <Border Grid.Row="0" Background="#10000000"/>
+                                                                <Border Grid.Row="1" Height="60" Background="#15FFFFFF" BorderBrush="#15FFFFFF" BorderThickness="0,1,0,0" CornerRadius="0,0,19,19" Margin="-1,0,-1,-1">
+                                                                    <Grid Margin="15,0">
+                                                                        <StackPanel VerticalAlignment="Center">
+                                                                            <TextBlock Text="{Binding Title}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource ThemeText}" TextTrimming="CharacterEllipsis"/>
+                                                                            <TextBlock Text="{Binding Description}" FontSize="11" Foreground="{DynamicResource ThemeTextMuted}" TextTrimming="CharacterEllipsis"/>
+                                                                        </StackPanel>
+                                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                                            <Button Tag="{Binding Id}" Click="BtnWidgetSettings_Click" Style="{StaticResource GearBtnStyle}" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                                                            <CheckBox Tag="{Binding Id}" IsChecked="{Binding IsActive, Mode=OneWay}" Style="{StaticResource AppleSwitchStyle}" Click="ToggleDynamicWidget_Click"/>
+                                                                        </StackPanel>
+                                                                    </Grid>
+                                                                </Border>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+
+                                            <!-- Кнопки пагинации теперь в самом низу списка -->
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,30">
+                                                <Button x:Name="BtnPrevPage" Click="BtnPrevPage_Click" Content="&#xE76B;" FontFamily="Segoe MDL2 Assets" Width="36" Height="36" Background="#20FFFFFF" Foreground="White" BorderThickness="0" Cursor="Hand" Margin="0,0,15,0">
+                                                    <Button.Resources>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="CornerRadius" Value="18"/>
+                                                        </Style>
+                                                    </Button.Resources>
+                                                </Button>
+                                                <TextBlock x:Name="TxtPageInfo" Text="1 / 1" Foreground="{DynamicResource ThemeText}" FontWeight="SemiBold" VerticalAlignment="Center" FontSize="14"/>
+                                                <Button x:Name="BtnNextPage" Click="BtnNextPage_Click" Content="&#xE76C;" FontFamily="Segoe MDL2 Assets" Width="36" Height="36" Background="#20FFFFFF" Foreground="White" BorderThickness="0" Cursor="Hand" Margin="15,0,0,0">
+                                                    <Button.Resources>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="CornerRadius" Value="18"/>
+                                                        </Style>
+                                                    </Button.Resources>
+                                                </Button>
+                                            </StackPanel>
+                                        </StackPanel>
                                     </ScrollViewer>
                                 </Grid>
 
@@ -744,10 +766,36 @@
                                                 </Grid>
 
                                                 <TextBlock Text="Прозрачность фона" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
-                                                <Slider x:Name="SldOpacity" Minimum="0.0" Maximum="1.0" ValueChanged="Slider_Changed" Margin="0,0,0,15"/>
+                                                <Grid Margin="0,0,0,15">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Slider x:Name="SldOpacity" Minimum="0.0" Maximum="1.0" ValueChanged="Slider_Changed" VerticalAlignment="Center" SmallChange="0.01" LargeChange="0.1"/>
+                                                    <TextBox x:Name="TxtOpacity" Grid.Column="1" Width="60" Height="28" Margin="15,0,0,0" Background="#20FFFFFF" Foreground="White" BorderThickness="0" TextAlignment="Center" VerticalContentAlignment="Center" FontSize="13" FontWeight="SemiBold" TextChanged="SizeInput_TextChanged">
+                                                        <TextBox.Resources>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="CornerRadius" Value="6"/>
+                                                            </Style>
+                                                        </TextBox.Resources>
+                                                    </TextBox>
+                                                </Grid>
 
-                                                <TextBlock Text="Масштаб (Размер интерфейса)" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
-                                                <Slider x:Name="SldScale" Minimum="0.5" Maximum="2.0" ValueChanged="Slider_Changed" Margin="0,0,0,15"/>
+                                                <TextBlock Text="Масштаб" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                <Grid Margin="0,0,0,15">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Slider x:Name="SldScale" Minimum="0.5" Maximum="4.0" ValueChanged="Slider_Changed" VerticalAlignment="Center" SmallChange="0.1" LargeChange="0.5"/>
+                                                    <TextBox x:Name="TxtScale" Grid.Column="1" Width="60" Height="28" Margin="15,0,0,0" Background="#20FFFFFF" Foreground="White" BorderThickness="0" TextAlignment="Center" VerticalContentAlignment="Center" FontSize="13" FontWeight="SemiBold" TextChanged="SizeInput_TextChanged">
+                                                        <TextBox.Resources>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="CornerRadius" Value="6"/>
+                                                            </Style>
+                                                        </TextBox.Resources>
+                                                    </TextBox>
+                                                </Grid>
 
                                                 <TextBlock Text="Ширина виджета (пиксели)" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
                                                 <Grid Margin="0,0,0,15">
@@ -755,7 +803,7 @@
                                                         <ColumnDefinition Width="*"/>
                                                         <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
-                                                    <Slider x:Name="SldWidth" Minimum="100" Maximum="500" ValueChanged="Slider_Changed" VerticalAlignment="Center"/>
+                                                    <Slider x:Name="SldWidth" Minimum="100" Maximum="1000" ValueChanged="Slider_Changed" VerticalAlignment="Center"/>
                                                     <TextBox x:Name="TxtWidth" Grid.Column="1" Width="60" Height="28" Margin="15,0,0,0" Background="#20FFFFFF" Foreground="White" BorderThickness="0" TextAlignment="Center" VerticalContentAlignment="Center" FontSize="13" FontWeight="SemiBold" TextChanged="SizeInput_TextChanged">
                                                         <TextBox.Resources>
                                                             <Style TargetType="Border">
@@ -771,7 +819,7 @@
                                                         <ColumnDefinition Width="*"/>
                                                         <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
-                                                    <Slider x:Name="SldHeight" Minimum="80" Maximum="600" ValueChanged="Slider_Changed" VerticalAlignment="Center"/>
+                                                    <Slider x:Name="SldHeight" Minimum="80" Maximum="1000" ValueChanged="Slider_Changed" VerticalAlignment="Center"/>
                                                     <TextBox x:Name="TxtHeight" Grid.Column="1" Width="60" Height="28" Margin="15,0,0,0" Background="#20FFFFFF" Foreground="White" BorderThickness="0" TextAlignment="Center" VerticalContentAlignment="Center" FontSize="13" FontWeight="SemiBold" TextChanged="SizeInput_TextChanged">
                                                         <TextBox.Resources>
                                                             <Style TargetType="Border">
@@ -781,8 +829,22 @@
                                                     </TextBox>
                                                 </Grid>
 
-                                                <TextBlock Text="Скругление углов (Corner Radius)" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
-                                                <Slider x:Name="SldRadius" Minimum="0" Maximum="100" ValueChanged="Slider_Changed" Margin="0,0,0,15"/>
+                                                <TextBlock Text="Скругление углов" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                <Grid Margin="0,0,0,15">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Slider x:Name="SldRadius" Minimum="0" Maximum="100" ValueChanged="Slider_Changed" VerticalAlignment="Center"/>
+                                                    <TextBox x:Name="TxtRadius" Grid.Column="1" Width="60" Height="28" Margin="15,0,0,0" Background="#20FFFFFF" Foreground="White" BorderThickness="0" TextAlignment="Center" VerticalContentAlignment="Center" FontSize="13" FontWeight="SemiBold" TextChanged="SizeInput_TextChanged">
+                                                        <TextBox.Resources>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="CornerRadius" Value="6"/>
+                                                            </Style>
+                                                        </TextBox.Resources>
+                                                    </TextBox>
+                                                    
+                                                </Grid>
                                                 <Grid Margin="0,10,0,15">
                                                     <StackPanel>
                                                         <TextBlock Text="Показывать обводку" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
@@ -794,17 +856,24 @@
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="*"/>
                                                         <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="*"/>
                                                     </Grid.ColumnDefinitions>
                                                     <StackPanel Grid.Column="0">
-                                                        <TextBlock Text="Цвет текста" Foreground="White" Opacity="0.6" Margin="0,0,0,5"/>
+                                                        <TextBlock Text="Текст" Foreground="White" Opacity="0.6" Margin="0,0,0,5"/>
                                                         <Button Tag="Text" Click="BtnPickColor_Click" Width="32" Height="32" HorizontalAlignment="Left" Style="{StaticResource TransparentHoverButtonStyle}" Cursor="Hand">
                                                             <Ellipse x:Name="CircleTextColor" Width="30" Height="30" Fill="White" Stroke="#40FFFFFF" StrokeThickness="2"/>
                                                         </Button>
                                                     </StackPanel>
                                                     <StackPanel Grid.Column="1">
-                                                        <TextBlock Text="Цвет фона (Тонировка)" Foreground="White" Opacity="0.6" Margin="0,0,0,5"/>
+                                                        <TextBlock Text="Фон" Foreground="White" Opacity="0.6" Margin="0,0,0,5"/>
                                                         <Button Tag="Bg" Click="BtnPickColor_Click" Width="32" Height="32" HorizontalAlignment="Left" Style="{StaticResource TransparentHoverButtonStyle}" Cursor="Hand">
                                                             <Ellipse x:Name="CircleBgColor" Width="30" Height="30" Fill="#45000000" Stroke="#40FFFFFF" StrokeThickness="2"/>
+                                                        </Button>
+                                                    </StackPanel>
+                                                    <StackPanel Grid.Column="2">
+                                                        <TextBlock Text="Рамка" Foreground="White" Opacity="0.6" Margin="0,0,0,5"/>
+                                                        <Button Tag="Border" Click="BtnPickColor_Click" Width="32" Height="32" HorizontalAlignment="Left" Style="{StaticResource TransparentHoverButtonStyle}" Cursor="Hand">
+                                                            <Ellipse x:Name="CircleBorderColor" Width="30" Height="30" Fill="White" Stroke="#40FFFFFF" StrokeThickness="2"/>
                                                         </Button>
                                                     </StackPanel>
                                                 </Grid>
@@ -859,6 +928,14 @@
                                                                 </Button.Resources>
                                                             </Button>
                                                         </StackPanel>
+                                                    </Grid>
+                                                    <!-- Тумблер включения графиков -->
+                                                    <Grid Margin="0,15,0,0">
+                                                        <StackPanel>
+                                                            <TextBlock Text="Показывать графики" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="Отображать интерактивные графики вместо простых прогресс-баров" Foreground="#80FFFFFF" FontSize="12"/>
+                                                        </StackPanel>
+                                                        <CheckBox x:Name="TglShowHardwareGraphs" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="HardwareSettings_Changed"/>
                                                     </Grid>
                                                 </StackPanel>
 
@@ -992,6 +1069,17 @@
                                                         <TextBlock Text="{Binding Value, ElementName=SldAiTemp, StringFormat={}{0:F1}}" Foreground="White" Opacity="0.8" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="SemiBold"/>
                                                     </Grid>
                                                     <Slider x:Name="SldAiTemp" Minimum="0.0" Maximum="1.5" ValueChanged="AiSlider_Changed"/>
+                                                </StackPanel>
+
+                                                <StackPanel x:Name="MediaSettingsPanel" Visibility="Collapsed">
+                                                    <Border Height="1" Background="#15FFFFFF" Margin="0,10"/>
+                                                    <Grid Margin="0,10,0,5">
+                                                        <StackPanel>
+                                                            <TextBlock Text="Показывать время трека" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="Отображать таймер проигрывания на плеере" Foreground="#80FFFFFF" FontSize="12"/>
+                                                        </StackPanel>
+                                                        <CheckBox x:Name="TglShowMediaTimer" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="MediaSettings_Changed"/>
+                                                    </Grid>
                                                 </StackPanel>
                                                 <StackPanel x:Name="WeatherSettingsPanel" Visibility="Collapsed">
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,10"/>

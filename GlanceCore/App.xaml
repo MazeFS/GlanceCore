@@ -6,7 +6,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/UI/Dictionaries/Theme.xaml"/>
                 <ResourceDictionary Source="/UI/Dictionaries/Themes/Original.xaml"/>
-                <ResourceDictionary Source="pack://application:,,,/UI/Dictionaries/Languages/Lang_RU.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/UI/Dictionaries/Languages/Lang_EN.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <Style TargetType="Control">

@@ -72,7 +72,7 @@ public static class WidgetHost
         AvailableWidgets.Add(new WidgetInfo { Id = "Image_01", Title = "Фоторамка", Description = "Ваше фото", PreviewImage = "/Resource/ScreenShots/ImagePreview.png", Width = 250, WidgetType = typeof(ImageFrameWidget) });
         AvailableWidgets.Add(new WidgetInfo { Id = "Weather_01", Title = "Погода", Description = "Open-Meteo", PreviewImage = "/Resource/ScreenShots/WeatherPreview.png", Width = 250, WidgetType = typeof(WeatherWidget) });
         AvailableWidgets.Add(new WidgetInfo { Id = "Time_01", Title = "Часы", Description = "Текущее время", PreviewImage = "/Resource/ScreenShots/HardwarePreview.png", Width = 250, WidgetType = typeof(TimeWidget) });
-        AvailableWidgets.Add(new WidgetInfo { Id = "Notes_01", Title = "Стикеры", Description = "Заметки на стекле", PreviewImage = "/Resource/ScreenShots/ImagePreview.png", Width = 220, WidgetType = typeof(GlanceCore.Widgets.StickyNotes.StickyNotesWidget) });
+        AvailableWidgets.Add(new WidgetInfo { Id = "Notes_01", Title = "Стикеры", Description = "Заметки на стекле", PreviewImage = "/Resource/ScreenShots/ImagePreview.png", Width = 250, WidgetType = typeof(GlanceCore.Widgets.StickyNotes.StickyNotesWidget) });
     }
 
     public static void RestoreActiveWidgets()

@@ -1,6 +1,8 @@
-﻿namespace GlanceCore.Widgets.AI;
+﻿
+namespace GlanceCore.Widgets.AI;
 
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -12,6 +14,7 @@ using System.Windows.Input;
 public partial class AIAssistantWidget : GlanceCore.Widgets.BaseWidgetWindow
 {
     private static readonly HttpClient _http = new();
+    private readonly List<object> _messagesContext = new();
     private string _chatHistory = "Готов к работе.\n\n";
     public string ChatHistory { get => _chatHistory; set { _chatHistory = value; OnPropertyChanged(); } }
 
@@ -33,20 +36,15 @@ public partial class AIAssistantWidget : GlanceCore.Widgets.BaseWidgetWindow
         ChatScroll.ScrollToEnd();
 
         var cfg = Core.WidgetHost.CurrentConfig;
+
+        if (_messagesContext.Count == 0) _messagesContext.Add(new { role = "system", content = cfg.AiSystemPrompt });
+        _messagesContext.Add(new { role = "user", content = input });
+        if (_messagesContext.Count > 11) _messagesContext.RemoveRange(1, 2);
+
         string url = cfg.AiEndpoint.EndsWith("/") ? cfg.AiEndpoint + "chat/completions" : cfg.AiEndpoint + "/chat/completions";
 
-        var payload = new
-        {
-            model = cfg.AiModel,
-            temperature = cfg.AiTemperature,
-            messages = new[] {
-                new { role = "system", content = cfg.AiSystemPrompt },
-                new { role = "user", content = input }
-            }
-        };
-
+        var payload = new { model = cfg.AiModel, temperature = cfg.AiTemperature, messages = _messagesContext };
         var request = new HttpRequestMessage(HttpMethod.Post, url) { Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json") };
-
         if (!string.IsNullOrEmpty(cfg.AiApiKey)) request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", cfg.AiApiKey);
 
         try
@@ -55,9 +53,10 @@ public partial class AIAssistantWidget : GlanceCore.Widgets.BaseWidgetWindow
             var json = await response.Content.ReadAsStringAsync();
             using var doc = JsonDocument.Parse(json);
             string reply = doc.RootElement.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString() ?? "";
+            _messagesContext.Add(new { role = "assistant", content = reply });
             ChatHistory += $"AI: {reply.Trim()}\n\n";
         }
-        catch { ChatHistory += "AI: Ошибка соединения с API.\n\n"; }
+        catch { ChatHistory += "AI: Ошибка соединения с API.\n\n"; _messagesContext.RemoveAt(_messagesContext.Count - 1); }
         ChatScroll.ScrollToEnd();
     }
 

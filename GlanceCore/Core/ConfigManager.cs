@@ -41,7 +41,8 @@ public class WidgetState
     public string DateDateColor { get; set; } = "#FFFFFF";
     public string DateTimeColor { get; set; } = "#FFFFFF";
     public bool IsVerticalTime { get; set; } = false;
-
+    public bool ShowMediaTimer { get; set; } = true;
+    public bool ShowHardwareGraphs { get; set; } = true;
     public string WeatherCity { get; set; } = "";
 }
 
@@ -52,7 +53,7 @@ public class GlobalConfig
     public bool EnableShader { get; set; } = true;
     public bool StreamerMode { get; set; } = false;
     public bool GameMode { get; set; } = true;
-    public string Language { get; set; } = "RU";
+    public string Language { get; set; } = "EN";
     public string HubTheme { get; set; } = "Original";
     public int IdleFps { get; set; } = 15;
     public int MovingFps { get; set; } = 60;

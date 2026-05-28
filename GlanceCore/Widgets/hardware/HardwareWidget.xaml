@@ -6,19 +6,21 @@
         DataContext="{Binding RelativeSource={RelativeSource Self}}">
 
 	<Window.Resources>
-		<Style x:Key="IOSProgressBar" TargetType="ProgressBar">
-			<Setter Property="Template">
-				<Setter.Value>
-					<ControlTemplate TargetType="ProgressBar">
-						<Grid x:Name="TemplateRoot" Height="{TemplateBinding Height}">
-							<Border Background="#20FFFFFF" CornerRadius="3"/>
-							<Border x:Name="PART_Indicator" HorizontalAlignment="Left" CornerRadius="3" Background="{TemplateBinding Foreground}"/>
-						</Grid>
-					</ControlTemplate>
-				</Setter.Value>
-			</Setter>
-		</Style>
-	</Window.Resources>
+        <Style x:Key="IOSProgressBar" TargetType="ProgressBar">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Grid x:Name="TemplateRoot" Height="{TemplateBinding Height}">
+                            <Border Background="#20FFFFFF" CornerRadius="3"/>
+                            <Decorator x:Name="PART_Indicator" HorizontalAlignment="Left">
+                                <Border Background="{TemplateBinding Foreground}" CornerRadius="3"/>
+                            </Decorator>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
 
 	<Grid x:Name="MainRoot" Width="220" Height="320" Margin="15">
 		<Grid.Effect>
@@ -36,7 +38,7 @@
 				</Border>
 
 				<!-- 2. Цветная тонировка из Хаба (Полупрозрачная, чтобы стекло просвечивало!) -->
-				<Border x:Name="MinimalBase" Background="{Binding BgColorBrush}" CornerRadius="{Binding WidgetCornerRadius}" Opacity="0.3"/>
+				<Border x:Name="MinimalBase" Background="{Binding BgColorBrush}" CornerRadius="{Binding WidgetCornerRadius}" Opacity="1"/>
 
 				<!-- 3. Базовое затемнение (Чтобы белый текст всегда читался на светлых обоях) -->
 				<Border Background="#30000000" CornerRadius="{Binding WidgetCornerRadius}"/>
@@ -62,34 +64,31 @@
 				<StackPanel x:Name="SensorsPanel">
 
 					<!-- БЛОК CPU -->
-					<StackPanel x:Name="BlockCpu" Margin="0,0,0,12">
-						<Grid Margin="0,0,0,6">
-							<TextBlock Text="CPU" Foreground="{Binding TextColorBrush}" Opacity="0.8" HorizontalAlignment="Left" FontWeight="Medium"/>
-							<TextBlock Text="{Binding CpuText}" Foreground="{Binding TextColorBrush}" HorizontalAlignment="Right" FontWeight="Bold"/>
-						</Grid>
-						<Grid Height="30" Margin="0,0,0,6">
-							<Polyline Points="{Binding CpuGraphPoints}" Stroke="#34C759" StrokeThickness="2" Stretch="Fill" StrokeLineJoin="Round"/>
-						</Grid>
-						<ProgressBar Style="{StaticResource IOSProgressBar}" Value="{Binding CpuValue}" Maximum="100" Height="6" Foreground="{Binding TextColorBrush}"/>
-						<Grid Margin="0,6,0,0" x:Name="BlockCpuTemp">
-							<TextBlock Text="TEMP" Foreground="{Binding TextColorBrush}" Opacity="0.6" FontSize="10" HorizontalAlignment="Left"/>
-							<TextBlock Text="{Binding TempText}" Foreground="{Binding TextColorBrush}" Opacity="0.8" FontSize="10" HorizontalAlignment="Right" FontWeight="Bold"/>
-						</Grid>
-					</StackPanel>
+                    <!-- CPU -->
+                    <StackPanel x:Name="BlockCpu">
+                        <Grid Margin="0,0,0,6">
+                            <TextBlock Text="CPU" Foreground="{Binding TextColorBrush}" Opacity="0.8" HorizontalAlignment="Left" FontWeight="Medium"/>
+                            <TextBlock Text="{Binding CpuText}" Foreground="{Binding TextColorBrush}" HorizontalAlignment="Right" FontWeight="Bold"/>
+                        </Grid>
+                        <Grid x:Name="GridCpuGraph" Height="30" Margin="0,0,0,8">
+                            <Polyline Points="{Binding CpuGraphPoints}" Stroke="#34C759" StrokeThickness="2" Stretch="Fill" StrokeLineJoin="Round"/>
+                        </Grid>
+                        <ProgressBar x:Name="BarCpu" Style="{StaticResource IOSProgressBar}" Value="{Binding CpuValue}" Maximum="100" Height="6" Foreground="{Binding TextColorBrush}"/>
+                    </StackPanel>
 
-					<!-- БЛОК GPU -->
-					<StackPanel x:Name="BlockGpu" Margin="0,0,0,12">
-						<Grid Margin="0,0,0,6">
-							<TextBlock Text="GPU" Foreground="{Binding TextColorBrush}" Opacity="0.8" HorizontalAlignment="Left" FontWeight="Medium"/>
-							<TextBlock Text="{Binding GpuText}" Foreground="{Binding TextColorBrush}" HorizontalAlignment="Right" FontWeight="Bold"/>
-						</Grid>
-						<Grid Height="30" Margin="0,0,0,6">
-							<Polyline Points="{Binding GpuGraphPoints}" Stroke="#0A84FF" StrokeThickness="2" Stretch="Fill" StrokeLineJoin="Round"/>
-						</Grid>
-						<ProgressBar Style="{StaticResource IOSProgressBar}" Value="{Binding GpuValue}" Maximum="100" Height="6" Foreground="{Binding TextColorBrush}"/>
-					</StackPanel>
+                    <!-- GPU -->
+                    <StackPanel x:Name="BlockGpu" Margin="0,12,0,0">
+                        <Grid Margin="0,0,0,6">
+                            <TextBlock Text="GPU" Foreground="{Binding TextColorBrush}" Opacity="0.8" HorizontalAlignment="Left" FontWeight="Medium"/>
+                            <TextBlock Text="{Binding GpuText}" Foreground="{Binding TextColorBrush}" HorizontalAlignment="Right" FontWeight="Bold"/>
+                        </Grid>
+                        <Grid x:Name="GridGpuGraph" Height="30" Margin="0,0,0,8">
+                            <Polyline Points="{Binding GpuGraphPoints}" Stroke="#0A84FF" StrokeThickness="2" Stretch="Fill" StrokeLineJoin="Round"/>
+                        </Grid>
+                        <ProgressBar x:Name="BarGpu" Style="{StaticResource IOSProgressBar}" Value="{Binding GpuValue}" Maximum="100" Height="6" Foreground="{Binding TextColorBrush}"/>
+                    </StackPanel>
 
-					<!-- БЛОК RAM -->
+                    <!-- БЛОК RAM -->
 					<StackPanel x:Name="BlockRam" Margin="0,0,0,12">
 						<Grid Margin="0,0,0,6">
 							<TextBlock Text="RAM" Foreground="{Binding TextColorBrush}" Opacity="0.8" HorizontalAlignment="Left" FontWeight="Medium"/>

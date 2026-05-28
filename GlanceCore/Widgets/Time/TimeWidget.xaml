@@ -18,7 +18,7 @@
 						<ImageBrush x:Name="WallpaperBrush" Stretch="Fill"/>
 					</Border.Background>
 				</Border>
-				<Border x:Name="MinimalBase" Background="{Binding BgColorBrush}" CornerRadius="{Binding WidgetCornerRadius}" Opacity="0.3"/>
+				<Border x:Name="MinimalBase" Background="{Binding BgColorBrush}" CornerRadius="{Binding WidgetCornerRadius}" Opacity="1"/>
 				<Border Background="#20000000" CornerRadius="{Binding WidgetCornerRadius}"/>
 				<Border x:Name="GlossBevel" CornerRadius="{Binding WidgetCornerRadius}" BorderBrush="#35FFFFFF" BorderThickness="1.5" Margin="1">
 					<Border.Background>

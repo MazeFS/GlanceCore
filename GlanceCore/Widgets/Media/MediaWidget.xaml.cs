@@ -14,7 +14,7 @@ public partial class MediaWidget : GlanceCore.Widgets.BaseWidgetWindow
     private GlobalSystemMediaTransportControlsSessionManager? _sessionManager;
     private GlobalSystemMediaTransportControlsSession? _currentSession;
     private readonly DispatcherTimer _timelineTimer;
-
+    private string _timeString = "00:00 / 00:00"; public string TimeString { get => _timeString; set { _timeString = value; OnPropertyChanged(); } }
     private string _trackName = "No Media"; public string TrackName { get => _trackName; set { _trackName = value; OnPropertyChanged(); } }
     private string _artistName = "Waiting..."; public string ArtistName { get => _artistName; set { _artistName = value; OnPropertyChanged(); } }
     private BitmapImage? _albumArt; public BitmapImage? AlbumArt { get => _albumArt; set { _albumArt = value; OnPropertyChanged(); } }
@@ -78,22 +78,45 @@ public partial class MediaWidget : GlanceCore.Widgets.BaseWidgetWindow
     private void Session_MediaPropertiesChanged(GlobalSystemMediaTransportControlsSession s, MediaPropertiesChangedEventArgs a) => UpdateMediaInfo();
     private void Session_PlaybackInfoChanged(GlobalSystemMediaTransportControlsSession s, PlaybackInfoChangedEventArgs a) => UpdatePlaybackState();
     private void Session_TimelinePropertiesChanged(GlobalSystemMediaTransportControlsSession s, TimelinePropertiesChangedEventArgs a) => UpdateTimeline();
+    private bool _isPlaying = false;
 
     private void TimelineTimer_Tick(object? sender, EventArgs e)
     {
-        var session = _currentSession;
-        if (session == null) return;
+        if (_sessionManager != null)
+        {
+            var activeSession = _sessionManager.GetCurrentSession();
+            if (activeSession?.SourceAppUserModelId != _currentSession?.SourceAppUserModelId)
+            {
+                UpdateCurrentSession();
+                return;
+            }
+        }
+
+        if (_currentSession == null) return;
 
         try
         {
-            var timeline = session.GetTimelineProperties();
-            if (timeline != null)
+            if (_isPlaying && TrackProgress < TrackDuration)
             {
-                Dispatcher.Invoke(() =>
+                TrackProgress += 1.0;
+                var current = TimeSpan.FromSeconds(TrackProgress);
+                var total = TimeSpan.FromSeconds(TrackDuration);
+                TimeString = $"{current:mm\\:ss} / {total:mm\\:ss}";
+            }
+            else
+            {
+                var timeline = _currentSession.GetTimelineProperties();
+                if (timeline != null)
                 {
-                    TrackDuration = timeline.EndTime.TotalSeconds > 0 ? timeline.EndTime.TotalSeconds : 100;
-                    TrackProgress = timeline.Position.TotalSeconds;
-                });
+                    Dispatcher.Invoke(() =>
+                    {
+                        TrackDuration = timeline.EndTime.TotalSeconds > 0 ? timeline.EndTime.TotalSeconds : 100;
+                        TrackProgress = timeline.Position.TotalSeconds;
+                        var current = TimeSpan.FromSeconds(TrackProgress);
+                        var total = TimeSpan.FromSeconds(TrackDuration);
+                        TimeString = $"{current:mm\\:ss} / {total:mm\\:ss}";
+                    });
+                }
             }
         }
         catch { }
@@ -141,7 +164,6 @@ public partial class MediaWidget : GlanceCore.Widgets.BaseWidgetWindow
     {
         var session = _currentSession;
         if (session == null) return;
-
         try
         {
             var playbackInfo = session.GetPlaybackInfo();
@@ -149,17 +171,45 @@ public partial class MediaWidget : GlanceCore.Widgets.BaseWidgetWindow
 
             Dispatcher.Invoke(() =>
             {
-                IconPlayPause.Kind = (playbackInfo.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
+                _isPlaying = playbackInfo.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
+                IconPlayPause.Kind = _isPlaying
                     ? MahApps.Metro.IconPacks.PackIconLucideKind.Pause
                     : MahApps.Metro.IconPacks.PackIconLucideKind.Play;
             });
         }
         catch { }
     }
+    protected override void ApplySkinSpecificVisuals()
+    {
+        base.ApplySkinSpecificVisuals();
+        var state = Core.WidgetHost.CurrentConfig.Widgets.GetValueOrDefault("Media_01");
+        if (state != null) ApplyMediaSettings(state);
+    }
+
+    private void ApplyMediaSettings(Core.WidgetState state)
+    {
+        if (TxtTime != null)
+        {
+            TxtTime.Visibility = state.ShowMediaTimer ? Visibility.Visible : Visibility.Collapsed;
+        }
+    }
+
 
     private async void BtnPrev_Click(object sender, RoutedEventArgs e) { var s = _currentSession; if (s != null) await s.TrySkipPreviousAsync(); }
     private async void BtnNext_Click(object sender, RoutedEventArgs e) { var s = _currentSession; if (s != null) await s.TrySkipNextAsync(); }
-    private async void BtnPlayPause_Click(object sender, RoutedEventArgs e) { var s = _currentSession; if (s != null) await s.TryTogglePlayPauseAsync(); }
+    private async void BtnPlayPause_Click(object sender, RoutedEventArgs e)
+    {
+        var s = _currentSession;
+        if (s != null)
+        {
+            _isPlaying = !_isPlaying;
+            IconPlayPause.Kind = _isPlaying
+                ? MahApps.Metro.IconPacks.PackIconLucideKind.Pause
+                : MahApps.Metro.IconPacks.PackIconLucideKind.Play;
+
+            await s.TryTogglePlayPauseAsync();
+        }
+    }
 
     private void CloseWidget_Click(object sender, RoutedEventArgs e) => Core.WidgetHost.CloseWidgetExplicitly("Media_01");
 

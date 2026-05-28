@@ -26,7 +26,7 @@ public partial class HardwareWidget : GlanceCore.Widgets.BaseWidgetWindow
 
     private readonly DispatcherTimer _statsTimer;
     private PerformanceCounter? _cpuCounter;
-    private readonly List<PerformanceCounter> _gpuCounters = new();
+    private readonly Dictionary<string, PerformanceCounter> _activeGpuCounters = new();
     private readonly Queue<double> _cpuHistory = new(new double[30]);
     private readonly Queue<double> _gpuHistory = new(new double[30]);
 
@@ -36,7 +36,6 @@ public partial class HardwareWidget : GlanceCore.Widgets.BaseWidgetWindow
     private double _gpuValue = 0; public double GpuValue { get => _gpuValue; set { _gpuValue = value; OnPropertyChanged(); } }
     private string _ramText = "0%"; public string RamText { get => _ramText; set { _ramText = value; OnPropertyChanged(); } }
     private double _ramValue = 0; public double RamValue { get => _ramValue; set { _ramValue = value; OnPropertyChanged(); } }
-    private string _tempText = "--°C"; public string TempText { get => _tempText; set { _tempText = value; OnPropertyChanged(); } }
 
     private PointCollection _cpuGraphPoints = new(); public PointCollection CpuGraphPoints { get => _cpuGraphPoints; set { _cpuGraphPoints = value; OnPropertyChanged(); } }
     private PointCollection _gpuGraphPoints = new(); public PointCollection GpuGraphPoints { get => _gpuGraphPoints; set { _gpuGraphPoints = value; OnPropertyChanged(); } }
@@ -58,13 +57,6 @@ public partial class HardwareWidget : GlanceCore.Widgets.BaseWidgetWindow
     private void InitializeCounters()
     {
         try { _cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total"); _cpuCounter.NextValue(); } catch { }
-        try
-        {
-            var category = new PerformanceCounterCategory("GPU Engine");
-            foreach (var instance in category.GetInstanceNames().Where(i => i.EndsWith("engtype_pid3D")))
-                _gpuCounters.Add(new PerformanceCounter("GPU Engine", "Utilization Percentage", instance));
-        }
-        catch { }
     }
 
     private async Task UpdateStatsAsync()
@@ -73,7 +65,37 @@ public partial class HardwareWidget : GlanceCore.Widgets.BaseWidgetWindow
             double cpu = 0, gpu = 0, ram = 0;
             try { if (_cpuCounter != null) cpu = _cpuCounter.NextValue(); } catch { }
             try { var mem = new MEMORYSTATUSEX(); if (GlobalMemoryStatusEx(mem)) ram = mem.dwMemoryLoad; } catch { }
-            try { double sum = 0; foreach (var c in _gpuCounters) { try { sum += c.NextValue(); } catch { } } gpu = Math.Min(sum, 100); } catch { }
+            try
+            {
+                var category = new PerformanceCounterCategory("GPU Engine");
+                var currentInstances = category.GetInstanceNames().Where(i => i.EndsWith("engtype_pid3D")).ToList();
+                var staleKeys = _activeGpuCounters.Keys.Where(k => !currentInstances.Contains(k)).ToList();
+                foreach (var key in staleKeys)
+                {
+                    _activeGpuCounters[key].Dispose();
+                    _activeGpuCounters.Remove(key);
+                }
+                double gpuSum = 0;
+                foreach (var instance in currentInstances)
+                {
+                    if (!_activeGpuCounters.TryGetValue(instance, out var counter))
+                    {
+                        try
+                        {
+                            counter = new PerformanceCounter("GPU Engine", "Utilization Percentage", instance);
+                            counter.NextValue();
+                            _activeGpuCounters[instance] = counter;
+                        }
+                        catch { }
+                    }
+                    else
+                    {
+                        try { gpuSum += counter.NextValue(); } catch { }
+                    }
+                }
+                gpu = Math.Min(gpuSum, 100);
+            }
+            catch { }
             return (cpu, gpu, ram);
         });
 
@@ -90,6 +112,20 @@ public partial class HardwareWidget : GlanceCore.Widgets.BaseWidgetWindow
         var gpuPts = new PointCollection(); int xG = 0;
         foreach (var val in _gpuHistory) { gpuPts.Add(new Point(xG, 100 - val)); xG += 10; }
         GpuGraphPoints = gpuPts;
+    }
+
+    public override void ApplySettings(Core.WidgetState state, bool isGlobalLocked, bool isGlobalShaderEnabled)
+    {
+        base.ApplySettings(state, isGlobalLocked, isGlobalShaderEnabled);
+        if (state != null)
+        {
+            if (GridCpuGraph != null) GridCpuGraph.Visibility = state.ShowHardwareGraphs ? Visibility.Visible : Visibility.Collapsed;
+            if (BarCpu != null) BarCpu.Visibility = state.ShowHardwareGraphs ? Visibility.Collapsed : Visibility.Visible;
+            if (GridGpuGraph != null) GridGpuGraph.Visibility = state.ShowHardwareGraphs ? Visibility.Visible : Visibility.Collapsed;
+            if (BarGpu != null) BarGpu.Visibility = state.ShowHardwareGraphs ? Visibility.Collapsed : Visibility.Visible;
+
+            ApplyOrder(state.HardwareOrder);
+        }
     }
 
     private void HardwareWidget_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -112,33 +148,23 @@ public partial class HardwareWidget : GlanceCore.Widgets.BaseWidgetWindow
         if (state != null) ApplyOrder(state.HardwareOrder);
     }
 
-    public override void ApplySettings(Core.WidgetState state, bool isGlobalLocked, bool isGlobalShaderEnabled)
-    {
-        base.ApplySettings(state, isGlobalLocked, isGlobalShaderEnabled);
-
-        // Как только Хаб сохраняет новые настройки, мгновенно меняем порядок блоков!
-        if (state != null) ApplyOrder(state.HardwareOrder);
-    }
-
-    // 2. БЕЗОТКАЗНЫЙ АЛГОРИТМ СОРТИРОВКИ
     public void ApplyOrder(List<string> order)
     {
-        // Используем прямые ссылки на объекты, созданные в XAML (BlockCpu, BlockGpu, BlockRam), 
-        // чтобы избежать потери элементов при откреплении от дерева
-        if (SensorsPanel == null || BlockCpu == null || BlockGpu == null || BlockRam == null) return;
-
-        SensorsPanel.Children.Clear(); // Очищаем панель
-
+        var panel = FindName("SensorsPanel") as System.Windows.Controls.StackPanel;
+        if (panel == null) return;
+        panel.Children.Clear();
         foreach (var item in order)
         {
-            if (item == "CPU") SensorsPanel.Children.Add(BlockCpu);
-            else if (item == "GPU") SensorsPanel.Children.Add(BlockGpu);
-            else if (item == "RAM") SensorsPanel.Children.Add(BlockRam);
+            if (item == "CPU" && FindName("BlockCpu") is UIElement c) panel.Children.Add(c);
+            if (item == "GPU" && FindName("BlockGpu") is UIElement g) panel.Children.Add(g);
+            if (item == "RAM" && FindName("BlockRam") is UIElement r) panel.Children.Add(r);
         }
     }
+
     protected override void OnClosed(EventArgs e)
     {
         _statsTimer.Stop();
+        foreach (var counter in _activeGpuCounters.Values) counter.Dispose();
         base.OnClosed(e);
     }
 }

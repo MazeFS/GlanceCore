@@ -2,6 +2,7 @@
 
 using System;
 using System.Windows;
+using GlanceCore.Core;
 
 public interface IWidgetPlugin
 {
@@ -12,5 +13,5 @@ public interface IWidgetPlugin
     int DefaultWidth { get; }
     Type WidgetWindowType { get; }
 
-    FrameworkElement? GetSettingsUI();
+    FrameworkElement? GetSettingsUI(WidgetState state, Action saveCallback);
 }

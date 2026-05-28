@@ -39,6 +39,8 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
         if (name == "WeatherWidget") return "Weather_01";
         if (name == "MediaWidget") return "Media_01";
         if (name == "ImageFrameWidget") return "Image_01";
+        if (name == "StickyNotesWidget") return "Notes_01";
+        if (name == "DateWidget") return "Date_01";
         return name.Replace("Widget", "_01");
     }
     protected bool _isLocked = false;
@@ -150,11 +152,18 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
     private void UpdateClipping()
     {
         if (BaseBackgroundLayer == null || BaseMainRoot == null || BaseMainRoot.ActualWidth <= 0) return;
+
         var clip = new RectangleGeometry();
         clip.RadiusX = WidgetCornerRadius.TopLeft;
         clip.RadiusY = WidgetCornerRadius.TopLeft;
         clip.Rect = new Rect(0, 0, BaseMainRoot.ActualWidth, BaseMainRoot.ActualHeight);
+
         BaseBackgroundLayer.Clip = clip;
+
+        if (FindName("ImageBorder") is UIElement imgBorder)
+        {
+            imgBorder.Clip = clip;
+        }
     }
     protected virtual void ApplySkinSpecificVisuals()
     {
