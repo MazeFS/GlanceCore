@@ -1,0 +1,11 @@
+[
+  {
+    "id": "Quote_01",
+    "title": "Цитата дня",
+    "description": "Вдохновение на стекле",
+    "previewImage": "https://raw.githubusercontent.com/MazeFS/GlanceCore/main/Resource/Screenshots/ImagePreview.png",
+    "downloadUrl": "https://github.com/MazeFS/GlanceCore/releases/download/v0.5.0/QuotePlugin.dll",
+    "author": "MazeFS",
+    "rating": 4.8
+  }
+]
