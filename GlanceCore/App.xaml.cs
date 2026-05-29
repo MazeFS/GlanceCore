@@ -15,7 +15,7 @@ using WinForms = System.Windows.Forms;
 
 public partial class App : System.Windows.Application
 {
-    private WinForms.NotifyIcon? _trayIcon;
+    private WinForms.NotifyIcon? _trayIcon = null;
     private Views.HubWindow? _hubWindow;
     private static Mutex? _mutex;
     public bool IsHubVisible => _hubWindow != null && _hubWindow.IsVisible;
@@ -58,30 +58,35 @@ public partial class App : System.Windows.Application
         if (string.IsNullOrEmpty(theme)) theme = "Original";
         ChangeTheme(theme);
 
-        WidgetHost.RestoreActiveWidgets();
+        var cfg = WidgetHost.CurrentConfig;
 
-        _trayIcon = new WinForms.NotifyIcon
-        {
-            Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location),
-            Visible = true,
-            Text = "GlanceCore"
-        };
-
-        var contextMenu = new WinForms.ContextMenuStrip();
-        contextMenu.Items.Add("Настройки (Hub)", null, (s, ev) => ShowHub());
-        contextMenu.Items.Add("-");
-        contextMenu.Items.Add("Выход", null, (s, ev) => FullShutdown());
-
-        _trayIcon.ContextMenuStrip = contextMenu;
-        _trayIcon.MouseDoubleClick += (s, ev) => { if (ev.Button == WinForms.MouseButtons.Left) ShowHub(); };
-
-        if (e.Args.Contains("--autostart"))
-            MemoryOptimizer.Trim();
-        else
-            new Views.SplashWindow().Show();
         var trimTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
         trimTimer.Tick += (s, ev) => MemoryOptimizer.Trim();
         trimTimer.Start();
+
+        if (e.Args.Contains("--autostart"))
+        {
+            MemoryOptimizer.Trim();
+            if (cfg.StartupDelay > 0)
+            {
+                var delayTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(cfg.StartupDelay) };
+                delayTimer.Tick += (s, ev) =>
+                {
+                    WidgetHost.RestoreActiveWidgets();
+                    delayTimer.Stop();
+                };
+                delayTimer.Start();
+            }
+            else
+            {
+                WidgetHost.RestoreActiveWidgets();
+            }
+        }
+        else
+        {
+            WidgetHost.RestoreActiveWidgets();
+            new Views.SplashWindow().Show();
+        }
     }
 
     private static void StartNamedPipeServer()
@@ -150,10 +155,16 @@ public partial class App : System.Windows.Application
     }
     public static void ChangeLanguage(string langCode)
     {
-        var newDict = new ResourceDictionary { Source = new Uri($"pack://application:,,,/UI/Dictionaries/Languages/Lang_{langCode}.xaml") };
+        var newDict = new ResourceDictionary { Source = new Uri($"/UI/Dictionaries/Languages/Lang_{langCode}.xaml", UriKind.Relative) };
         var oldDict = Current.Resources.MergedDictionaries.FirstOrDefault(d => d.Source != null && d.Source.OriginalString.Contains("/Languages/"));
+
         if (oldDict != null) Current.Resources.MergedDictionaries.Remove(oldDict);
         Current.Resources.MergedDictionaries.Add(newDict);
+
+        foreach (var widget in WidgetHost.AvailableWidgets)
+        {
+            widget.NotifyStateChanged();
+        }
     }
     public static void ChangeTheme(string themeName)
     {

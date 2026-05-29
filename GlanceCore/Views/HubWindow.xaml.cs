@@ -18,6 +18,7 @@ public class SkinItemModel
     public string Name { get; set; } = "";
     public string Image { get; set; } = "";
     public string Color { get; set; } = "";
+    public string DisplayName => System.Windows.Application.Current.FindResource($"Lang_Style_{Id}") as string ?? Name;
 }
 public partial class HubWindow : Window
 {
@@ -111,18 +112,24 @@ public partial class HubWindow : Window
             }
         }
 
-        CarouselSkins.ItemContainerGenerator.StatusChanged += (s, e) =>
+        if (CarouselSkins != null)
         {
-            if (CarouselSkins.ItemContainerGenerator.Status == System.Windows.Controls.Primitives.GeneratorStatus.ContainersGenerated)
+            CarouselSkins.ItemContainerGenerator.StatusChanged += (s, ev) =>
             {
-                Dispatcher.BeginInvoke(new Action(() => AnimateCarousel()), DispatcherPriority.Render);
-            }
-        };
+                if (CarouselSkins?.ItemContainerGenerator?.Status == System.Windows.Controls.Primitives.GeneratorStatus.ContainersGenerated)
+                {
+                    Dispatcher.BeginInvoke(new Action(() => AnimateCarousel()), DispatcherPriority.Render);
+                }
+            };
+        }
+
+
         if (ComboLang != null)
         {
             foreach (ComboBoxItem item in ComboLang.Items)
                 if (item.Tag?.ToString() == cfg.Language) { item.IsSelected = true; break; }
         }
+        if (SldStartupDelay != null) SldStartupDelay.Value = cfg?.StartupDelay ?? 0;
         _isLoaded = true;
     }
 
@@ -239,7 +246,8 @@ public partial class HubWindow : Window
         {
             _isApplyingSettings = true;
             _editingWidgetId = btn.Tag.ToString()!;
-            ConfigTitle.Text = $"Настройки: {_editingWidgetId.Replace("_01", "")}";
+            string localizedTitle = Application.Current.FindResource("Lang_Config_Title") as string ?? "Settings";
+            ConfigTitle.Text = $"{localizedTitle}: {_editingWidgetId.Replace("_01", "")}";
 
             _isLoaded = false;
             var cfg = Core.WidgetHost.CurrentConfig;
@@ -656,6 +664,7 @@ public partial class HubWindow : Window
         var cfg = Core.WidgetHost.CurrentConfig;
         cfg.RunAtStartup = TglAutoStart.IsChecked == true;
         cfg.LockWidgets = TglLock.IsChecked == true;
+        cfg.StartupDelay = (int)SldStartupDelay.Value;
         cfg.EnableShader = TglShader.IsChecked == true;
         cfg.StreamerMode = TglStreamerMode.IsChecked == true;
         cfg.GameMode = TglGameMode.IsChecked == true;
@@ -740,6 +749,45 @@ public partial class HubWindow : Window
         WidgetsList.ItemsSource = list.Skip((_currentPage - 1) * _itemsPerPage).Take(_itemsPerPage).ToList();
     }
 
+    private void BtnImportFont_Click(object sender, RoutedEventArgs e)
+    {
+        var dlg = new Microsoft.Win32.OpenFileDialog
+        {
+            Filter = "Font Files (*.ttf;*.otf)|*.ttf;*.otf",
+            Title = "Выберите шрифт для импорта"
+        };
+
+        if (dlg.ShowDialog() == true)
+        {
+            try
+            {
+                string fontsDir = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fonts");
+                if (!System.IO.Directory.Exists(fontsDir)) System.IO.Directory.CreateDirectory(fontsDir);
+
+                string destPath = System.IO.Path.Combine(fontsDir, System.IO.Path.GetFileName(dlg.FileName));
+                System.IO.File.Copy(dlg.FileName, destPath, true);
+
+                var glyphTypeface = new System.Windows.Media.GlyphTypeface(new Uri(destPath));
+                var culture = System.Globalization.CultureInfo.GetCultureInfo("en-US");
+
+                if (glyphTypeface.FamilyNames != null && glyphTypeface.FamilyNames.TryGetValue(culture, out string? fontName) && fontName != null)
+                {
+                    var cfg = Core.WidgetHost.CurrentConfig;
+                    if (cfg != null && cfg.Widgets != null && cfg.Widgets.ContainsKey(_editingWidgetId))
+                    {
+                        var state = cfg.Widgets[_editingWidgetId];
+                        if (state != null)
+                        {
+                            state.FontFamily = $"./Fonts/#{fontName}";
+                            Core.ConfigManager.Save(cfg);
+                            Core.WidgetHost.RefreshWidgetVisuals(_editingWidgetId);
+                        }
+                    }
+                }
+            }
+            catch { }
+        }
+    }
 
     private void BtnPrevPage_Click(object sender, RoutedEventArgs e) { if (_currentPage > 1) { _currentPage--; UpdatePagination(); } }
     private void BtnNextPage_Click(object sender, RoutedEventArgs e) { _currentPage++; UpdatePagination(); }
@@ -788,9 +836,24 @@ public partial class HubWindow : Window
             if (AboutPanel != null) AboutPanel.Visibility = Visibility.Collapsed;
 
             string tab = rb.Name;
-            if (tab == "TabWidgets") { TabTitleText.Text = "Управление виджетами"; WidgetsPanel.Visibility = Visibility.Visible; if (SearchBoxBorder != null) SearchBoxBorder.Visibility = Visibility.Visible; }
-            else if (tab == "TabStore") { TabTitleText.Text = "Магазин плагинов"; StorePanel.Visibility = Visibility.Visible; if (SearchBoxBorder != null) SearchBoxBorder.Visibility = Visibility.Collapsed; }
-            else if (tab == "TabSettings") { TabTitleText.Text = "Настройки системы"; SettingsPanel.Visibility = Visibility.Visible; if (SearchBoxBorder != null) SearchBoxBorder.Visibility = Visibility.Collapsed; }
+            if (tab == "TabWidgets")
+            {
+                TabTitleText.Text = Application.Current.FindResource("Lang_Title_Widgets") as string ?? "Widget Management";
+                WidgetsPanel.Visibility = Visibility.Visible;
+                if (SearchBoxBorder != null) SearchBoxBorder.Visibility = Visibility.Visible;
+            }
+            else if (tab == "TabStore")
+            {
+                TabTitleText.Text = Application.Current.FindResource("Lang_Title_Store") as string ?? "Plugin Store";
+                StorePanel.Visibility = Visibility.Visible;
+                if (SearchBoxBorder != null) SearchBoxBorder.Visibility = Visibility.Collapsed;
+            }
+            else if (tab == "TabSettings")
+            {
+                TabTitleText.Text = Application.Current.FindResource("Lang_Title_Settings") as string ?? "System Settings";
+                SettingsPanel.Visibility = Visibility.Visible;
+                if (SearchBoxBorder != null) SearchBoxBorder.Visibility = Visibility.Collapsed;
+            }
 
             ActiveTabContent.BeginAnimation(OpacityProperty, new DoubleAnimation(1, TimeSpan.FromSeconds(0.2)));
             var zoom = new DoubleAnimation(0.96, 1, TimeSpan.FromSeconds(0.3)) { EasingFunction = new BackEase { Amplitude = 0.3 } };
@@ -866,6 +929,7 @@ public class HubThemeModel
 {
     public string Id { get; set; } = "";
     public string Name { get; set; } = "";
+    public string DisplayName => System.Windows.Application.Current.FindResource($"Lang_Theme_{Id}") as string ?? Name;
 }
 
 

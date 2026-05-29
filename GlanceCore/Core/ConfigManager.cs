@@ -53,6 +53,7 @@ public class GlobalConfig
     public bool EnableShader { get; set; } = true;
     public bool StreamerMode { get; set; } = false;
     public bool GameMode { get; set; } = true;
+    public int StartupDelay { get; set; } = 0;
     public string Language { get; set; } = "EN";
     public string HubTheme { get; set; } = "Original";
     public int IdleFps { get; set; } = 15;

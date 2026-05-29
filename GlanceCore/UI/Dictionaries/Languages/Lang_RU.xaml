@@ -1,5 +1,116 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <system:String x:Key="Lang_Menu_Widgets" xmlns:system="clr-namespace:System;assembly=mscorlib">Виджеты</system:String>
-    <system:String x:Key="Lang_Menu_Store" xmlns:system="clr-namespace:System;assembly=mscorlib">Магазин</system:String>
-    <system:String x:Key="Lang_Menu_Settings" xmlns:system="clr-namespace:System;assembly=mscorlib">Настройки</system:String>
+	<system:String x:Key="Lang_Menu_Widgets" xmlns:system="clr-namespace:System;assembly=mscorlib">Виджеты</system:String>
+	<system:String x:Key="Lang_Menu_Store" xmlns:system="clr-namespace:System;assembly=mscorlib">Магазин</system:String>
+	<system:String x:Key="Lang_Menu_Settings" xmlns:system="clr-namespace:System;assembly=mscorlib">Настройки</system:String>
+	<system:String x:Key="Lang_Btn_Back" xmlns:system="clr-namespace:System;assembly=mscorlib">Назад к списку</system:String>
+	<system:String x:Key="Lang_Config_Title" xmlns:system="clr-namespace:System;assembly=mscorlib">Настройки</system:String>
+	<system:String x:Key="Lang_Prop_Topmost" xmlns:system="clr-namespace:System;assembly=mscorlib">Поверх всех окон</system:String>
+	<system:String x:Key="Lang_Prop_Topmost_Desc" xmlns:system="clr-namespace:System;assembly=mscorlib">Виджет будет виден поверх других окон и программ</system:String>
+	<system:String x:Key="Lang_Prop_Opacity" xmlns:system="clr-namespace:System;assembly=mscorlib">Прозрачность фона</system:String>
+	<system:String x:Key="Lang_Prop_Scale" xmlns:system="clr-namespace:System;assembly=mscorlib">Масштаб (Размер интерфейса)</system:String>
+	<system:String x:Key="Lang_Prop_Width" xmlns:system="clr-namespace:System;assembly=mscorlib">Ширина виджета (пиксели)</system:String>
+	<system:String x:Key="Lang_Prop_Height" xmlns:system="clr-namespace:System;assembly=mscorlib">Высота виджета (пиксели)</system:String>
+	<system:String x:Key="Lang_Prop_Radius" xmlns:system="clr-namespace:System;assembly=mscorlib">Скругление углов (Corner Radius)</system:String>
+	<system:String x:Key="Lang_Prop_Border" xmlns:system="clr-namespace:System;assembly=mscorlib">Показывать обводку</system:String>
+	<system:String x:Key="Lang_Prop_Border_Desc" xmlns:system="clr-namespace:System;assembly=mscorlib">Включить внешние границы виджета</system:String>
+	<system:String x:Key="Lang_Prop_Font" xmlns:system="clr-namespace:System;assembly=mscorlib">Шрифт</system:String>
+	<system:String x:Key="Lang_Btn_ImportFont" xmlns:system="clr-namespace:System;assembly=mscorlib">Импортировать шрифт (.ttf/.otf)...</system:String>
+	<system:String x:Key="Lang_Prop_FontSize" xmlns:system="clr-namespace:System;assembly=mscorlib">Размер текста</system:String>
+	<system:String x:Key="Lang_Prop_TextColor" xmlns:system="clr-namespace:System;assembly=mscorlib">Цвет текста</system:String>
+	<system:String x:Key="Lang_Prop_BgColor" xmlns:system="clr-namespace:System;assembly=mscorlib">Цвет фона (Тонировка)</system:String>
+	<system:String x:Key="Lang_Prop_BorderColor" xmlns:system="clr-namespace:System;assembly=mscorlib">Цвет рамки</system:String>
+	<system:String x:Key="Lang_Sys_Title" xmlns:system="clr-namespace:System;assembly=mscorlib">СИСТЕМНЫЕ ПАРАМЕТРЫ</system:String>
+	<system:String x:Key="Lang_Sys_Theme" xmlns:system="clr-namespace:System;assembly=mscorlib">Тема оформления Hub</system:String>
+	<system:String x:Key="Lang_Sys_Autostart" xmlns:system="clr-namespace:System;assembly=mscorlib">Автозапуск</system:String>
+	<system:String x:Key="Lang_Sys_Autostart_Desc" xmlns:system="clr-namespace:System;assembly=mscorlib">Запускать вместе с Windows</system:String>
+	<system:String x:Key="Lang_Sys_Lock" xmlns:system="clr-namespace:System;assembly=mscorlib">Блокировка позиций</system:String>
+	<system:String x:Key="Lang_Sys_Lock_Desc" xmlns:system="clr-namespace:System;assembly=mscorlib">Запретить перетаскивание виджетов мышью</system:String>
+	<system:String x:Key="Lang_Sys_Shader" xmlns:system="clr-namespace:System;assembly=mscorlib">Liquid Glass (Шейдер)</system:String>
+	<system:String x:Key="Lang_Sys_Shader_Desc" xmlns:system="clr-namespace:System;assembly=mscorlib">Искажение обоев рабочего стола (GPU)</system:String>
+	<system:String x:Key="Lang_Sys_Streamer" xmlns:system="clr-namespace:System;assembly=mscorlib">Режим Стримера (Smart Freeze)</system:String>
+	<system:String x:Key="Lang_Sys_Streamer_Desc" xmlns:system="clr-namespace:System;assembly=mscorlib">Заморозка фона для идеального захвата в OBS/Скриншотах</system:String>
+	<system:String x:Key="Lang_Sys_Game" xmlns:system="clr-namespace:System;assembly=mscorlib">Игровой режим (Game On)</system:String>
+	<system:String x:Key="Lang_Sys_Game_Desc" xmlns:system="clr-namespace:System;assembly=mscorlib">Авто-отключение шейдеров при запуске полноэкранных игр</system:String>
+	<system:String x:Key="Lang_Sys_IdleFps" xmlns:system="clr-namespace:System;assembly=mscorlib">Частота кадров в покое (FPS)</system:String>
+	<system:String x:Key="Lang_Sys_MovingFps" xmlns:system="clr-namespace:System;assembly=mscorlib">Частота кадров при переносе (FPS)</system:String>
+	<system:String x:Key="Lang_Donate_Title" xmlns:system="clr-namespace:System;assembly=mscorlib">Поддержите создателя GlanceCore ☕</system:String>
+	<system:String x:Key="Lang_Donate_Desc" xmlns:system="clr-namespace:System;assembly=mscorlib">Проект создается одним человеком в свободное время. Ваш донат напрямую ускоряет выход новых виджетов, стилей и функций.</system:String>
+	<system:String x:Key="Lang_Title_Widgets" xmlns:system="clr-namespace:System;assembly=mscorlib">Управление виджетами</system:String>
+	<system:String x:Key="Lang_Title_Store" xmlns:system="clr-namespace:System;assembly=mscorlib">Магазин плагинов</system:String>
+	<system:String x:Key="Lang_Title_Settings" xmlns:system="clr-namespace:System;assembly=mscorlib">Настройки системы</system:String>
+	<system:String x:Key="Lang_Title_About" xmlns:system="clr-namespace:System;assembly=mscorlib">О программе (About)</system:String>
+	<system:String x:Key="Lang_Store_Upcoming" xmlns:system="clr-namespace:System;assembly=mscorlib">Скоро: Загружайте новые виджеты одним кликом</system:String>
+	<system:String x:Key="Lang_Sys_AutostartDelay" xmlns:system="clr-namespace:System;assembly=mscorlib">Задержка автозапуска</system:String>
+	<system:String x:Key="Lang_Theme_Original" xmlns:system="clr-namespace:System;assembly=mscorlib">Оригинал</system:String>
+	<system:String x:Key="Lang_Theme_Dark" xmlns:system="clr-namespace:System;assembly=mscorlib">Темная</system:String>
+	<system:String x:Key="Lang_Theme_Blue" xmlns:system="clr-namespace:System;assembly=mscorlib">Синяя</system:String>
+	<system:String x:Key="Lang_Theme_Light" xmlns:system="clr-namespace:System;assembly=mscorlib">Светлая</system:String>
+	<system:String x:Key="Lang_Style_LiquidGlass" xmlns:system="clr-namespace:System;assembly=mscorlib">Liquid Glass</system:String>
+	<system:String x:Key="Lang_Style_Minimalism" xmlns:system="clr-namespace:System;assembly=mscorlib">Минимализм</system:String>
+	<system:String x:Key="Lang_Style_Retro" xmlns:system="clr-namespace:System;assembly=mscorlib">Ретро 8-bit</system:String>
+	<system:String x:Key="Lang_Style_Neon" xmlns:system="clr-namespace:System;assembly=mscorlib">Кибер-Неон</system:String>
+	<system:String x:Key="Lang_HW_Graphs" xmlns:system="clr-namespace:System;assembly=mscorlib">Показывать графики</system:String>
+	<system:String x:Key="Lang_HW_Graphs_Desc" xmlns:system="clr-namespace:System;assembly=mscorlib">Отображать интерактивные графики вместо простых прогресс-баров</system:String>
+	<system:String x:Key="Lang_HW_Order" xmlns:system="clr-namespace:System;assembly=mscorlib">Порядок датчиков</system:String>
+	<system:String x:Key="Lang_Prop_Style" xmlns:system="clr-namespace:System;assembly=mscorlib">Стиль виджета</system:String>
+	<system:String x:Key="Lang_AI_Prompt" xmlns:system="clr-namespace:System;assembly=mscorlib">Системный промпт (Поведение)</system:String>
+	<system:String x:Key="Lang_AI_Model" xmlns:system="clr-namespace:System;assembly=mscorlib">Имя модели (например, llama3)</system:String>
+	<system:String x:Key="Lang_AI_Temp" xmlns:system="clr-namespace:System;assembly=mscorlib">Температура (Креативность)</system:String>
+	<system:String x:Key="Lang_AI_Endpoint" xmlns:system="clr-namespace:System;assembly=mscorlib">API Endpoint</system:String>
+	<system:String x:Key="Lang_AI_Key" xmlns:system="clr-namespace:System;assembly=mscorlib">API Key (Пусто для Ollama)</system:String>
+	<system:String x:Key="Lang_Media_Timer" xmlns:system="clr-namespace:System;assembly=mscorlib">Показывать время трека</system:String>
+	<system:String x:Key="Lang_Media_Timer_Desc" xmlns:system="clr-namespace:System;assembly=mscorlib">Отображать таймер проигрывания на плеере</system:String>
+	<system:String x:Key="Lang_Weather_City" xmlns:system="clr-namespace:System;assembly=mscorlib">Город (Оставьте пустым для авто-IP)</system:String>
+	<system:String x:Key="Lang_Clock_Seconds" xmlns:system="clr-namespace:System;assembly=mscorlib">Показывать секунды</system:String>
+	<system:String x:Key="Lang_Clock_Vertical" xmlns:system="clr-namespace:System;assembly=mscorlib">Вертикальное расположение</system:String>
+	<system:String x:Key="Lang_Clock_Separator" xmlns:system="clr-namespace:System;assembly=mscorlib">Разделитель</system:String>
+	<system:String x:Key="Lang_Date_Plate" xmlns:system="clr-namespace:System;assembly=mscorlib">Фоновая подложка</system:String>
+	<system:String x:Key="Lang_Date_Plate_Desc" xmlns:system="clr-namespace:System;assembly=mscorlib">Включить отображение стеклянного фона</system:String>
+	<system:String x:Key="Lang_Date_ShowDay" xmlns:system="clr-namespace:System;assembly=mscorlib">Показывать день недели</system:String>
+	<system:String x:Key="Lang_Date_ShowDate" xmlns:system="clr-namespace:System;assembly=mscorlib">Показывать календарную дату</system:String>
+	<system:String x:Key="Lang_Date_ShowTime" xmlns:system="clr-namespace:System;assembly=mscorlib">Показывать часы</system:String>
+	<system:String x:Key="Lang_Date_DaySize" xmlns:system="clr-namespace:System;assembly=mscorlib">Размер шрифта дня недели</system:String>
+	<system:String x:Key="Lang_Date_DateSize" xmlns:system="clr-namespace:System;assembly=mscorlib">Размер шрифта календарной даты</system:String>
+	<system:String x:Key="Lang_Date_TimeSize" xmlns:system="clr-namespace:System;assembly=mscorlib">Размер шрифта часов</system:String>
+	<system:String x:Key="Lang_Widget_Title_Hardware_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Система</system:String>
+	<system:String x:Key="Lang_Widget_Desc_Hardware_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Hardware Monitor</system:String>
+	<system:String x:Key="Lang_Widget_Title_Media_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Медиа-плеер</system:String>
+	<system:String x:Key="Lang_Widget_Desc_Media_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Музыка и видео</system:String>
+	<system:String x:Key="Lang_Widget_Title_Image_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Фоторамка</system:String>
+	<system:String x:Key="Lang_Widget_Desc_Image_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Ваше фото</system:String>
+	<system:String x:Key="Lang_Widget_Title_Weather_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Погода</system:String>
+	<system:String x:Key="Lang_Widget_Desc_Weather_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Open-Meteo</system:String>
+	<system:String x:Key="Lang_Widget_Title_Time_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Часы</system:String>
+	<system:String x:Key="Lang_Widget_Desc_Time_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Текущее время</system:String>
+	<system:String x:Key="Lang_Widget_Title_AI_01" xmlns:system="clr-namespace:System;assembly=mscorlib">AI Ассистент</system:String>
+	<system:String x:Key="Lang_Widget_Desc_AI_01" xmlns:system="clr-namespace:System;assembly=mscorlib">API и Локальные модели</system:String>
+	<system:String x:Key="Lang_Widget_Title_Notes_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Стикеры</system:String>
+	<system:String x:Key="Lang_Widget_Desc_Notes_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Заметки на стекле</system:String>
+	<system:String x:Key="Lang_Widget_Title_Quote_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Цитата дня</system:String>
+	<system:String x:Key="Lang_Widget_Desc_Quote_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Вдохновение на рабочем столе</system:String>
+	<system:String x:Key="Lang_Widget_Title_Date_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Дата и время</system:String>
+	<system:String x:Key="Lang_Widget_Desc_Date_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Календарь</system:String>
+	<system:String x:Key="Lang_Weather_Sunny" xmlns:system="clr-namespace:System;assembly=mscorlib">Ясно</system:String>
+	<system:String x:Key="Lang_Weather_Cloudy" xmlns:system="clr-namespace:System;assembly=mscorlib">Облачно</system:String>
+	<system:String x:Key="Lang_Weather_Fog" xmlns:system="clr-namespace:System;assembly=mscorlib">Туман</system:String>
+	<system:String x:Key="Lang_Weather_Rain" xmlns:system="clr-namespace:System;assembly=mscorlib">Дождь</system:String>
+	<system:String x:Key="Lang_Weather_Snow" xmlns:system="clr-namespace:System;assembly=mscorlib">Снег</system:String>
+	<system:String x:Key="Lang_Weather_Storm" xmlns:system="clr-namespace:System;assembly=mscorlib">Гроза</system:String>
+	<system:String x:Key="Lang_Weather_Error" xmlns:system="clr-namespace:System;assembly=mscorlib">Ошибка API</system:String>
+	<system:String x:Key="Lang_Weather_Loading" xmlns:system="clr-namespace:System;assembly=mscorlib">Загрузка</system:String>
+	<system:String x:Key="Lang_Weather_Search" xmlns:system="clr-namespace:System;assembly=mscorlib">Поиск...</system:String>
+	<system:String x:Key="Lang_About_Header" xmlns:system="clr-namespace:System;assembly=mscorlib">💎 GlanceCore — Новая эстетика вашего рабочего стола</system:String>
+	<system:String x:Key="Lang_About_Version" xmlns:system="clr-namespace:System;assembly=mscorlib">Версия: 0.5.0 &quot;Prism&quot; Alpha</system:String>
+	<system:String x:Key="Lang_About_ManifestTitle" xmlns:system="clr-namespace:System;assembly=mscorlib">📜 Манифест</system:String>
+	<system:String x:Key="Lang_About_ManifestText" xmlns:system="clr-namespace:System;assembly=mscorlib">GlanceCore — это не просто набор виджетов. Это манифест минимализма и производительности в экосиестеме Windows. Мы создали его для тех, кто ценит детали: от плавности анимации до физически корректного преломления света в «жидком стекле».</system:String>
+	<system:String x:Key="Lang_About_StackTitle" xmlns:system="clr-namespace:System;assembly=mscorlib">🛠 Технологический стек</system:String>
+	<system:String x:Key="Lang_About_StackText" xmlns:system="clr-namespace:System;assembly=mscorlib">• Движок: .NET 10 + WPF (Pure Native)&#x0a;• Графика: Аппаратное ускорение DirectX и HLSL-шейдеры&#x0a;• Приватность: Мы не собираем ваши данные. Всё хранится локально.</system:String>
+	<system:String x:Key="Lang_About_TeamTitle" xmlns:system="clr-namespace:System;assembly=mscorlib">👥 Команда</system:String>
+	<system:String x:Key="Lang_About_TeamText" xmlns:system="clr-namespace:System;assembly=mscorlib">Ведущий разработчик: MazeFS&#x0a;Дизайн: Вдохновлено философией Apple и Modern Fluent.</system:String>
+	<system:String x:Key="Lang_Btn_UploadImage" xmlns:system="clr-namespace:System;assembly=mscorlib">Выбрать фотографию...</system:String>
+	<system:String x:Key="Lang_Date_ColorDay" xmlns:system="clr-namespace:System;assembly=mscorlib">Цвет дня</system:String>
+	<system:String x:Key="Lang_Date_ColorDate" xmlns:system="clr-namespace:System;assembly=mscorlib">Цвет даты</system:String>
+	<system:String x:Key="Lang_Date_ColorTime" xmlns:system="clr-namespace:System;assembly=mscorlib">Цвет часов</system:String>
+	<system:String x:Key="Lang_Clock_Space" xmlns:system="clr-namespace:System;assembly=mscorlib">Пробел</system:String>
+	<system:String x:Key="Lang_Sys_Sec" xmlns:system="clr-namespace:System;assembly=mscorlib">сек</system:String>
 </ResourceDictionary>

@@ -1,5 +1,116 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <system:String x:Key="Lang_Menu_Widgets" xmlns:system="clr-namespace:System;assembly=mscorlib">Widgets</system:String>
-    <system:String x:Key="Lang_Menu_Store" xmlns:system="clr-namespace:System;assembly=mscorlib">Store</system:String>
-    <system:String x:Key="Lang_Menu_Settings" xmlns:system="clr-namespace:System;assembly=mscorlib">Settings</system:String>
+	<system:String x:Key="Lang_Menu_Widgets" xmlns:system="clr-namespace:System;assembly=mscorlib">Widgets</system:String>
+	<system:String x:Key="Lang_Menu_Store" xmlns:system="clr-namespace:System;assembly=mscorlib">Store</system:String>
+	<system:String x:Key="Lang_Menu_Settings" xmlns:system="clr-namespace:System;assembly=mscorlib">Settings</system:String>
+	<system:String x:Key="Lang_Btn_Back" xmlns:system="clr-namespace:System;assembly=mscorlib">Back to list</system:String>
+	<system:String x:Key="Lang_Config_Title" xmlns:system="clr-namespace:System;assembly=mscorlib">Settings</system:String>
+	<system:String x:Key="Lang_Prop_Topmost" xmlns:system="clr-namespace:System;assembly=mscorlib">Always on Top</system:String>
+	<system:String x:Key="Lang_Prop_Topmost_Desc" xmlns:system="clr-namespace:System;assembly=mscorlib">The widget will stay on top of other active windows</system:String>
+	<system:String x:Key="Lang_Prop_Opacity" xmlns:system="clr-namespace:System;assembly=mscorlib">Background Opacity</system:String>
+	<system:String x:Key="Lang_Prop_Scale" xmlns:system="clr-namespace:System;assembly=mscorlib">Scale (Interface Size)</system:String>
+	<system:String x:Key="Lang_Prop_Width" xmlns:system="clr-namespace:System;assembly=mscorlib">Widget Width (pixels)</system:String>
+	<system:String x:Key="Lang_Prop_Height" xmlns:system="clr-namespace:System;assembly=mscorlib">Widget Height (pixels)</system:String>
+	<system:String x:Key="Lang_Prop_Radius" xmlns:system="clr-namespace:System;assembly=mscorlib">Corner Radius</system:String>
+	<system:String x:Key="Lang_Prop_Border" xmlns:system="clr-namespace:System;assembly=mscorlib">Show Borders</system:String>
+	<system:String x:Key="Lang_Prop_Border_Desc" xmlns:system="clr-namespace:System;assembly=mscorlib">Enable visible outer edges on the widget</system:String>
+	<system:String x:Key="Lang_Prop_Font" xmlns:system="clr-namespace:System;assembly=mscorlib">Font Family</system:String>
+	<system:String x:Key="Lang_Btn_ImportFont" xmlns:system="clr-namespace:System;assembly=mscorlib">Import Font (.ttf/.otf)...</system:String>
+	<system:String x:Key="Lang_Prop_FontSize" xmlns:system="clr-namespace:System;assembly=mscorlib">Text Size</system:String>
+	<system:String x:Key="Lang_Prop_TextColor" xmlns:system="clr-namespace:System;assembly=mscorlib">Text Color</system:String>
+	<system:String x:Key="Lang_Prop_BgColor" xmlns:system="clr-namespace:System;assembly=mscorlib">Background Color (Tint)</system:String>
+	<system:String x:Key="Lang_Prop_BorderColor" xmlns:system="clr-namespace:System;assembly=mscorlib">Border Color</system:String>
+	<system:String x:Key="Lang_Sys_Title" xmlns:system="clr-namespace:System;assembly=mscorlib">SYSTEM PARAMETERS</system:String>
+	<system:String x:Key="Lang_Sys_Theme" xmlns:system="clr-namespace:System;assembly=mscorlib">Hub Color Theme</system:String>
+	<system:String x:Key="Lang_Sys_Autostart" xmlns:system="clr-namespace:System;assembly=mscorlib">Autostart</system:String>
+	<system:String x:Key="Lang_Sys_Autostart_Desc" xmlns:system="clr-namespace:System;assembly=mscorlib">Launch automatically on Windows startup</system:String>
+	<system:String x:Key="Lang_Sys_Lock" xmlns:system="clr-namespace:System;assembly=mscorlib">Lock Positions</system:String>
+	<system:String x:Key="Lang_Sys_Lock_Desc" xmlns:system="clr-namespace:System;assembly=mscorlib">Prevent dragging widgets around the screen</system:String>
+	<system:String x:Key="Lang_Sys_Shader" xmlns:system="clr-namespace:System;assembly=mscorlib">Liquid Glass (Shader)</system:String>
+	<system:String x:Key="Lang_Sys_Shader_Desc" xmlns:system="clr-namespace:System;assembly=mscorlib">Enable real-time wallpaper refraction (GPU)</system:String>
+	<system:String x:Key="Lang_Sys_Streamer" xmlns:system="clr-namespace:System;assembly=mscorlib">Streamer Mode (Smart Freeze)</system:String>
+	<system:String x:Key="Lang_Sys_Streamer_Desc" xmlns:system="clr-namespace:System;assembly=mscorlib">Freeze background capture for secure recording in OBS/Snipping Tool</system:String>
+	<system:String x:Key="Lang_Sys_Game" xmlns:system="clr-namespace:System;assembly=mscorlib">Game Mode (Game On)</system:String>
+	<system:String x:Key="Lang_Sys_Game_Desc" xmlns:system="clr-namespace:System;assembly=mscorlib">Auto-disable shaders when playing full-screen 3D games</system:String>
+	<system:String x:Key="Lang_Sys_IdleFps" xmlns:system="clr-namespace:System;assembly=mscorlib">Idle Frame Rate (FPS)</system:String>
+	<system:String x:Key="Lang_Sys_MovingFps" xmlns:system="clr-namespace:System;assembly=mscorlib">Dragging Frame Rate (FPS)</system:String>
+	<system:String x:Key="Lang_Donate_Title" xmlns:system="clr-namespace:System;assembly=mscorlib">Support GlanceCore Creator ☕</system:String>
+	<system:String x:Key="Lang_Donate_Desc" xmlns:system="clr-namespace:System;assembly=mscorlib">This software is created by a single developer in spare time. Your donation directly accelerates new widgets, styles, and updates.</system:String>
+	<system:String x:Key="Lang_Title_Widgets" xmlns:system="clr-namespace:System;assembly=mscorlib">Widget Management</system:String>
+	<system:String x:Key="Lang_Title_Store" xmlns:system="clr-namespace:System;assembly=mscorlib">Plugin Store</system:String>
+	<system:String x:Key="Lang_Title_Settings" xmlns:system="clr-namespace:System;assembly=mscorlib">System Settings</system:String>
+	<system:String x:Key="Lang_Title_About" xmlns:system="clr-namespace:System;assembly=mscorlib">About GlanceCore</system:String>
+	<system:String x:Key="Lang_Store_Upcoming" xmlns:system="clr-namespace:System;assembly=mscorlib">Upcoming: Download new widgets with a single click</system:String>
+	<system:String x:Key="Lang_Sys_AutostartDelay" xmlns:system="clr-namespace:System;assembly=mscorlib">Autostart Delay</system:String>
+	<system:String x:Key="Lang_Theme_Original" xmlns:system="clr-namespace:System;assembly=mscorlib">Original</system:String>
+	<system:String x:Key="Lang_Theme_Dark" xmlns:system="clr-namespace:System;assembly=mscorlib">Dark</system:String>
+	<system:String x:Key="Lang_Theme_Blue" xmlns:system="clr-namespace:System;assembly=mscorlib">Blue</system:String>
+	<system:String x:Key="Lang_Theme_Light" xmlns:system="clr-namespace:System;assembly=mscorlib">Light</system:String>
+	<system:String x:Key="Lang_Style_LiquidGlass" xmlns:system="clr-namespace:System;assembly=mscorlib">Liquid Glass</system:String>
+	<system:String x:Key="Lang_Style_Minimalism" xmlns:system="clr-namespace:System;assembly=mscorlib">Minimalism</system:String>
+	<system:String x:Key="Lang_Style_Retro" xmlns:system="clr-namespace:System;assembly=mscorlib">Retro 8-bit</system:String>
+	<system:String x:Key="Lang_Style_Neon" xmlns:system="clr-namespace:System;assembly=mscorlib">Cyber-Neon</system:String>
+	<system:String x:Key="Lang_HW_Graphs" xmlns:system="clr-namespace:System;assembly=mscorlib">Show Graphs</system:String>
+	<system:String x:Key="Lang_HW_Graphs_Desc" xmlns:system="clr-namespace:System;assembly=mscorlib">Display interactive live graphs instead of simple progress bars</system:String>
+	<system:String x:Key="Lang_HW_Order" xmlns:system="clr-namespace:System;assembly=mscorlib">Sensor Order</system:String>
+	<system:String x:Key="Lang_Prop_Style" xmlns:system="clr-namespace:System;assembly=mscorlib">Widget Style</system:String>
+	<system:String x:Key="Lang_AI_Prompt" xmlns:system="clr-namespace:System;assembly=mscorlib">System Prompt (Behavior)</system:String>
+	<system:String x:Key="Lang_AI_Model" xmlns:system="clr-namespace:System;assembly=mscorlib">Model Name (e.g. Llama3)</system:String>
+	<system:String x:Key="Lang_AI_Temp" xmlns:system="clr-namespace:System;assembly=mscorlib">Temperature (Creativity)</system:String>
+	<system:String x:Key="Lang_AI_Endpoint" xmlns:system="clr-namespace:System;assembly=mscorlib">API Endpoint</system:String>
+	<system:String x:Key="Lang_AI_Key" xmlns:system="clr-namespace:System;assembly=mscorlib">API Key (Leave empty for Ollama)</system:String>
+	<system:String x:Key="Lang_Media_Timer" xmlns:system="clr-namespace:System;assembly=mscorlib">Show Track Duration</system:String>
+	<system:String x:Key="Lang_Media_Timer_Desc" xmlns:system="clr-namespace:System;assembly=mscorlib">Display playback progress timer on the media player</system:String>
+	<system:String x:Key="Lang_Weather_City" xmlns:system="clr-namespace:System;assembly=mscorlib">City Name (Leave empty for Auto-IP)</system:String>
+	<system:String x:Key="Lang_Clock_Seconds" xmlns:system="clr-namespace:System;assembly=mscorlib">Show Seconds</system:String>
+	<system:String x:Key="Lang_Clock_Vertical" xmlns:system="clr-namespace:System;assembly=mscorlib">Vertical Layout</system:String>
+	<system:String x:Key="Lang_Clock_Separator" xmlns:system="clr-namespace:System;assembly=mscorlib">Separator</system:String>
+	<system:String x:Key="Lang_Date_Plate" xmlns:system="clr-namespace:System;assembly=mscorlib">Background Plate</system:String>
+	<system:String x:Key="Lang_Date_Plate_Desc" xmlns:system="clr-namespace:System;assembly=mscorlib">Enable semi-transparent glass background plate</system:String>
+	<system:String x:Key="Lang_Date_ShowDay" xmlns:system="clr-namespace:System;assembly=mscorlib">Show Day of Week</system:String>
+	<system:String x:Key="Lang_Date_ShowDate" xmlns:system="clr-namespace:System;assembly=mscorlib">Show Calendar Date</system:String>
+	<system:String x:Key="Lang_Date_ShowTime" xmlns:system="clr-namespace:System;assembly=mscorlib">Show Clock Time</system:String>
+	<system:String x:Key="Lang_Date_DaySize" xmlns:system="clr-namespace:System;assembly=mscorlib">Day of Week Font Size</system:String>
+	<system:String x:Key="Lang_Date_DateSize" xmlns:system="clr-namespace:System;assembly=mscorlib">Calendar Date Font Size</system:String>
+	<system:String x:Key="Lang_Date_TimeSize" xmlns:system="clr-namespace:System;assembly=mscorlib">Clock Time Font Size</system:String>
+	<system:String x:Key="Lang_Widget_Title_Hardware_01" xmlns:system="clr-namespace:System;assembly=mscorlib">System</system:String>
+	<system:String x:Key="Lang_Widget_Desc_Hardware_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Hardware Monitor</system:String>
+	<system:String x:Key="Lang_Widget_Title_Media_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Media Player</system:String>
+	<system:String x:Key="Lang_Widget_Desc_Media_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Music and Video</system:String>
+	<system:String x:Key="Lang_Widget_Title_Image_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Image Frame</system:String>
+	<system:String x:Key="Lang_Widget_Desc_Image_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Your Photo</system:String>
+	<system:String x:Key="Lang_Widget_Title_Weather_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Weather</system:String>
+	<system:String x:Key="Lang_Widget_Desc_Weather_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Open-Meteo</system:String>
+	<system:String x:Key="Lang_Widget_Title_Time_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Clock</system:String>
+	<system:String x:Key="Lang_Widget_Desc_Time_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Current Time</system:String>
+	<system:String x:Key="Lang_Widget_Title_AI_01" xmlns:system="clr-namespace:System;assembly=mscorlib">AI Assistant</system:String>
+	<system:String x:Key="Lang_Widget_Desc_AI_01" xmlns:system="clr-namespace:System;assembly=mscorlib">API &amp; Local Models</system:String>
+	<system:String x:Key="Lang_Widget_Title_Notes_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Sticky Notes</system:String>
+	<system:String x:Key="Lang_Widget_Desc_Notes_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Notes on Glass</system:String>
+	<system:String x:Key="Lang_Widget_Title_Quote_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Quote of the Day</system:String>
+	<system:String x:Key="Lang_Widget_Desc_Quote_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Daily Inspiration</system:String>
+	<system:String x:Key="Lang_Widget_Title_Date_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Date &amp; Time</system:String>
+	<system:String x:Key="Lang_Widget_Desc_Date_01" xmlns:system="clr-namespace:System;assembly=mscorlib">Calendar</system:String>
+	<system:String x:Key="Lang_Weather_Sunny" xmlns:system="clr-namespace:System;assembly=mscorlib">Clear</system:String>
+	<system:String x:Key="Lang_Weather_Cloudy" xmlns:system="clr-namespace:System;assembly=mscorlib">Cloudy</system:String>
+	<system:String x:Key="Lang_Weather_Fog" xmlns:system="clr-namespace:System;assembly=mscorlib">Fog</system:String>
+	<system:String x:Key="Lang_Weather_Rain" xmlns:system="clr-namespace:System;assembly=mscorlib">Rain</system:String>
+	<system:String x:Key="Lang_Weather_Snow" xmlns:system="clr-namespace:System;assembly=mscorlib">Snow</system:String>
+	<system:String x:Key="Lang_Weather_Storm" xmlns:system="clr-namespace:System;assembly=mscorlib">Storm</system:String>
+	<system:String x:Key="Lang_Weather_Error" xmlns:system="clr-namespace:System;assembly=mscorlib">API Error</system:String>
+	<system:String x:Key="Lang_Weather_Loading" xmlns:system="clr-namespace:System;assembly=mscorlib">Loading</system:String>
+	<system:String x:Key="Lang_Weather_Search" xmlns:system="clr-namespace:System;assembly=mscorlib">Searching...</system:String>
+	<system:String x:Key="Lang_About_Header" xmlns:system="clr-namespace:System;assembly=mscorlib">💎 GlanceCore — New Aesthetic of Your Desktop</system:String>
+	<system:String x:Key="Lang_About_Version" xmlns:system="clr-namespace:System;assembly=mscorlib">Version: 0.5.0 &quot;Prism&quot; Alpha</system:String>
+	<system:String x:Key="Lang_About_ManifestTitle" xmlns:system="clr-namespace:System;assembly=mscorlib">📜 Manifesto</system:String>
+	<system:String x:Key="Lang_About_ManifestText" xmlns:system="clr-namespace:System;assembly=mscorlib">GlanceCore is more than just a set of widgets. It is a manifesto of minimalism and performance in the Windows ecosystem. We created it for those who appreciate details: from fluid animations to physically correct refraction of light in &quot;liquid glass&quot;.</system:String>
+	<system:String x:Key="Lang_About_StackTitle" xmlns:system="clr-namespace:System;assembly=mscorlib">🛠 Tech Stack</system:String>
+	<system:String x:Key="Lang_About_StackText" xmlns:system="clr-namespace:System;assembly=mscorlib">• Engine: .NET 10 + WPF (Pure Native)&#x0a;• Graphics: Hardware-accelerated DirectX and HLSL shaders&#x0a;• Privacy: We do not collect your data. Everything is stored locally.</system:String>
+	<system:String x:Key="Lang_About_TeamTitle" xmlns:system="clr-namespace:System;assembly=mscorlib">👥 Team</system:String>
+	<system:String x:Key="Lang_About_TeamText" xmlns:system="clr-namespace:System;assembly=mscorlib">Lead Developer: MazeFS&#x0a;Design: Inspired by Apple philosophy and Modern Fluent.</system:String>
+	<system:String x:Key="Lang_Btn_UploadImage" xmlns:system="clr-namespace:System;assembly=mscorlib">Choose Photo...</system:String>
+	<system:String x:Key="Lang_Date_ColorDay" xmlns:system="clr-namespace:System;assembly=mscorlib">Day Color</system:String>
+	<system:String x:Key="Lang_Date_ColorDate" xmlns:system="clr-namespace:System;assembly=mscorlib">Date Color</system:String>
+	<system:String x:Key="Lang_Date_ColorTime" xmlns:system="clr-namespace:System;assembly=mscorlib">Time Color</system:String>
+	<system:String x:Key="Lang_Clock_Space" xmlns:system="clr-namespace:System;assembly=mscorlib">Space</system:String>
+	<system:String x:Key="Lang_Sys_Sec" xmlns:system="clr-namespace:System;assembly=mscorlib">sec</system:String>
 </ResourceDictionary>

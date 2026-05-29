@@ -247,7 +247,17 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
         this.BgOpacity = state.Opacity;
         this.Topmost = state.IsAlwaysOnTop;
         this._isLocked = isGlobalLocked;
-        this.FontFamily = new FontFamily(state.FontFamily);
+        if (!string.IsNullOrEmpty(state.FontFamily))
+        {
+            if (state.FontFamily.Contains("#"))
+            {
+                this.FontFamily = new FontFamily(new Uri(AppDomain.CurrentDomain.BaseDirectory), state.FontFamily);
+            }
+            else
+            {
+                this.FontFamily = new FontFamily(state.FontFamily);
+            }
+        }
         this.FontSize = state.FontSize;
         this.WidgetCornerRadius = new CornerRadius(state.CornerRadius);
         _shaderShouldBeEnabled = isGlobalShaderEnabled;

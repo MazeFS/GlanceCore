@@ -113,16 +113,19 @@ public partial class WeatherWidget : GlanceCore.Widgets.BaseWidgetWindow
         switch (code)
         {
             case 0:
-                WeatherDescription = "Ясно"; CurrentIcon = MahApps.Metro.IconPacks.PackIconLucideKind.Sun;
+                WeatherDescription = Application.Current.FindResource("Lang_Weather_Sunny") as string ?? "Sunny";
+                CurrentIcon = MahApps.Metro.IconPacks.PackIconLucideKind.Sun;
                 if (tint != null) tint.Background = new SolidColorBrush(Color.FromArgb(120, 255, 150, 0)); break;
             case 1:
             case 2:
             case 3:
-                WeatherDescription = "Облачно"; CurrentIcon = MahApps.Metro.IconPacks.PackIconLucideKind.CloudSun;
+                WeatherDescription = Application.Current.FindResource("Lang_Weather_Cloudy") as string ?? "Cloudy";
+                CurrentIcon = MahApps.Metro.IconPacks.PackIconLucideKind.CloudSun;
                 if (tint != null) tint.Background = new SolidColorBrush(Color.FromArgb(120, 100, 120, 150)); break;
             case 45:
             case 48:
-                WeatherDescription = "Туман"; CurrentIcon = MahApps.Metro.IconPacks.PackIconLucideKind.CloudFog;
+                WeatherDescription = Application.Current.FindResource("Lang_Weather_Fog") as string ?? "Fog";
+                CurrentIcon = MahApps.Metro.IconPacks.PackIconLucideKind.CloudFog;
                 if (tint != null) tint.Background = new SolidColorBrush(Color.FromArgb(150, 150, 150, 150)); break;
             case 51:
             case 53:
@@ -130,21 +133,25 @@ public partial class WeatherWidget : GlanceCore.Widgets.BaseWidgetWindow
             case 61:
             case 63:
             case 65:
-                WeatherDescription = "Дождь"; CurrentIcon = MahApps.Metro.IconPacks.PackIconLucideKind.CloudRain;
+                WeatherDescription = Application.Current.FindResource("Lang_Weather_Rain") as string ?? "Rain";
+                CurrentIcon = MahApps.Metro.IconPacks.PackIconLucideKind.CloudRain;
                 if (tint != null) tint.Background = new SolidColorBrush(Color.FromArgb(150, 0, 50, 100)); break;
             case 71:
             case 73:
             case 75:
             case 77:
-                WeatherDescription = "Снег"; CurrentIcon = MahApps.Metro.IconPacks.PackIconLucideKind.Snowflake;
+                WeatherDescription = Application.Current.FindResource("Lang_Weather_Snow") as string ?? "Snow";
+                CurrentIcon = MahApps.Metro.IconPacks.PackIconLucideKind.Snowflake;
                 if (tint != null) tint.Background = new SolidColorBrush(Color.FromArgb(120, 200, 220, 255)); break;
             case 95:
             case 96:
             case 99:
-                WeatherDescription = "Гроза"; CurrentIcon = MahApps.Metro.IconPacks.PackIconLucideKind.CloudLightning;
+                WeatherDescription = Application.Current.FindResource("Lang_Weather_Storm") as string ?? "Storm";
+                CurrentIcon = MahApps.Metro.IconPacks.PackIconLucideKind.CloudLightning;
                 if (tint != null) tint.Background = new SolidColorBrush(Color.FromArgb(160, 50, 0, 80)); break;
             default:
-                WeatherDescription = "Облачно"; CurrentIcon = MahApps.Metro.IconPacks.PackIconLucideKind.Cloud; break;
+                WeatherDescription = Application.Current.FindResource("Lang_Weather_Cloudy") as string ?? "Cloudy";
+                CurrentIcon = MahApps.Metro.IconPacks.PackIconLucideKind.Cloud; break;
         }
     }
 

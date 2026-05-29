@@ -593,8 +593,8 @@
                                                                 <Border Grid.Row="1" Height="60" Background="#15FFFFFF" BorderBrush="#15FFFFFF" BorderThickness="0,1,0,0" CornerRadius="0,0,19,19" Margin="-1,0,-1,-1">
                                                                     <Grid Margin="15,0">
                                                                         <StackPanel VerticalAlignment="Center">
-                                                                            <TextBlock Text="{Binding Title}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource ThemeText}" TextTrimming="CharacterEllipsis"/>
-                                                                            <TextBlock Text="{Binding Description}" FontSize="11" Foreground="{DynamicResource ThemeTextMuted}" TextTrimming="CharacterEllipsis"/>
+                                                                            <TextBlock Text="{Binding DisplayTitle}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource ThemeText}" TextTrimming="CharacterEllipsis"/>
+                                                                            <TextBlock Text="{Binding DisplayDescription}" FontSize="11" Foreground="{DynamicResource ThemeTextMuted}" TextTrimming="CharacterEllipsis"/>
                                                                         </StackPanel>
                                                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                                             <Button Tag="{Binding Id}" Click="BtnWidgetSettings_Click" Style="{StaticResource GearBtnStyle}" Margin="0,0,12,0" VerticalAlignment="Center"/>
@@ -641,14 +641,14 @@
                                             <Border Background="#20FFFFFF" CornerRadius="8" Padding="6">
                                                 <iconPacks:PackIconLucide Kind="ChevronLeft" Width="16" Height="16" Foreground="White" VerticalAlignment="Center"/>
                                             </Border>
-                                            <TextBlock Text="Назад к списку" Foreground="White" FontSize="15" FontWeight="SemiBold" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{DynamicResource Lang_Btn_Back}" Foreground="{DynamicResource ThemeText}" FontSize="15" FontWeight="SemiBold" Margin="12,0,0,0" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </Button>
 
                                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                         <Border Background="#15000000" CornerRadius="16" Padding="20" BorderBrush="#20FFFFFF" BorderThickness="1">
                                             <StackPanel>
-                                                <TextBlock x:Name="ConfigTitle" Text="Настройки" Foreground="White" FontSize="18" FontWeight="Bold" Margin="0,0,0,20"/>
+                                                <TextBlock x:Name="ConfigTitle" Foreground="{DynamicResource ThemeText}" FontSize="18" FontWeight="Bold" Margin="0,0,0,20"/>
                                                 <TextBlock Text="Стиль виджета" Foreground="White" Opacity="0.6" Margin="0,0,0,10"/>
                                                 <ListBox x:Name="CarouselSkins" SelectionChanged="CarouselSkins_SelectionChanged" Background="Transparent" BorderThickness="0" Margin="0,0,0,20" Height="140" HorizontalAlignment="Center" Width="480" VerticalAlignment="Center">
                                                     <ListBox.ItemsPanel>
@@ -683,7 +683,7 @@
                                                                                 </Image>
 
                                                                                 <Border Background="#CC120A24" VerticalAlignment="Bottom" Height="25">
-                                                                                    <TextBlock Text="{Binding Name}" Foreground="White" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                                    <TextBlock Text="{Binding DisplayName}" Foreground="White" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,12"/>
                                                                                 </Border>
 
                                                                                 <Border x:Name="ActiveRing" BorderBrush="#8A2BE2" BorderThickness="2" CornerRadius="16" Visibility="Collapsed"/>
@@ -745,7 +745,7 @@
                                                     </ListBox.ItemTemplate>
                                                 </ListBox>
                                                 <Border Height="1" Background="#15FFFFFF" Margin="0,0,0,20"/>
-                                                <Button x:Name="BtnUploadImage" Content="Выбрать фотографию..." Click="BtnUploadImage_Click" Visibility="Collapsed" Background="#30FFFFFF" Foreground="White" Padding="15,10" BorderThickness="0" Cursor="Hand" Margin="0,0,0,20">
+                                                <Button x:Name="BtnUploadImage" Content="{DynamicResource Lang_Btn_UploadImage}" Click="BtnUploadImage_Click" Visibility="Collapsed" Background="#30FFFFFF" Foreground="White" Padding="15,10" BorderThickness="0" Cursor="Hand" Margin="0,0,0,20">
                                                     <Button.Resources>
                                                         <Style TargetType="Border">
                                                             <Setter Property="CornerRadius" Value="8"/>
@@ -759,13 +759,13 @@
                                                         <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
                                                     <StackPanel>
-                                                        <TextBlock Text="Поверх всех окон" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
-                                                        <TextBlock Text="Виджет будет виден поверх других окон и программ" Foreground="#80FFFFFF" FontSize="12"/>
+                                                        <TextBlock Text="{DynamicResource Lang_Prop_Topmost}" Foreground="{DynamicResource ThemeText}" FontSize="15" FontWeight="SemiBold"/>
+                                                        <TextBlock Text="{DynamicResource Lang_Prop_Topmost_Desc}" Foreground="{DynamicResource ThemeTextMuted}" FontSize="12"/>
                                                     </StackPanel>
                                                     <CheckBox x:Name="TglWidgetTopmost" Grid.Column="1" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="Topmost_Changed"/>
                                                 </Grid>
 
-                                                <TextBlock Text="Прозрачность фона" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                <TextBlock Text="{DynamicResource Lang_Prop_Opacity}" Foreground="{DynamicResource ThemeText}" Opacity="0.6" Margin="0,10,0,5"/>
                                                 <Grid Margin="0,0,0,15">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="*"/>
@@ -781,7 +781,7 @@
                                                     </TextBox>
                                                 </Grid>
 
-                                                <TextBlock Text="Масштаб" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                <TextBlock Text="{DynamicResource Lang_Prop_Scale}" Foreground="{DynamicResource ThemeText}" Opacity="0.6" Margin="0,10,0,5"/>
                                                 <Grid Margin="0,0,0,15">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="*"/>
@@ -797,7 +797,7 @@
                                                     </TextBox>
                                                 </Grid>
 
-                                                <TextBlock Text="Ширина виджета (пиксели)" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                <TextBlock Text="{DynamicResource Lang_Prop_Width}" Foreground="{DynamicResource ThemeText}" Opacity="0.6" Margin="0,10,0,5"/>
                                                 <Grid Margin="0,0,0,15">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="*"/>
@@ -813,7 +813,7 @@
                                                     </TextBox>
                                                 </Grid>
 
-                                                <TextBlock Text="Высота виджета (пиксели)" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                <TextBlock Text="{DynamicResource Lang_Prop_Height}" Foreground="{DynamicResource ThemeText}" Opacity="0.6" Margin="0,10,0,5"/>
                                                 <Grid Margin="0,0,0,15">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="*"/>
@@ -829,7 +829,7 @@
                                                     </TextBox>
                                                 </Grid>
 
-                                                <TextBlock Text="Скругление углов" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                <TextBlock Text="{DynamicResource Lang_Prop_Radius}" Foreground="{DynamicResource ThemeText}" Opacity="0.6" Margin="0,10,0,5"/>
                                                 <Grid Margin="0,0,0,15">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="*"/>
@@ -847,8 +847,8 @@
                                                 </Grid>
                                                 <Grid Margin="0,10,0,15">
                                                     <StackPanel>
-                                                        <TextBlock Text="Показывать обводку" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
-                                                        <TextBlock Text="Включить внешние границы виджета" Foreground="#80FFFFFF" FontSize="12"/>
+                                                        <TextBlock Text="{DynamicResource Lang_Prop_Border}" Foreground="{DynamicResource ThemeText}" FontSize="15" FontWeight="SemiBold"/>
+                                                        <TextBlock Text="{DynamicResource Lang_Prop_Border_Desc}" Foreground="{DynamicResource ThemeTextMuted}" FontSize="12"/>
                                                     </StackPanel>
                                                     <CheckBox x:Name="TglShowBorder" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="TglShowBorder_Click"/>
                                                 </Grid>
@@ -859,19 +859,19 @@
                                                         <ColumnDefinition Width="*"/>
                                                     </Grid.ColumnDefinitions>
                                                     <StackPanel Grid.Column="0">
-                                                        <TextBlock Text="Текст" Foreground="White" Opacity="0.6" Margin="0,0,0,5"/>
+                                                        <TextBlock Text="{DynamicResource Lang_Prop_TextColor}" Foreground="{DynamicResource ThemeText}" Opacity="0.6" Margin="0,0,0,5" FontSize="11"/>
                                                         <Button Tag="Text" Click="BtnPickColor_Click" Width="32" Height="32" HorizontalAlignment="Left" Style="{StaticResource TransparentHoverButtonStyle}" Cursor="Hand">
                                                             <Ellipse x:Name="CircleTextColor" Width="30" Height="30" Fill="White" Stroke="#40FFFFFF" StrokeThickness="2"/>
                                                         </Button>
                                                     </StackPanel>
                                                     <StackPanel Grid.Column="1">
-                                                        <TextBlock Text="Фон" Foreground="White" Opacity="0.6" Margin="0,0,0,5"/>
+                                                        <TextBlock Text="{DynamicResource Lang_Prop_BgColor}" Foreground="{DynamicResource ThemeText}" Opacity="0.6" Margin="0,0,0,5" FontSize="11"/>
                                                         <Button Tag="Bg" Click="BtnPickColor_Click" Width="32" Height="32" HorizontalAlignment="Left" Style="{StaticResource TransparentHoverButtonStyle}" Cursor="Hand">
                                                             <Ellipse x:Name="CircleBgColor" Width="30" Height="30" Fill="#45000000" Stroke="#40FFFFFF" StrokeThickness="2"/>
                                                         </Button>
                                                     </StackPanel>
                                                     <StackPanel Grid.Column="2">
-                                                        <TextBlock Text="Рамка" Foreground="White" Opacity="0.6" Margin="0,0,0,5"/>
+                                                        <TextBlock Text="{DynamicResource Lang_Prop_BorderColor}" Foreground="{DynamicResource ThemeText}" Opacity="0.6" Margin="0,0,0,5" FontSize="11"/>
                                                         <Button Tag="Border" Click="BtnPickColor_Click" Width="32" Height="32" HorizontalAlignment="Left" Style="{StaticResource TransparentHoverButtonStyle}" Cursor="Hand">
                                                             <Ellipse x:Name="CircleBorderColor" Width="30" Height="30" Fill="White" Stroke="#40FFFFFF" StrokeThickness="2"/>
                                                         </Button>
@@ -947,7 +947,7 @@
                                                         <ComboBoxItem Content="."/>
                                                         <ComboBoxItem Content="/"/>
                                                         <ComboBoxItem Content="-"/>
-                                                        <ComboBoxItem Content="Пробел"/>
+                                                        <ComboBoxItem Content="{DynamicResource Lang_Clock_Space}" Tag="Пробел"/>
                                                     </ComboBox>
                                                     <Grid Margin="0,0,0,15">
                                                         <StackPanel>
@@ -963,17 +963,18 @@
                                                     </Grid>
                                                 </StackPanel>
                                                 <ContentControl x:Name="PluginSettingsContainer" Margin="0,10,0,0"/>
-                                                <StackPanel x:Name="DateSettingsPanel" Visibility="Collapsed">
+                                                <StackPanel x:Name="DateSettingsPanel" Visibility="Collapsed" Cursor="">
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,10"/>
 
-                                                    <TextBlock Text="Размер шрифта дня недели" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                    <TextBlock Text="{DynamicResource Lang_Date_DaySize}" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
                                                     <Slider x:Name="SldDateDayFontSize" Minimum="8" Maximum="40" ValueChanged="DateSettings_Changed" Margin="0,0,0,15"/>
 
-                                                    <TextBlock Text="Размер шрифта календарной даты" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                    <TextBlock Text="{DynamicResource Lang_Date_DateSize}" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
                                                     <Slider x:Name="SldDateDateFontSize" Minimum="8" Maximum="40" ValueChanged="DateSettings_Changed" Margin="0,0,0,15"/>
 
-                                                    <TextBlock Text="Размер шрифта часов" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                    <TextBlock Text="{DynamicResource Lang_Date_TimeSize}" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
                                                     <Slider x:Name="SldDateTimeFontSize" Minimum="8" Maximum="80" ValueChanged="DateSettings_Changed" Margin="0,0,0,15"/>
+
                                                     <Grid Margin="0,10,0,15">
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="*"/>
@@ -981,46 +982,47 @@
                                                             <ColumnDefinition Width="*"/>
                                                         </Grid.ColumnDefinitions>
                                                         <StackPanel Grid.Column="0">
-                                                            <TextBlock Text="Цвет дня" Foreground="White" Opacity="0.6" Margin="0,0,0,5" FontSize="11"/>
+                                                            <TextBlock Text="{DynamicResource Lang_Date_ColorDay}" Foreground="White" Opacity="0.6" Margin="0,0,0,5" FontSize="11"/>
                                                             <Button Tag="DateDay" Click="BtnPickColor_Click" Width="32" Height="32" HorizontalAlignment="Left" Style="{StaticResource TransparentHoverButtonStyle}" Cursor="Hand">
                                                                 <Ellipse x:Name="CircleDateDayColor" Width="30" Height="30" Fill="White" Stroke="#40FFFFFF" StrokeThickness="2"/>
                                                             </Button>
                                                         </StackPanel>
                                                         <StackPanel Grid.Column="1">
-                                                            <TextBlock Text="Цвет даты" Foreground="White" Opacity="0.6" Margin="0,0,0,5" FontSize="11"/>
+                                                            <TextBlock Text="{DynamicResource Lang_Date_ColorDate}" Foreground="White" Opacity="0.6" Margin="0,0,0,5" FontSize="11"/>
                                                             <Button Tag="DateDate" Click="BtnPickColor_Click" Width="32" Height="32" HorizontalAlignment="Left" Style="{StaticResource TransparentHoverButtonStyle}" Cursor="Hand">
                                                                 <Ellipse x:Name="CircleDateDateColor" Width="30" Height="30" Fill="White" Stroke="#40FFFFFF" StrokeThickness="2"/>
                                                             </Button>
                                                         </StackPanel>
                                                         <StackPanel Grid.Column="2">
-                                                            <TextBlock Text="Цвет часов" Foreground="White" Opacity="0.6" Margin="0,0,0,5" FontSize="11"/>
+                                                            <TextBlock Text="{DynamicResource Lang_Date_ColorTime}" Foreground="White" Opacity="0.6" Margin="0,0,0,5" FontSize="11"/>
                                                             <Button Tag="DateTime" Click="BtnPickColor_Click" Width="32" Height="32" HorizontalAlignment="Left" Style="{StaticResource TransparentHoverButtonStyle}" Cursor="Hand">
                                                                 <Ellipse x:Name="CircleDateTimeColor" Width="30" Height="30" Fill="White" Stroke="#40FFFFFF" StrokeThickness="2"/>
                                                             </Button>
                                                         </StackPanel>
                                                     </Grid>
+
                                                     <Grid Margin="0,10,0,15">
                                                         <StackPanel>
-                                                            <TextBlock Text="Фоновая подложка" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
-                                                            <TextBlock Text="Включить отображение стеклянного фона" Foreground="#80FFFFFF" FontSize="12"/>
+                                                            <TextBlock Text="{DynamicResource Lang_Date_Plate}" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="{DynamicResource Lang_Date_Plate_Desc}" Foreground="#80FFFFFF" FontSize="12"/>
                                                         </StackPanel>
                                                         <CheckBox x:Name="TglShowPlate" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="DateSettings_Changed"/>
                                                     </Grid>
                                                     <Grid Margin="0,0,0,15">
                                                         <StackPanel>
-                                                            <TextBlock Text="Показывать день недели" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="{DynamicResource Lang_Date_ShowDay}" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
                                                         </StackPanel>
                                                         <CheckBox x:Name="TglShowDay" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="DateSettings_Changed"/>
                                                     </Grid>
                                                     <Grid Margin="0,0,0,15">
                                                         <StackPanel>
-                                                            <TextBlock Text="Показывать календарную дату" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="{DynamicResource Lang_Date_ShowDate}" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
                                                         </StackPanel>
                                                         <CheckBox x:Name="TglShowCalendarDate" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="DateSettings_Changed"/>
                                                     </Grid>
                                                     <Grid Margin="0,0,0,5">
                                                         <StackPanel>
-                                                            <TextBlock Text="Показывать часы" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="{DynamicResource Lang_Date_ShowTime}" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
                                                         </StackPanel>
                                                         <CheckBox x:Name="TglShowClockTime" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="DateSettings_Changed"/>
                                                     </Grid>
@@ -1028,7 +1030,7 @@
                                                 <StackPanel x:Name="AiSettingsPanel" Visibility="Collapsed">
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,10"/>
 
-                                                    <TextBlock Text="API Endpoint" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                    <TextBlock Text="{DynamicResource Lang_AI_Endpoint}" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
                                                     <TextBox x:Name="TxtAiEndpoint" Height="30" Background="#20FFFFFF" Foreground="White" BorderThickness="0" Padding="8,0" VerticalContentAlignment="Center" TextChanged="AiSettings_Changed">
                                                         <TextBox.Resources>
                                                             <Style TargetType="Border">
@@ -1037,7 +1039,7 @@
                                                         </TextBox.Resources>
                                                     </TextBox>
 
-                                                    <TextBlock Text="API Key (Пусто для Ollama)" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                    <TextBlock Text="{DynamicResource Lang_AI_Key}" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
                                                     <TextBox x:Name="TxtAiKey" Height="30" Background="#20FFFFFF" Foreground="White" BorderThickness="0" Padding="8,0" VerticalContentAlignment="Center" TextChanged="AiSettings_Changed">
                                                         <TextBox.Resources>
                                                             <Style TargetType="Border">
@@ -1046,7 +1048,7 @@
                                                         </TextBox.Resources>
                                                     </TextBox>
 
-                                                    <TextBlock Text="Имя модели (например, llama3)" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                    <TextBlock Text="{DynamicResource Lang_AI_Model}" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
                                                     <TextBox x:Name="TxtAiModel" Height="30" Background="#20FFFFFF" Foreground="White" BorderThickness="0" Padding="8,0" VerticalContentAlignment="Center" TextChanged="AiSettings_Changed">
                                                         <TextBox.Resources>
                                                             <Style TargetType="Border">
@@ -1055,7 +1057,7 @@
                                                         </TextBox.Resources>
                                                     </TextBox>
 
-                                                    <TextBlock Text="Системный промпт (Поведение)" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                    <TextBlock Text="{DynamicResource Lang_AI_Prompt}" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
                                                     <TextBox x:Name="TxtAiPrompt" Height="60" AcceptsReturn="True" TextWrapping="Wrap" Background="#20FFFFFF" Foreground="White" BorderThickness="0" Padding="8,5" VerticalContentAlignment="Top" TextChanged="AiSettings_Changed">
                                                         <TextBox.Resources>
                                                             <Style TargetType="Border">
@@ -1065,7 +1067,7 @@
                                                     </TextBox>
 
                                                     <Grid Margin="0,10,0,5">
-                                                        <TextBlock Text="Температура (Креативность)" Foreground="White" Opacity="0.6" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="{DynamicResource Lang_AI_Temp}" Foreground="White" Opacity="0.6" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                                         <TextBlock Text="{Binding Value, ElementName=SldAiTemp, StringFormat={}{0:F1}}" Foreground="White" Opacity="0.8" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="SemiBold"/>
                                                     </Grid>
                                                     <Slider x:Name="SldAiTemp" Minimum="0.0" Maximum="1.5" ValueChanged="AiSlider_Changed"/>
@@ -1075,15 +1077,16 @@
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,10"/>
                                                     <Grid Margin="0,10,0,5">
                                                         <StackPanel>
-                                                            <TextBlock Text="Показывать время трека" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
-                                                            <TextBlock Text="Отображать таймер проигрывания на плеере" Foreground="#80FFFFFF" FontSize="12"/>
+                                                            <TextBlock Text="{DynamicResource Lang_Media_Timer}" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="{DynamicResource Lang_Media_Timer_Desc}" Foreground="#80FFFFFF" FontSize="12"/>
                                                         </StackPanel>
                                                         <CheckBox x:Name="TglShowMediaTimer" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="MediaSettings_Changed"/>
                                                     </Grid>
                                                 </StackPanel>
+
                                                 <StackPanel x:Name="WeatherSettingsPanel" Visibility="Collapsed">
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,10"/>
-                                                    <TextBlock Text="Город (Оставьте пустым для авто-IP)" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                    <TextBlock Text="{DynamicResource Lang_Weather_City}" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
                                                     <TextBox x:Name="TxtWeatherCity" Height="30" Background="#20FFFFFF" Foreground="White" BorderThickness="0" Padding="8,0" VerticalContentAlignment="Center" TextChanged="WeatherSettings_Changed">
                                                         <TextBox.Resources>
                                                             <Style TargetType="Border">
@@ -1094,7 +1097,7 @@
                                                 </StackPanel>
                                                 <StackPanel x:Name="TypographySettingsPanel">
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,10"/>
-                                                    <TextBlock Text="Шрифт" Foreground="MediumPurple" Opacity="0.6" Margin="0,10,0,5"/>
+                                                    <TextBlock Text="{DynamicResource Lang_Prop_Font}" Foreground="MediumPurple" Opacity="0.6" Margin="0,10,0,5"/>
                                                     <ComboBox x:Name="ComboFont" SelectionChanged="ComboBox_SelectionChanged" Background="#20FFFFFF" Foreground="White" BorderThickness="0" Height="32" Margin="0,0,0,15">
                                                         <ComboBox.ItemContainerStyle>
                                                             <Style TargetType="ComboBoxItem">
@@ -1121,7 +1124,14 @@
                                                         <ComboBoxItem Content="Verdana" FontFamily="Verdana" FontSize="14"/>
                                                         <ComboBoxItem Content="Courier New" FontFamily="Courier New" FontSize="14"/>
                                                     </ComboBox>
-                                                    <TextBlock x:Name="LblFontSize" Text="Размер текста" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
+                                                    <Button x:Name="BtnImportFont" Content="{DynamicResource Lang_Btn_ImportFont}" Click="BtnImportFont_Click" Background="#30FFFFFF" Foreground="White" Padding="10,6" BorderThickness="0" Cursor="Hand" Margin="0,0,0,15">
+                                                        <Button.Resources>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="CornerRadius" Value="6"/>
+                                                            </Style>
+                                                        </Button.Resources>
+                                                    </Button>
+                                                    <TextBlock x:Name="LblFontSize" Text="{DynamicResource Lang_Prop_FontSize}" Foreground="White" Opacity="0.6" Margin="0,10,0,5"/>
                                                     <Slider x:Name="SldFontSize" Minimum="8" Maximum="30" ValueChanged="Slider_Changed"/>
                                                 </StackPanel>
                                             </StackPanel>
@@ -1133,8 +1143,8 @@
                                 <Grid x:Name="StorePanel" Visibility="Collapsed">
                                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                         <iconPacks:PackIconLucide Kind="ShoppingBag" Width="48" Height="48" Foreground="#40FFFFFF" HorizontalAlignment="Center" Margin="0,0,0,15"/>
-                                        <TextBlock Text="Магазин плагинов" FontSize="20" FontWeight="SemiBold" Foreground="#A0FFFFFF" HorizontalAlignment="Center"/>
-                                        <TextBlock Text="Скоро: Загружайте новые виджеты одним кликом" FontSize="14" Foreground="#60FFFFFF" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                                        <TextBlock Text="{DynamicResource Lang_Title_Store}" FontSize="20" FontWeight="SemiBold" Foreground="#A0FFFFFF" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{DynamicResource Lang_Store_Upcoming}" FontSize="14" Foreground="#60FFFFFF" HorizontalAlignment="Center" Margin="0,5,0,0"/>
                                     </StackPanel>
                                 </Grid>
 
@@ -1144,8 +1154,8 @@
                                         <StackPanel Margin="0,0,10,0">
                                             <Border Background="#15000000" CornerRadius="16" Padding="20" BorderBrush="#20FFFFFF" BorderThickness="1">
                                                 <StackPanel>
-                                                    <TextBlock Text="СИСТЕМНЫЕ ПАРАМЕТРЫ" Foreground="{DynamicResource ThemeText}" Opacity="0.5" FontSize="11" FontWeight="Bold" Margin="0,0,0,15"/>
-                                                    <TextBlock Text="Язык (Language)" Foreground="{DynamicResource ThemeText}" Opacity="0.6" Margin="0,0,0,5"/>
+                                                    <TextBlock Text="{DynamicResource Lang_Sys_Title}" Foreground="{DynamicResource ThemeText}" Opacity="0.5" FontSize="11" FontWeight="Bold" Margin="0,0,0,15"/>
+                                                    <TextBlock Text="{DynamicResource Lang_Sys_Theme}" Foreground="{DynamicResource ThemeText}" Opacity="0.6" Margin="0,0,0,5"/>
                                                     <ComboBox x:Name="ComboLang" SelectionChanged="ComboLang_SelectionChanged" Height="32" VerticalContentAlignment="Center" Margin="0,0,0,20">
                                                         <ComboBoxItem Content="Русский" Tag="RU"/>
                                                         <ComboBoxItem Content="English" Tag="EN"/>
@@ -1167,7 +1177,7 @@
                                                                             <Border x:Name="Card" Width="100" Height="75" Background="#150E24" CornerRadius="12" BorderBrush="#30FFFFFF" BorderThickness="1.5">
                                                                                 <Grid>
                                                                                     <Border x:Name="ThemePreview" Height="26" CornerRadius="6" Margin="10,10,10,0" VerticalAlignment="Top" BorderThickness="1" BorderBrush="#20FFFFFF"/>
-                                                                                    <TextBlock Text="{Binding Name}" Foreground="{DynamicResource ThemeText}" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10"/>
+                                                                                    <TextBlock Text="{Binding DisplayName}" Foreground="{DynamicResource ThemeText}" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10"/>
                                                                                     <Border x:Name="ActiveRing" BorderBrush="#8A2BE2" BorderThickness="2" CornerRadius="12" Visibility="Collapsed"/>
                                                                                 </Grid>
                                                                             </Border>
@@ -1234,55 +1244,66 @@
 
                                                     <Grid Margin="0,0,0,15">
                                                         <StackPanel>
-                                                            <TextBlock Text="Автозапуск" Foreground="{DynamicResource ThemeText}" FontSize="15" FontWeight="SemiBold"/>
-                                                            <TextBlock Text="Запускать вместе с Windows" Foreground="{DynamicResource ThemeTextMuted}" FontSize="12"/>
+                                                            <TextBlock Text="{DynamicResource Lang_Sys_Autostart}" Foreground="{DynamicResource ThemeText}" FontSize="15" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="{DynamicResource Lang_Sys_Autostart_Desc}" Foreground="{DynamicResource ThemeTextMuted}" FontSize="12"/>
                                                         </StackPanel>
                                                         <CheckBox x:Name="TglAutoStart" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="SystemSettings_Changed"/>
                                                     </Grid>
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,0,0,15"/>
                                                     <Grid Margin="0,0,0,15">
                                                         <StackPanel>
-                                                            <TextBlock Text="Блокировка позиций" Foreground="{DynamicResource ThemeText}" FontSize="15" FontWeight="SemiBold"/>
-                                                            <TextBlock Text="Запретить перетаскивание виджетов мышью" Foreground="{DynamicResource ThemeTextMuted}" FontSize="12"/>
+                                                            <TextBlock Text="{DynamicResource Lang_Sys_Lock}" Foreground="{DynamicResource ThemeText}" FontSize="15" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="{DynamicResource Lang_Sys_Lock_Desc}" Foreground="{DynamicResource ThemeTextMuted}" FontSize="12"/>
                                                         </StackPanel>
                                                         <CheckBox x:Name="TglLock" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="SystemSettings_Changed"/>
                                                     </Grid>
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,0,0,15"/>
                                                     <Grid Margin="0,0,0,15">
                                                         <StackPanel>
-                                                            <TextBlock Text="Liquid Glass (Шейдер)" Foreground="{DynamicResource ThemeText}" FontSize="15" FontWeight="SemiBold"/>
-                                                            <TextBlock Text="Искажение обоев рабочего стола (GPU)" Foreground="{DynamicResource ThemeTextMuted}" FontSize="12"/>
+                                                            <TextBlock Text="{DynamicResource Lang_Sys_Shader}" Foreground="{DynamicResource ThemeText}" FontSize="15" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="{DynamicResource Lang_Sys_Shader_Desc}" Foreground="{DynamicResource ThemeTextMuted}" FontSize="12"/>
                                                         </StackPanel>
                                                         <CheckBox x:Name="TglShader" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="SystemSettings_Changed"/>
                                                     </Grid>
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,18,0,18"/>
                                                     <Grid Margin="0,5,0,0">
                                                         <StackPanel>
-                                                            <TextBlock Text="Режим Стримера (Smart Freeze)" Foreground="{DynamicResource ThemeText}" FontSize="15" FontWeight="SemiBold"/>
-                                                            <TextBlock Text="Заморозка фона для идеального захвата в OBS/Скриншотах" Foreground="{DynamicResource ThemeTextMuted}" FontSize="12"/>
+                                                            <TextBlock Text="{DynamicResource Lang_Sys_Streamer}" Foreground="{DynamicResource ThemeText}" FontSize="15" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="{DynamicResource Lang_Sys_Streamer_Desc}" Foreground="{DynamicResource ThemeTextMuted}" FontSize="12"/>
                                                         </StackPanel>
                                                         <CheckBox x:Name="TglStreamerMode" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="SystemSettings_Changed"/>
                                                     </Grid>
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,18,0,18"/>
                                                     <Grid Margin="0,5,0,0">
                                                         <StackPanel>
-                                                            <TextBlock Text="Игровой режим (Game On)" Foreground="{DynamicResource ThemeText}" FontSize="15" FontWeight="SemiBold"/>
-                                                            <TextBlock Text="Авто-отключение шейдеров при запуске полноэкранных игр" Foreground="{DynamicResource ThemeTextMuted}" FontSize="12"/>
+                                                            <TextBlock Text="{DynamicResource Lang_Sys_Game}" Foreground="{DynamicResource ThemeText}" FontSize="15" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="{DynamicResource Lang_Sys_Game_Desc}" Foreground="{DynamicResource ThemeTextMuted}" FontSize="12"/>
                                                         </StackPanel>
                                                         <CheckBox x:Name="TglGameMode" Style="{StaticResource AppleSwitchStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="SystemSettings_Changed"/>
                                                     </Grid>
                                                     <Border Height="1" Background="#15FFFFFF" Margin="0,18,0,18"/>
                                                     <Grid>
-                                                        <TextBlock Text="Частота кадров в покое (FPS)" Foreground="{DynamicResource ThemeText}" Opacity="0.6" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                        <TextBlock Text="{Binding Value, ElementName=SldIdleFps, StringFormat={}{0:F0}}" Foreground="{DynamicResource ThemeText}" Opacity="0.8" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                                        <TextBlock Text="{DynamicResource Lang_Sys_IdleFps}" Foreground="{DynamicResource ThemeText}" Opacity="0.6" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="{Binding Value, ElementName=SldIdleFps, StringFormat={}{0:F0} FPS}" Foreground="{DynamicResource ThemeText}" Opacity="0.8" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="SemiBold"/>
                                                     </Grid>
                                                     <Slider x:Name="SldIdleFps" Minimum="5" Maximum="30" ValueChanged="SystemSettings_Changed" Margin="0,5,0,15"/>
 
                                                     <Grid>
-                                                        <TextBlock Text="Частота кадров при переносе (FPS)" Foreground="{DynamicResource ThemeText}" Opacity="0.6" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                        <TextBlock Text="{Binding Value, ElementName=SldMovingFps, StringFormat={}{0:F0}}" Foreground="{DynamicResource ThemeText}" Opacity="0.8" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                                        <TextBlock Text="{DynamicResource Lang_Sys_MovingFps}" Foreground="{DynamicResource ThemeText}" Opacity="0.6" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="{Binding Value, ElementName=SldMovingFps, StringFormat={}{0:F0} FPS}" Foreground="{DynamicResource ThemeText}" Opacity="0.8" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="SemiBold"/>
                                                     </Grid>
                                                     <Slider x:Name="SldMovingFps" Minimum="24" Maximum="120" ValueChanged="SystemSettings_Changed" Margin="0,5,0,15"/>
+
+                                                    <Border Height="1" Background="#15FFFFFF" Margin="0,18,0,18"/>
+                                                    <Grid>
+                                                        <TextBlock Text="{DynamicResource Lang_Sys_AutostartDelay}" Foreground="{DynamicResource ThemeText}" Opacity="0.6" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                        <TextBlock Foreground="{DynamicResource ThemeText}" Opacity="0.8" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="SemiBold">
+                                                            <Run Text="{Binding Value, ElementName=SldStartupDelay, StringFormat={}{0:F0}}"/>
+                                                            <Run Text=" "/>
+                                                            <Run Text="{DynamicResource Lang_Sys_Sec}"/>
+                                                        </TextBlock>
+                                                    </Grid>
+                                                    <Slider x:Name="SldStartupDelay" Minimum="0" Maximum="15" ValueChanged="SystemSettings_Changed" Margin="0,5,0,15"/>
                                                 </StackPanel>
                                             </Border>
                                             <Border CornerRadius="20" Padding="2" Margin="0,25,0,0">
@@ -1303,8 +1324,8 @@
                                                             <ColumnDefinition Width="Auto"/>
                                                         </Grid.ColumnDefinitions>
                                                         <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,20,0">
-                                                            <TextBlock Text="Поддержите создателя GlanceCore ☕" Foreground="White" FontSize="18" FontWeight="Bold" Margin="0,0,0,5"/>
-                                                            <TextBlock Text="Проект создается одним человеком в свободное время. Ваш донат напрямую ускоряет выход новых виджетов, стилей и функций." Foreground="#B0FFFFFF" FontSize="12" TextWrapping="Wrap" LineHeight="18"/>
+                                                            <TextBlock Text="{DynamicResource Lang_Donate_Title}" Foreground="White" FontSize="18" FontWeight="Bold" Margin="0,0,0,5"/>
+                                                            <TextBlock Text="{DynamicResource Lang_Donate_Desc}" Foreground="#B0FFFFFF" FontSize="12" TextWrapping="Wrap" LineHeight="18"/>
                                                         </StackPanel>
                                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                                             <Button Content="Buy Me a Coffee" Tag="https://www.buymeacoffee.com/" Click="OpenLink_Click" Background="#FFDD00" Foreground="Black" FontWeight="Bold" FontSize="13" Padding="20,10" BorderThickness="0" Cursor="Hand" Margin="0,0,0,10" FocusVisualStyle="{x:Null}">
@@ -1334,21 +1355,21 @@
                                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                         <StackPanel Margin="0,0,15,20">
                                             <TextBlock Text="GLANCECORE" FontFamily="Segoe Print" FontSize="36" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
-                                            <TextBlock Text="Стиль. Оптимизация. Уникальность." FontSize="14" FontWeight="SemiBold" Foreground="#A0FFFFFF" HorizontalAlignment="Center" Margin="0,0,0,30"/>
+                                            <TextBlock Text="{DynamicResource Lang_About_Header}" FontSize="14" FontWeight="SemiBold" Foreground="#A0FFFFFF" HorizontalAlignment="Center" Margin="0,0,0,30"/>
 
                                             <Border Background="#15000000" CornerRadius="16" Padding="25" BorderBrush="#20FFFFFF" BorderThickness="1" Margin="0,0,0,20">
                                                 <StackPanel>
-                                                    <TextBlock Text="💎 GlanceCore — Новая эстетика вашего рабочего стола" FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,0,0,5"/>
-                                                    <TextBlock Text="Версия: 0.1.5 &quot;Liquid&quot; Alpha" FontSize="12" Foreground="#80FFA3" Margin="0,0,0,20"/>
+                                                    <TextBlock Text="{DynamicResource Lang_About_Header}" FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,0,0,5"/>
+                                                    <TextBlock Text="{DynamicResource Lang_About_Version}" FontSize="12" Foreground="#80FFA3" Margin="0,0,0,20"/>
 
-                                                    <TextBlock Text="📜 Манифест" FontSize="16" FontWeight="Bold" Foreground="White" Margin="0,0,0,10"/>
-                                                    <TextBlock Text="GlanceCore — это не просто набор виджетов. Это манифест минимализма и производительности в экосистеме Windows. Мы создали его для тех, кто ценит детали: от плавности анимации до физически корректного преломления света в «жидком стекле»." Foreground="#D0FFFFFF" TextWrapping="Wrap" LineHeight="20" Margin="0,0,0,20"/>
+                                                    <TextBlock Text="{DynamicResource Lang_About_ManifestTitle}" FontSize="16" FontWeight="Bold" Foreground="White" Margin="0,0,0,10"/>
+                                                    <TextBlock Text="{DynamicResource Lang_About_ManifestText}" Foreground="#D0FFFFFF" TextWrapping="Wrap" LineHeight="20" Margin="0,0,0,20"/>
 
-                                                    <TextBlock Text="🛠 Технологический стек" FontSize="16" FontWeight="Bold" Foreground="White" Margin="0,0,0,10"/>
-                                                    <TextBlock Text="• Движок: .NET 10 + WPF (Pure Native)&#x0a;• Графика: Аппаратное ускорение DirectX и HLSL-шейдеры&#x0a;• Приватность: Мы не собираем ваши данные. Всё хранится локально." Foreground="#A0FFFFFF" TextWrapping="Wrap" LineHeight="20" Margin="10,0,0,20"/>
+                                                    <TextBlock Text="{DynamicResource Lang_About_StackTitle}" FontSize="16" FontWeight="Bold" Foreground="White" Margin="0,0,0,10"/>
+                                                    <TextBlock Text="{DynamicResource Lang_About_StackText}" Foreground="#A0FFFFFF" TextWrapping="Wrap" LineHeight="20" Margin="10,0,0,20"/>
 
-                                                    <TextBlock Text="👥 Команда" FontSize="16" FontWeight="Bold" Foreground="White" Margin="0,0,0,10"/>
-                                                    <TextBlock Text="Ведущий разработчик: MazeFS&#x0a;Дизайн: Вдохновлено философией Apple и Modern Fluent." Foreground="#D0FFFFFF" TextWrapping="Wrap" LineHeight="20"/>
+                                                    <TextBlock Text="{DynamicResource Lang_About_TeamTitle}" FontSize="16" FontWeight="Bold" Foreground="White" Margin="0,0,0,10"/>
+                                                    <TextBlock Text="{DynamicResource Lang_About_TeamText}" Foreground="#D0FFFFFF" TextWrapping="Wrap" LineHeight="20"/>
                                                 </StackPanel>
                                             </Border>
 

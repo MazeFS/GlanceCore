@@ -7,6 +7,8 @@ using System.Runtime.CompilerServices;
 public class WidgetInfo : INotifyPropertyChanged
 {
     public string Id { get; set; } = "";
+    public string DisplayTitle => System.Windows.Application.Current.FindResource($"Lang_Widget_Title_{Id}") as string ?? Title;
+    public string DisplayDescription => System.Windows.Application.Current.FindResource($"Lang_Widget_Desc_{Id}") as string ?? Description;
     public string Title { get; set; } = "";
     public string Description { get; set; } = "";
     public string PreviewImage { get; set; } = "";
@@ -20,7 +22,12 @@ public class WidgetInfo : INotifyPropertyChanged
         set { OnPropertyChanged(); }
     }
 
-    public void NotifyStateChanged() => OnPropertyChanged(nameof(IsActive));
+    public void NotifyStateChanged()
+    {
+        OnPropertyChanged(nameof(IsActive));
+        OnPropertyChanged(nameof(DisplayTitle));
+        OnPropertyChanged(nameof(DisplayDescription));
+    }
     public object? PluginInstance { get; set; }
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged([CallerMemberName] string? name = null) =>
