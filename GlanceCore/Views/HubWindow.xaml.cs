@@ -10,6 +10,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
+using System.Net.Http;
+using System.Text.Json;
+using System.IO;
 
 
 public class SkinItemModel
@@ -23,7 +26,9 @@ public class SkinItemModel
 public partial class HubWindow : Window
 {
 
-
+    private List<StoreItemModel> _fullStoreCatalog = new();
+    private string _activeStoreCategory = "Essentials";
+    private string _activeStoreSearch = "";
     private bool _isLoaded = false;
     private string _editingWidgetId = "";
     private bool _isUpdatingSize = false;
@@ -242,6 +247,11 @@ public partial class HubWindow : Window
     // --- WIDGET CONFIGURATION ---
     private void BtnWidgetSettings_Click(object sender, RoutedEventArgs e)
     {
+        if (BtnUninstallPlugin != null)
+        {
+            BtnUninstallPlugin.Visibility = (_editingWidgetId == "Quote_01" || _editingWidgetId == "Notes_01")
+                ? Visibility.Visible : Visibility.Collapsed;
+        }
         if (sender is Button btn && btn.Tag != null)
         {
             _isApplyingSettings = true;
@@ -788,7 +798,195 @@ public partial class HubWindow : Window
             catch { }
         }
     }
+    private async void LoadStoreCatalogAsync()
+    {
+        if (StoreList == null) return;
+        string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "debug_log.txt");
 
+        try
+        {
+            List<StoreItemModel>? catalog = null;
+            try
+            {
+                using var http = new HttpClient();
+                http.DefaultRequestHeaders.Add("User-Agent", "GlanceCore/1.0");
+                string url = "https://raw.githubusercontent.com/MazeFS/GlanceCore/main/store_test.json";
+                var json = await http.GetStringAsync(url);
+                catalog = JsonSerializer.Deserialize<List<StoreItemModel>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                File.AppendAllText(logPath, $"{DateTime.Now}: Downloaded catalog. Count: {catalog?.Count ?? 0}\n");
+            }
+            catch (Exception ex)
+            {
+                File.AppendAllText(logPath, $"{DateTime.Now}: HTTP/JSON ERROR: {ex.Message}\nInner: {ex.InnerException?.Message}\n");
+            }
+
+            if (catalog == null)
+            {
+                catalog = new List<StoreItemModel>
+                {
+                    new StoreItemModel { Id = "Quote_01", Title = "Цитата дня", Description = "Вдохновение на стекле", PreviewImage = "/Resource/Skins/Skin_Retro.png", DownloadUrl = "https://github.com/MazeFS/GlanceCore/releases/download/v0.5.0/QuotePlugin.dll", Author = "MazeFS", Rating = 4.8, Category = "Essentials" },
+                    new StoreItemModel { Id = "Notes_01", Title = "Стикеры", Description = "Заметки на стекле", PreviewImage = "/Resource/Skins/Skin_Minimalism.png", DownloadUrl = "", Author = "MazeFS", Rating = 4.5, Category = "Essentials" },
+                    new StoreItemModel { Id = "Calculator_01", Title = "Калькулятор", Description = "Стеклянный калькулятор", PreviewImage = "/Resource/Skins/Skin_Neon.png", DownloadUrl = "", Author = "GlanceCommunity", Rating = 4.2, Category = "Premium" },
+                    new StoreItemModel { Id = "NeonSkin_01", Title = "Neon Glow Skin", Description = "Неоновое оформление", PreviewImage = "/Resource/Skins/Skin_Neon.png", DownloadUrl = "", Author = "GlanceCore", Rating = 4.9, Category = "Skins" }
+                };
+                File.AppendAllText(logPath, $"{DateTime.Now}: Loaded fallback offline catalog. Count: {catalog.Count}\n");
+            }
+
+            Dispatcher.Invoke(() =>
+            {
+                _fullStoreCatalog = catalog;
+                foreach (var item in _fullStoreCatalog)
+                {
+                    if (string.IsNullOrEmpty(item.Category)) item.Category = "Essentials";
+                    item.IsDownloaded = Core.WidgetHost.AvailableWidgets.Any(w => w.Id == item.Id);
+                }
+                FilterStore();
+                File.AppendAllText(logPath, $"{DateTime.Now}: Successfully filtered and applied ItemsSource.\n\n");
+            });
+        }
+        catch (Exception ex)
+        {
+            try
+            {
+                File.AppendAllText(logPath, $"{DateTime.Now}: FATAL GLOBAL STORE ERROR: {ex.Message}\nStack: {ex.StackTrace}\n\n");
+            }
+            catch { }
+        }
+    }
+
+    private void FilterStore()
+    {
+        if (StoreList == null) return;
+
+        var filtered = _fullStoreCatalog.AsEnumerable();
+
+        if (!string.IsNullOrEmpty(_activeStoreCategory))
+        {
+            filtered = filtered.Where(item => item.Category == _activeStoreCategory);
+        }
+
+        if (!string.IsNullOrEmpty(_activeStoreSearch))
+        {
+            filtered = filtered.Where(item => item.Title.ToLower().Contains(_activeStoreSearch) || item.Description.ToLower().Contains(_activeStoreSearch));
+        }
+
+        StoreList.ItemsSource = filtered.ToList();
+    }
+
+    private void TabStoreCategory_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.Tag != null)
+        {
+            _activeStoreCategory = btn.Tag.ToString()!;
+
+            TabStoreSkins.Foreground = new SolidColorBrush(Color.FromArgb(128, 255, 255, 255));
+            TabStorePremium.Foreground = new SolidColorBrush(Color.FromArgb(128, 255, 255, 255));
+            TabStoreEssentials.Foreground = new SolidColorBrush(Color.FromArgb(128, 255, 255, 255));
+
+            btn.Foreground = Brushes.MediumPurple;
+
+            FilterStore();
+        }
+    }
+
+    private void TxtSearchStore_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        _activeStoreSearch = TxtSearchStore.Text.ToLower();
+        FilterStore();
+    }
+    private void BtnStoreInfo_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.DataContext is StoreItemModel item)
+        {
+            StoreDetailsGrid.DataContext = item;
+            StoreMainGrid.Visibility = Visibility.Collapsed;
+            StoreDetailsGrid.Visibility = Visibility.Visible;
+        }
+    }
+
+    private void BtnStoreBack_Click(object sender, RoutedEventArgs e)
+    {
+        StoreMainGrid.Visibility = Visibility.Visible;
+        StoreDetailsGrid.Visibility = Visibility.Collapsed;
+    }
+    private void BtnStoreFilter_Click(object sender, RoutedEventArgs e)
+    {
+    }
+
+
+    private void FilterStore_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.Tag != null)
+        {
+            string filter = btn.Tag.ToString()!;
+        }
+    }
+
+    private async void BtnInstallPlugin_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.DataContext is StoreItemModel item)
+        {
+            if (item.IsDownloaded) return;
+
+            string url = item.DownloadUrl;
+            if (string.IsNullOrEmpty(url)) return;
+
+            try
+            {
+                using var http = new HttpClient();
+                var data = await http.GetByteArrayAsync(url);
+                string pluginsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
+                if (!Directory.Exists(pluginsPath)) Directory.CreateDirectory(pluginsPath);
+
+                string fileName = Path.GetFileName(url);
+                string destPath = Path.Combine(pluginsPath, fileName);
+                await File.WriteAllBytesAsync(destPath, data);
+
+                var loaded = GlanceCore.Plugins.PluginManager.LoadPlugins();
+                foreach (var p in loaded)
+                {
+                    if (!WidgetHost.AvailableWidgets.Any(w => w.Id == p.Id))
+                    {
+                        WidgetHost.AvailableWidgets.Add(p);
+                    }
+                }
+                item.IsDownloaded = true;
+            }
+            catch { }
+        }
+    }
+
+    private void BtnUninstallPlugin_Click(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrEmpty(_editingWidgetId)) return;
+        var widgetInfo = Core.WidgetHost.AvailableWidgets.FirstOrDefault(w => w.Id == _editingWidgetId);
+        if (widgetInfo != null)
+        {
+            Core.WidgetHost.CloseWidgetExplicitly(_editingWidgetId);
+            try
+            {
+                string pluginsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
+                string dllName = $"{_editingWidgetId.Replace("_01", "")}Plugin.dll";
+                string dllPath = Path.Combine(pluginsPath, dllName);
+                if (File.Exists(dllPath))
+                {
+                    File.Move(dllPath, dllPath + ".deleted", true);
+                }
+            }
+            catch { }
+
+            Core.WidgetHost.AvailableWidgets.Remove(widgetInfo);
+            var cfg = Core.WidgetHost.CurrentConfig;
+            if (cfg.Widgets.ContainsKey(_editingWidgetId))
+            {
+                cfg.Widgets.Remove(_editingWidgetId);
+                Core.ConfigManager.Save(cfg);
+            }
+
+            WidgetsPanel.Visibility = Visibility.Visible;
+            WidgetConfigPanel.Visibility = Visibility.Collapsed;
+        }
+    }
     private void BtnPrevPage_Click(object sender, RoutedEventArgs e) { if (_currentPage > 1) { _currentPage--; UpdatePagination(); } }
     private void BtnNextPage_Click(object sender, RoutedEventArgs e) { _currentPage++; UpdatePagination(); }
     private void BtnAbout_Click(object sender, RoutedEventArgs e)
@@ -853,6 +1051,13 @@ public partial class HubWindow : Window
                 TabTitleText.Text = Application.Current.FindResource("Lang_Title_Settings") as string ?? "System Settings";
                 SettingsPanel.Visibility = Visibility.Visible;
                 if (SearchBoxBorder != null) SearchBoxBorder.Visibility = Visibility.Collapsed;
+            }
+            else if (tab == "TabStore")
+            {
+                TabTitleText.Text = Application.Current.FindResource("Lang_Title_Store") as string ?? "Plugin Store";
+                StorePanel.Visibility = Visibility.Visible;
+                if (SearchBoxBorder != null) SearchBoxBorder.Visibility = Visibility.Collapsed;
+                LoadStoreCatalogAsync(); // Запуск загрузки!
             }
 
             ActiveTabContent.BeginAnimation(OpacityProperty, new DoubleAnimation(1, TimeSpan.FromSeconds(0.2)));
