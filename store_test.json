@@ -1,0 +1,42 @@
+[
+  {
+    "id": "Quote_01",
+    "title": "Quote of the Day",
+    "description": "Daily inspiration on your glass slate",
+    "previewImage": "https://github.com/MazeFS/GlanceCore/blob/main/GlanceCore/Resource/Screenshots/HardwarePreview.png",
+    "downloadUrl": "https://github.com/MazeFS/GlanceCore/releases/download/v0.5.0/QuotePlugin.dll",
+    "author": "MazeFS",
+    "rating": 4.8,
+    "category": "Essentials"
+  },
+  {
+    "id": "Notes_01",
+    "title": "Sticky Notes",
+    "description": "Minimalist notes on glass",
+    "previewImage": "https://github.com/MazeFS/GlanceCore/blob/main/GlanceCore/Resource/Screenshots/HardwarePreview.pngg",
+    "downloadUrl": "",
+    "author": "MazeFS",
+    "rating": 4.5,
+    "category": "Essentials"
+  },
+  {
+    "id": "NeonSkin_01",
+    "title": "Neon Glow Skin",
+    "description": "Vibrant cyberpunk neon outline",
+    "previewImage": "https://raw.githubusercontent.com/твой_логин/GlanceCore/main/Resource/Skins/Skin_Neon.png",
+    "downloadUrl": "",
+    "author": "GlanceCore",
+    "rating": 4.9,
+    "category": "Skins"
+  },
+  {
+    "id": "Calculator_01",
+    "title": "Calculator",
+    "description": "Clean glass computing slates",
+    "previewImage": "https://raw.githubusercontent.com/твой_логин/GlanceCore/main/Resource/Skins/Skin_Neon.png",
+    "downloadUrl": "",
+    "author": "GlanceCommunity",
+    "rating": 4.2,
+    "category": "Premium"
+  }
+]
