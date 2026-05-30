@@ -132,6 +132,16 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
         _shaderTime += 0.05;
         if (BaseGlassBase?.Effect is UI.Shaders.RetroPixelEffect retro) retro.Time = _shaderTime;
         if (BaseGlassBase?.Effect is UI.Shaders.NeonEffect neon) neon.Time = _shaderTime;
+
+        if (BaseGlassBase?.Effect != null)
+        {
+            var type = BaseGlassBase.Effect.GetType();
+            var prop = type.GetProperty("Time");
+            if (prop != null)
+            {
+                prop.SetValue(BaseGlassBase.Effect, _shaderTime);
+            }
+        }
     }
     protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e) { if (!_isLocked && e.ButtonState == MouseButtonState.Pressed) DragMove(); }
 
@@ -176,7 +186,19 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
         SetWindowDisplayAffinity(hwnd, WDA_NONE);
         if (BaseWallpaperBrush != null) BaseWallpaperBrush.ImageSource = null;
 
-        string skinId = Core.WidgetHost.CurrentConfig.Widgets.GetValueOrDefault(GetWidgetId())?.SkinId ?? "LiquidGlass";
+        string widgetId = GetWidgetId();
+        var state = Core.WidgetHost.CurrentConfig.Widgets.GetValueOrDefault(widgetId);
+        string skinId = state?.SkinId ?? "LiquidGlass";
+
+        var widgetInfo = Core.WidgetHost.AvailableWidgets.FirstOrDefault(w => w.Id == widgetId);
+        if (widgetInfo?.PluginInstance is Plugins.IWidgetPlugin plugin && skinId != "LiquidGlass" && skinId != "Minimalism" && skinId != "Retro" && skinId != "Neon")
+        {
+            var customResources = plugin.GetSkinResources(skinId);
+            if (customResources != null)
+            {
+                this.Resources.MergedDictionaries.Add(customResources);
+            }
+        }
 
         if (_shaderShouldBeEnabled)
         {
@@ -197,6 +219,14 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
             if (BaseGlossBevel != null) BaseGlossBevel.Visibility = Visibility.Visible;
 
             bool isStreamer = Core.WidgetHost.CurrentConfig.StreamerMode;
+            SetWindowDisplayAffinity(hwnd, isStreamer ? WDA_NONE : WDA_EXCLUDEFROMCAPTURE);
+
+            var globalSkin = Core.WidgetHost.GlobalCustomSkins.FirstOrDefault(s => s.Id == skinId);
+            if (globalSkin != null)
+            {
+                var customResources = globalSkin.GetResources();
+                if (customResources != null) this.Resources.MergedDictionaries.Add(customResources);
+            }
 
             if (skinId == "Retro")
             {
@@ -210,24 +240,24 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
                 BaseGlassBase.Effect = new UI.Shaders.NeonEffect { NeonColor = glowColor };
                 TextGlowEffect = new System.Windows.Media.Effects.DropShadowEffect { Color = glowColor, BlurRadius = 15, ShadowDepth = 0, Opacity = 0.9 };
             }
+            else if (globalSkin != null)
+            {
+                TextGlowEffect = null;
+                var fx = globalSkin.GetEffect();
+                if (fx != null) BaseGlassBase.Effect = fx;
+            }
+            else if (skinId != "LiquidGlass" && widgetInfo?.PluginInstance is Plugins.IWidgetPlugin)
+            {
+                TextGlowEffect = null;
+                if (this.Resources.Contains("CustomShaderEffect") && this.Resources["CustomShaderEffect"] is System.Windows.Media.Effects.ShaderEffect fx)
+                {
+                    BaseGlassBase.Effect = fx;
+                }
+            }
             else
             {
                 TextGlowEffect = null;
                 BaseGlassBase.Effect = new UI.Shaders.LiquidGlassEffect { Amount = GetAdjustedAmount() };
-            }
-
-            if (isStreamer)
-            {
-                SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE);
-                Dispatcher.BeginInvoke(new Action(() => {
-                    UpdateRealtimeBackground();
-                    SetWindowDisplayAffinity(hwnd, WDA_NONE);
-                }), DispatcherPriority.Render);
-            }
-            else
-            {
-                SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE);
-                _captureTimer.Start();
             }
 
             UpdateClipping();

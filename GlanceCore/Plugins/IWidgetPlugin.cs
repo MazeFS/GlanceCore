@@ -1,8 +1,10 @@
 ﻿namespace GlanceCore.Plugins;
 
+using GlanceCore.Views;
 using System;
+using System.Collections.Generic;
 using System.Windows;
-using GlanceCore.Core;
+using System.Windows.Media.Effects;
 
 public interface IWidgetPlugin
 {
@@ -12,6 +14,17 @@ public interface IWidgetPlugin
     string PreviewImagePath { get; }
     int DefaultWidth { get; }
     Type WidgetWindowType { get; }
+    FrameworkElement? GetSettingsUI(GlanceCore.Core.WidgetState state, Action saveCallback);
+    List<SkinItemModel>? GetCustomSkins() => null;
+    ResourceDictionary? GetSkinResources(string skinId) => null;
+}
 
-    FrameworkElement? GetSettingsUI(WidgetState state, Action saveCallback);
+public interface ISkinPlugin
+{
+    string Id { get; }
+    string Name { get; }
+    string PreviewImagePath { get; }
+    string Color { get; }
+    ResourceDictionary? GetResources();
+    ShaderEffect? GetEffect();
 }

@@ -113,4 +113,6 @@
 	<system:String x:Key="Lang_Date_ColorTime" xmlns:system="clr-namespace:System;assembly=mscorlib">Цвет часов</system:String>
 	<system:String x:Key="Lang_Clock_Space" xmlns:system="clr-namespace:System;assembly=mscorlib">Пробел</system:String>
 	<system:String x:Key="Lang_Sys_Sec" xmlns:system="clr-namespace:System;assembly=mscorlib">сек</system:String>
+    <system:String x:Key="Lang_Msg_UninstallPrompt" xmlns:system="clr-namespace:System;assembly=mscorlib">Вы уверены, что хотите полностью удалить этот плагин и стереть его файлы с компьютера?</system:String>
+    <system:String x:Key="Lang_Msg_UninstallTitle" xmlns:system="clr-namespace:System;assembly=mscorlib">Удаление плагина</system:String>
 </ResourceDictionary>

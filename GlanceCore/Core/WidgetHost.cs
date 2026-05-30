@@ -23,7 +23,7 @@ public static class WidgetHost
     private static readonly Dictionary<string, Window> _activeWidgets = new();
     private static DispatcherTimer? _gameModeTimer;
     private static bool _isGameModeActive = false;
-
+    public static List<GlanceCore.Plugins.ISkinPlugin> GlobalCustomSkins { get; } = new();
     public static ObservableCollection<WidgetInfo> AvailableWidgets { get; } = new();
     public static GlobalConfig CurrentConfig => _config;
 

@@ -113,4 +113,6 @@
 	<system:String x:Key="Lang_Date_ColorTime" xmlns:system="clr-namespace:System;assembly=mscorlib">Time Color</system:String>
 	<system:String x:Key="Lang_Clock_Space" xmlns:system="clr-namespace:System;assembly=mscorlib">Space</system:String>
 	<system:String x:Key="Lang_Sys_Sec" xmlns:system="clr-namespace:System;assembly=mscorlib">sec</system:String>
+    <system:String x:Key="Lang_Msg_UninstallPrompt" xmlns:system="clr-namespace:System;assembly=mscorlib">Are you sure you want to completely uninstall this plugin and delete its files?</system:String>
+    <system:String x:Key="Lang_Msg_UninstallTitle" xmlns:system="clr-namespace:System;assembly=mscorlib">Uninstall Plugin</system:String>
 </ResourceDictionary>
