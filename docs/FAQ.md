@@ -1,36 +1,21 @@
-Q: Тратит ли GlanceCore много оперативной памяти? 
+***
 
-A: Нет, мы используем Native .NET, потребление всего 40-60 МБ.
+# Frequently Asked Questions (FAQ)
 
+**Q: Does GlanceCore consume a lot of RAM?**  
+**A:** No. Thanks to Native .NET, our memory consumption is highly optimized, usually using only about 40–60 MB of RAM.
 
+**Q: Will there be paid widgets?**  
+**A:** The core widgets will always remain completely free. However, exclusive visual styles and certain specialized premium widgets will be available via subscription.
 
-Q: Будут ли платные виджеты? 
+**Q: Is Windows 10 supported?**  
+**A:** Yes, Windows 10 is supported. However, please note that the "Liquid Glass" effect performs and looks best on the latest versions of Windows.
 
-A: Базовые виджеты всегда будут бесплатными, эксклюзивные стили и определенные виджеты — по подписке. 
+**Q: Why are the widgets invisible when I take a screenshot or record my screen?**  
+**A:** Unfortunately, this is a side effect of the custom shader system we use for rendering. If you want to take a picture of your desktop with the widgets visible, you will temporarily need to disable shaders in the global settings. We hope to fix this in future updates! :)
 
+**Q: Does the program take screenshots of my screen? Is it safe?**  
+**A:** To create the realistic light refraction for the "Liquid Glass" effect, the application must capture the desktop area directly underneath the widget. However, these frames are processed instantly inside your graphics card's volatile memory (VRAM). They are **never** saved to your disk and **never** transmitted over the internet. It is completely safe and privacy-friendly.
 
-
-Q: Поддерживается ли Windows 10?
-
-A: Да, но эффект "liquid glass" лучше всего работает на последних версиях Windows).
-
-
-
-Q: Почему не видно виджетов при скриншоте/записи экрана?
-
-A: Увы, используется определенная система шейдеров, поэтому если вы хотите сфотографировать свой рабочий стол, придется в глобальных настройках выключить шейдеры. В будущем возможно исправим :)
-
-
-
-Q: Зачем приложению нужны права Администратора?
-A: Права необходимы исключительно для доступа к низкоуровневым датчикам вашего процессора (температура, нагрузка, частоты) через библиотеку LibreHardwareMonitor. Без этих прав виджет системы будет показывать некорректные данные.
-
-
-
-Q: Программа делает скриншоты моего экрана? Это безопасно?
-A: Эффект «Liquid Glass» требует захвата изображения рабочего стола под виджетом для создания преломления. Эти кадры обрабатываются мгновенно в видеопамяти (VRAM) и никогда не сохраняются на диск и не передаются в сеть.
-
-
-
-Q: Как добавить свой виджет в GlanceCore?
-A: Мы разрабатываем систему плагинов. Скоро мы опубликуем документацию API, чтобы любой разработчик на C# мог создать и выложить свой виджет в наш магазин.
+**Q: How can I add my own custom widget to GlanceCore?**  
+**A:** Everything you need is detailed in the `developer_guide` documentation! It provides comprehensive, step-by-step instructions on how to build, test, and publish your own plugins.
