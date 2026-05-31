@@ -38,7 +38,7 @@
 				</Border>
 
 				<!-- 2. Цветная тонировка из Хаба (Полупрозрачная, чтобы стекло просвечивало!) -->
-				<Border x:Name="MinimalBase" Background="{Binding BgColorBrush}" CornerRadius="{Binding WidgetCornerRadius}" Opacity="1"/>
+				<Border x:Name="MinimalBase" Background="{Binding BgColorBrush}" CornerRadius="{Binding WidgetCornerRadius}"/>
 
 				<!-- 3. Базовое затемнение (Чтобы белый текст всегда читался на светлых обоях) -->
 				<Border Background="#30000000" CornerRadius="{Binding WidgetCornerRadius}"/>

@@ -76,7 +76,7 @@ public partial class HubWindow : Window
     {
         InitializeComponent();
         _isLoaded = false;
-
+        DisplayPage();
         var cfg = WidgetHost.CurrentConfig;
 
         if (WidgetsList != null)
@@ -247,178 +247,180 @@ public partial class HubWindow : Window
     // --- WIDGET CONFIGURATION ---
     private void BtnWidgetSettings_Click(object sender, RoutedEventArgs e)
     {
-        if (BtnUninstallPlugin != null)
-        {
-            BtnUninstallPlugin.Visibility = (_editingWidgetId == "Quote_01" || _editingWidgetId == "Notes_01")
-                ? Visibility.Visible : Visibility.Collapsed;
-        }
         if (sender is Button btn && btn.Tag != null)
         {
             _isApplyingSettings = true;
             _editingWidgetId = btn.Tag.ToString()!;
-            string localizedTitle = Application.Current.FindResource("Lang_Config_Title") as string ?? "Settings";
-            ConfigTitle.Text = $"{localizedTitle}: {_editingWidgetId.Replace("_01", "")}";
-
             _isLoaded = false;
-            var cfg = Core.WidgetHost.CurrentConfig;
-            var state = cfg.Widgets.GetValueOrDefault(_editingWidgetId, new Core.WidgetState());
-            var skinsList = new System.Collections.ObjectModel.ObservableCollection<SkinItemModel>(AvailableSkins);
-            var activeWidget = Core.WidgetHost.AvailableWidgets.FirstOrDefault(w => w.Id == _editingWidgetId);
-
-            if (activeWidget?.PluginInstance is GlanceCore.Plugins.IWidgetPlugin activePlugin)
-            {
-                var customSkins = activePlugin.GetCustomSkins();
-                if (customSkins != null)
-                {
-                    foreach (var s in customSkins) skinsList.Add(s);
-                }
-            }
-
-            foreach (var globalSkin in Core.WidgetHost.GlobalCustomSkins)
-            {
-                skinsList.Add(new SkinItemModel
-                {
-                    Id = globalSkin.Id,
-                    Name = globalSkin.Name,
-                    Image = globalSkin.PreviewImagePath,
-                    Color = globalSkin.Color
-                });
-            }
-
-            if (CarouselSkins != null)
-            {
-                CarouselSkins.ItemsSource = skinsList;
-                foreach (SkinItemModel item in CarouselSkins.Items)
-                {
-                    if (item != null && item.Id == state.SkinId)
-                    {
-                        CarouselSkins.SelectedItem = item;
-                        break;
-                    }
-                }
-            }
-            // 1. АДАПТАЦИЯ ПАНЕЛЕЙ: Показываем нужные настройки
-            if (HardwareSettingsPanel != null) HardwareSettingsPanel.Visibility = _editingWidgetId == "Hardware_01" ? Visibility.Visible : Visibility.Collapsed;
-            if (TimeSettingsPanel != null) TimeSettingsPanel.Visibility = _editingWidgetId == "Time_01" ? Visibility.Visible : Visibility.Collapsed;
-            if (AiSettingsPanel != null) AiSettingsPanel.Visibility = _editingWidgetId == "AI_01" ? Visibility.Visible : Visibility.Collapsed;
-            if (DateSettingsPanel != null) DateSettingsPanel.Visibility = _editingWidgetId == "Date_01" ? Visibility.Visible : Visibility.Collapsed;
-            if (WeatherSettingsPanel != null) WeatherSettingsPanel.Visibility = _editingWidgetId == "Weather_01" ? Visibility.Visible : Visibility.Collapsed;
-            if (MediaSettingsPanel != null) MediaSettingsPanel.Visibility = _editingWidgetId == "Media_01" ? Visibility.Visible : Visibility.Collapsed;
-            if (TglShowHardwareGraphs != null) TglShowHardwareGraphs.IsChecked = cfg.Widgets.GetValueOrDefault("Hardware_01")?.ShowHardwareGraphs ?? true;
-            else if (_editingWidgetId == "Weather_01")
-            {
-                if (TxtWeatherCity != null) TxtWeatherCity.Text = state.WeatherCity;
-            }
-            if (_editingWidgetId == "Image_01") { BtnUploadImage.Visibility = Visibility.Visible; TypographySettingsPanel.Visibility = Visibility.Collapsed; }
-            if (PluginSettingsContainer != null)
-            {
-                PluginSettingsContainer.Content = null;
-                var widgetInfo = Core.WidgetHost.AvailableWidgets.FirstOrDefault(w => w.Id == _editingWidgetId);
-                if (widgetInfo?.PluginInstance is GlanceCore.Plugins.IWidgetPlugin plugin)
-                {
-                    PluginSettingsContainer.Content = plugin.GetSettingsUI(state, () =>
-                    {
-                        Core.WidgetHost.RefreshWidgetVisuals(_editingWidgetId);
-                    });
-                }
-            }
-
-            // 2. ЗАГРУЗКА БАЗОВЫХ ЗНАЧЕНИЙ (Ползунки)
-            else if (_editingWidgetId == "Date_01")
-        {
-            if (TglShowPlate != null) TglShowPlate.IsChecked = state.ShowPlate;
-            if (TglShowDay != null) TglShowDay.IsChecked = state.ShowDayOfWeek;
-            if (TglShowCalendarDate != null) TglShowCalendarDate.IsChecked = state.ShowDate;
-            if (TglShowClockTime != null) TglShowClockTime.IsChecked = state.ShowTime;
-        }
-            
-            _isUpdatingSize = true;
-            if (SldWidth != null) SldWidth.Value = state.CustomWidth > 0 ? state.CustomWidth : 220;
-            if (SldHeight != null) SldHeight.Value = state.CustomHeight > 0 ? state.CustomHeight : 280;
-            if (TxtWidth != null) TxtWidth.Text = state.CustomWidth > 0 ? ((int)state.CustomWidth).ToString() : "220";
-            if (TxtHeight != null) TxtHeight.Text = state.CustomHeight > 0 ? ((int)state.CustomHeight).ToString() : "280";
-            _isUpdatingSize = true;
-            if (TxtOpacity != null) TxtOpacity.Text = Math.Round(state.Opacity, 2).ToString();
-            if (TxtScale != null) TxtScale.Text = Math.Round(state.Scale, 2).ToString();
-            if (TxtRadius != null) TxtRadius.Text = state.CornerRadius.ToString();
-            _isUpdatingSize = false;
-            if (_editingWidgetId == "Image_01" || _editingWidgetId == "Date_01")
-            {
-                BtnUploadImage.Visibility = _editingWidgetId == "Image_01" ? Visibility.Visible : Visibility.Collapsed;
-                TypographySettingsPanel.Visibility = _editingWidgetId == "Image_01" ? Visibility.Collapsed : Visibility.Visible;
-                if (SldFontSize != null) SldFontSize.Visibility = Visibility.Collapsed;
-                if (LblFontSize != null) LblFontSize.Visibility = Visibility.Collapsed;
-            }
-            else
-            {
-                BtnUploadImage.Visibility = Visibility.Collapsed;
-                TypographySettingsPanel.Visibility = Visibility.Visible;
-                if (SldFontSize != null) SldFontSize.Visibility = Visibility.Visible;
-                if (LblFontSize != null) LblFontSize.Visibility = Visibility.Visible;
-            }
-            // Цвета
             try
             {
-                var conv = new System.Windows.Media.BrushConverter();
-                if (CircleTextColor != null) CircleTextColor.Fill = (System.Windows.Media.Brush)conv.ConvertFromString(state.TextColor)!;
-                if (CircleBgColor != null) CircleBgColor.Fill = (System.Windows.Media.Brush)conv.ConvertFromString(state.BgColor)!;
-            }
-            catch { }
+                var cfg = Core.WidgetHost.CurrentConfig;
+                var state = cfg.Widgets.GetValueOrDefault(_editingWidgetId, new Core.WidgetState());
+                var activeWidget = Core.WidgetHost.AvailableWidgets.FirstOrDefault(w => w.Id == _editingWidgetId);
 
-            // Шрифты
-            if (ComboFont != null)
-            {
-                foreach (ComboBoxItem item in ComboFont.Items)
-                    if (item.Content.ToString() == state.FontFamily) { item.IsSelected = true; break; }
-            }
-            else if (_editingWidgetId == "Date_01")
-            {
-                if (TglShowPlate != null) TglShowPlate.IsChecked = state.ShowPlate;
-                if (TglShowDay != null) TglShowDay.IsChecked = state.ShowDayOfWeek;
-                if (TglShowCalendarDate != null) TglShowCalendarDate.IsChecked = state.ShowDate;
-                if (TglShowClockTime != null) TglShowClockTime.IsChecked = state.ShowTime;
+                if (HardwareSettingsPanel != null) HardwareSettingsPanel.Visibility = _editingWidgetId == "Hardware_01" ? Visibility.Visible : Visibility.Collapsed;
+                if (TimeSettingsPanel != null) TimeSettingsPanel.Visibility = _editingWidgetId == "Time_01" ? Visibility.Visible : Visibility.Collapsed;
+                if (AiSettingsPanel != null) AiSettingsPanel.Visibility = _editingWidgetId == "AI_01" ? Visibility.Visible : Visibility.Collapsed;
+                if (DateSettingsPanel != null) DateSettingsPanel.Visibility = _editingWidgetId == "Date_01" ? Visibility.Visible : Visibility.Collapsed;
+                if (WeatherSettingsPanel != null) WeatherSettingsPanel.Visibility = _editingWidgetId == "Weather_01" ? Visibility.Visible : Visibility.Collapsed;
+                if (MediaSettingsPanel != null) MediaSettingsPanel.Visibility = _editingWidgetId == "Media_01" ? Visibility.Visible : Visibility.Collapsed;
 
-                if (SldDateDayFontSize != null) SldDateDayFontSize.Value = state.DateDayFontSize;
-                if (SldDateDateFontSize != null) SldDateDateFontSize.Value = state.DateDateFontSize;
-                if (SldDateTimeFontSize != null) SldDateTimeFontSize.Value = state.DateTimeFontSize;
+                if (_editingWidgetId == "Image_01" || _editingWidgetId == "Date_01")
+                {
+                    BtnUploadImage.Visibility = _editingWidgetId == "Image_01" ? Visibility.Visible : Visibility.Collapsed;
+                    TypographySettingsPanel.Visibility = _editingWidgetId == "Image_01" ? Visibility.Collapsed : Visibility.Visible;
+                    if (SldFontSize != null) SldFontSize.Visibility = Visibility.Collapsed;
+                    if (LblFontSize != null) LblFontSize.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    BtnUploadImage.Visibility = Visibility.Collapsed;
+                    TypographySettingsPanel.Visibility = Visibility.Visible;
+                    if (SldFontSize != null) SldFontSize.Visibility = Visibility.Visible;
+                    if (LblFontSize != null) LblFontSize.Visibility = Visibility.Visible;
+                }
+                if (BtnUninstallPlugin != null)
+                {
+                    bool isBuiltIn = _editingWidgetId == "Hardware_01" ||
+                                     _editingWidgetId == "Media_01" ||
+                                     _editingWidgetId == "Image_01" ||
+                                     _editingWidgetId == "Weather_01" ||
+                                     _editingWidgetId == "Time_01" ||
+                                     _editingWidgetId == "Date_01" ||
+                                     _editingWidgetId == "Notes_01";
+
+                    BtnUninstallPlugin.Visibility = !isBuiltIn ? Visibility.Visible : Visibility.Collapsed;
+                }
+
+                _isUpdatingSize = true;
+                if (SldWidth != null) SldWidth.Value = state.CustomWidth > 0 ? state.CustomWidth : 220;
+                if (SldHeight != null) SldHeight.Value = state.CustomHeight > 0 ? state.CustomHeight : 280;
+                if (TxtWidth != null) TxtWidth.Text = state.CustomWidth > 0 ? ((int)state.CustomWidth).ToString() : "220";
+                if (TxtHeight != null) TxtHeight.Text = state.CustomHeight > 0 ? ((int)state.CustomHeight).ToString() : "280";
+
+                if (SldOpacity != null) SldOpacity.Value = state.Opacity;
+                if (SldScale != null) SldScale.Value = state.Scale;
+                if (SldRadius != null) SldRadius.Value = state.CornerRadius;
+                if (TglWidgetTopmost != null) TglWidgetTopmost.IsChecked = state.IsAlwaysOnTop;
+                if (SldFontSize != null) SldFontSize.Value = state.FontSize;
+
+                if (TxtOpacity != null) TxtOpacity.Text = Math.Round(state.Opacity, 2).ToString();
+                if (TxtScale != null) TxtScale.Text = Math.Round(state.Scale, 2).ToString();
+                if (TxtRadius != null) TxtRadius.Text = state.CornerRadius.ToString();
+                if (TxtFontSize != null) TxtFontSize.Text = state.FontSize.ToString();
+                _isUpdatingSize = false;
+
+                if (TglShowBorder != null) TglShowBorder.IsChecked = state.ShowBorder;
+
                 try
                 {
                     var conv = new System.Windows.Media.BrushConverter();
-                    if (CircleDateDayColor != null && !string.IsNullOrEmpty(state.DateDayColor)) CircleDateDayColor.Fill = (Brush)conv.ConvertFromString(state.DateDayColor)!;
-                    if (CircleDateDateColor != null && !string.IsNullOrEmpty(state.DateDateColor)) CircleDateDateColor.Fill = (Brush)conv.ConvertFromString(state.DateDateColor)!;
-                    if (CircleDateTimeColor != null && !string.IsNullOrEmpty(state.DateTimeColor)) CircleDateTimeColor.Fill = (Brush)conv.ConvertFromString(state.DateTimeColor)!;
+                    if (CircleTextColor != null && !string.IsNullOrEmpty(state.TextColor)) CircleTextColor.Fill = (System.Windows.Media.Brush)conv.ConvertFromString(state.TextColor)!;
+                    if (CircleBgColor != null && !string.IsNullOrEmpty(state.BgColor)) CircleBgColor.Fill = (System.Windows.Media.Brush)conv.ConvertFromString(state.BgColor)!;
+                    if (CircleBorderColor != null && !string.IsNullOrEmpty(state.BorderColor)) CircleBorderColor.Fill = (System.Windows.Media.Brush)conv.ConvertFromString(state.BorderColor)!;
                 }
                 catch { }
-            }
 
-            // 3. ЗАГРУЗКА СПЕЦИФИЧНЫХ НАСТРОЕК (Hardware / Time)
-            if (_editingWidgetId == "Hardware_01" && ListHardwareOrder != null)
-            {
-                ListHardwareOrder.Items.Clear();
-                foreach (var item in state.HardwareOrder) ListHardwareOrder.Items.Add(item);
-            }
-            else if (_editingWidgetId == "Time_01")
-            {
-                if (TglShowSeconds != null) TglShowSeconds.IsChecked = state.ShowSeconds;
-                if (TglVerticalTime != null) TglVerticalTime.IsChecked = state.IsVerticalTime;
-
-                if (ComboTimeSeparator != null)
+                if (ComboFont != null)
                 {
-                    foreach (ComboBoxItem item in ComboTimeSeparator.Items)
+                    foreach (ComboBoxItem item in ComboFont.Items)
                     {
-                        string targetSep = state.TimeSeparator == " " ? "Пробел" : state.TimeSeparator;
-                        if (item.Content.ToString() == targetSep) { item.IsSelected = true; break; }
+                        if (item.Content.ToString() == state.FontFamily) { item.IsSelected = true; break; }
+                    }
+                }
+
+                if (_editingWidgetId == "Hardware_01" && ListHardwareOrder != null)
+                {
+                    ListHardwareOrder.Items.Clear();
+                    foreach (var item in state.HardwareOrder) ListHardwareOrder.Items.Add(item);
+                    if (TglShowHardwareGraphs != null) TglShowHardwareGraphs.IsChecked = state.ShowHardwareGraphs;
+                }
+                else if (_editingWidgetId == "Time_01")
+                {
+                    if (TglShowSeconds != null) TglShowSeconds.IsChecked = state.ShowSeconds;
+                    if (TglVerticalTime != null) TglVerticalTime.IsChecked = state.IsVerticalTime;
+                    if (ComboTimeSeparator != null)
+                    {
+                        foreach (ComboBoxItem item in ComboTimeSeparator.Items)
+                        {
+                            string targetSep = state.TimeSeparator == " " ? "Пробел" : state.TimeSeparator;
+                            if (item.Content.ToString() == targetSep) { item.IsSelected = true; break; }
+                        }
+                    }
+                }
+                else if (_editingWidgetId == "Date_01")
+                {
+                    if (TglShowPlate != null) TglShowPlate.IsChecked = state.ShowPlate;
+                    if (TglShowDay != null) TglShowDay.IsChecked = state.ShowDayOfWeek;
+                    if (TglShowCalendarDate != null) TglShowCalendarDate.IsChecked = state.ShowDate;
+                    if (TglShowClockTime != null) TglShowClockTime.IsChecked = state.ShowTime;
+                    if (SldDateDayFontSize != null) SldDateDayFontSize.Value = state.DateDayFontSize;
+                    if (SldDateDateFontSize != null) SldDateDateFontSize.Value = state.DateDateFontSize;
+                    if (SldDateTimeFontSize != null) SldDateTimeFontSize.Value = state.DateTimeFontSize;
+
+                    try
+                    {
+                        var conv = new System.Windows.Media.BrushConverter();
+                        if (CircleDateDayColor != null && !string.IsNullOrEmpty(state.DateDayColor)) CircleDateDayColor.Fill = (System.Windows.Media.Brush)conv.ConvertFromString(state.DateDayColor)!;
+                        if (CircleDateDateColor != null && !string.IsNullOrEmpty(state.DateDateColor)) CircleDateDateColor.Fill = (System.Windows.Media.Brush)conv.ConvertFromString(state.DateDateColor)!;
+                        if (CircleDateTimeColor != null && !string.IsNullOrEmpty(state.DateTimeColor)) CircleDateTimeColor.Fill = (System.Windows.Media.Brush)conv.ConvertFromString(state.DateTimeColor)!;
+                    }
+                    catch { }
+                }
+                else if (_editingWidgetId == "Media_01")
+                {
+                    if (TglShowMediaTimer != null) TglShowMediaTimer.IsChecked = state.ShowMediaTimer;
+                }
+                if (PluginSettingsContainer != null)
+                {
+                    PluginSettingsContainer.Content = null;
+                    if (activeWidget?.PluginInstance is GlanceCore.Plugins.IWidgetPlugin activePlugin)
+                    {
+                        PluginSettingsContainer.Content = activePlugin.GetSettingsUI(state, () =>
+                        {
+                            Core.WidgetHost.RefreshWidgetVisuals(_editingWidgetId);
+                        });
+                    }
+                }
+
+                if (CarouselSkins != null)
+                {
+                    var skinsList = new System.Collections.ObjectModel.ObservableCollection<SkinItemModel>(AvailableSkins);
+
+                    if (activeWidget?.PluginInstance is GlanceCore.Plugins.IWidgetPlugin activePlugin)
+                    {
+                        var customSkins = activePlugin.GetCustomSkins();
+                        if (customSkins != null)
+                        {
+                            foreach (var s in customSkins) skinsList.Add(s);
+                        }
+                    }
+
+                    foreach (var globalSkin in Core.WidgetHost.GlobalCustomSkins)
+                    {
+                        skinsList.Add(new SkinItemModel { Id = globalSkin.Id, Name = globalSkin.Name, Image = globalSkin.PreviewImagePath, Color = globalSkin.Color });
+                    }
+
+                    CarouselSkins.ItemsSource = skinsList;
+                    foreach (SkinItemModel item in CarouselSkins.Items)
+                    {
+                        if (item != null && item.Id == state.SkinId) { CarouselSkins.SelectedItem = item; break; }
                     }
                 }
             }
-            else if (_editingWidgetId == "Media_01")
+
+            catch (Exception ex)
             {
-                if (TglShowMediaTimer != null) TglShowMediaTimer.IsChecked = state.ShowMediaTimer;
+                try { File.AppendAllText("debug_log.txt", $"{DateTime.Now}: ERROR LOADING SETTINGS: {ex.Message}\nStack: {ex.StackTrace}\n\n"); } catch { }
             }
-            _isLoaded = true;
+            finally
+            {
+                _isLoaded = true;
+                Dispatcher.BeginInvoke(new Action(() => { _isApplyingSettings = false; }), DispatcherPriority.Background);
+            }
+
             WidgetsPanel.Visibility = Visibility.Collapsed;
             WidgetConfigPanel.Visibility = Visibility.Visible;
-            _isApplyingSettings = false;
         }
     }
     private void WeatherSettings_Changed(object sender, TextChangedEventArgs e)
@@ -645,16 +647,7 @@ public partial class HubWindow : Window
     // --- REAL-TIME SETTINGS APPLY ---
     private void Slider_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
-        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId) || _isUpdatingSize || _isApplyingSettings) return;
-
-        _isUpdatingSize = true;
-        if (TxtWidth != null && SldWidth != null) TxtWidth.Text = ((int)SldWidth.Value).ToString();
-        if (TxtHeight != null && SldHeight != null) TxtHeight.Text = ((int)SldHeight.Value).ToString();
-        if (TxtOpacity != null && SldOpacity != null) TxtOpacity.Text = Math.Round(SldOpacity.Value, 2).ToString();
-        if (TxtScale != null && SldScale != null) TxtScale.Text = Math.Round(SldScale.Value, 2).ToString();
-        if (TxtRadius != null && SldRadius != null) TxtRadius.Text = ((int)SldRadius.Value).ToString();
-        _isUpdatingSize = false;
-
+        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId) || _isApplyingSettings) return;
         ApplyCurrentWidgetSettings();
     }
 
@@ -740,31 +733,6 @@ public partial class HubWindow : Window
             catch { }
         }
     }
-    private void SizeInput_TextChanged(object sender, TextChangedEventArgs e)
-    {
-        if (!_isLoaded || string.IsNullOrEmpty(_editingWidgetId) || _isUpdatingSize || _isApplyingSettings) return;
-
-        _isUpdatingSize = true;
-
-        double ParseInput(string text, double fallback)
-        {
-            if (string.IsNullOrWhiteSpace(text)) return fallback;
-            string normalized = text.Replace(",", ".");
-            if (double.TryParse(normalized, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double result))
-                return result;
-            return fallback;
-        }
-
-        if (SldWidth != null) SldWidth.Value = ParseInput(TxtWidth.Text, SldWidth.Value);
-        if (SldHeight != null) SldHeight.Value = ParseInput(TxtHeight.Text, SldHeight.Value);
-        if (SldOpacity != null) SldOpacity.Value = ParseInput(TxtOpacity.Text, SldOpacity.Value);
-        if (SldScale != null) SldScale.Value = ParseInput(TxtScale.Text, SldScale.Value);
-        if (SldRadius != null) SldRadius.Value = ParseInput(TxtRadius.Text, SldRadius.Value);
-
-        _isUpdatingSize = false;
-
-        ApplyCurrentWidgetSettings();
-    }
 
     private int _currentPage = 1;
     private const int _itemsPerPage = 10;
@@ -829,7 +797,18 @@ public partial class HubWindow : Window
     private async void LoadStoreCatalogAsync()
     {
         if (StoreList == null) return;
-        string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "debug_log.txt");
+
+        string logPath = AppDomain.CurrentDomain.BaseDirectory;
+        try
+        {
+            if (logPath.Contains(@"\bin\"))
+            {
+                var parent = Directory.GetParent(logPath)?.Parent?.Parent?.Parent;
+                if (parent != null) logPath = parent.FullName;
+            }
+        }
+        catch { }
+        logPath = Path.Combine(logPath, "debug_log.txt");
 
         Dispatcher.Invoke(() => {
             if (StoreLoadingSpinner != null) StoreLoadingSpinner.Visibility = Visibility.Visible;
@@ -842,20 +821,24 @@ public partial class HubWindow : Window
         {
             using var http = new HttpClient();
             http.DefaultRequestHeaders.Add("User-Agent", "GlanceCore/1.0");
-            string url = "https://raw.githubusercontent.com/MazeFS/GlanceCore/main/store_test.json";
+
+            // ВСТАВЬ СВОЙ ANON_KEY В ДВЕ СТРОКИ НИЖЕ ВМЕСТО "ТВОЙ_ANON_KEY"
+            http.DefaultRequestHeaders.Add("apikey", "sb_publishable_KUL3XVA_FwVDVMqN8NNr4A_b5Vbohte");
+            http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "sb_publishable_KUL3XVA_FwVDVMqN8NNr4A_b5Vbohte");
+
+            string url = "https://zmuzyjtfjzcapdorpgsw.supabase.co/rest/v1/plugins?select=*&is_approved=eq.true";
+
             var json = await http.GetStringAsync(url);
             catalog = JsonSerializer.Deserialize<List<StoreItemModel>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            try { File.AppendAllText(logPath, $"{DateTime.Now}: Downloaded catalog. Count: {catalog?.Count ?? 0}\n"); } catch { }
+            try { File.AppendAllText(logPath, $"{DateTime.Now}: Downloaded catalog from Supabase. Count: {catalog?.Count ?? 0}\n"); } catch { }
         }
         catch (Exception ex)
         {
-            try { File.AppendAllText(logPath, $"{DateTime.Now}: HTTP/JSON ERROR: {ex.Message}\nInner: {ex.InnerException?.Message}\n"); } catch { }
+            try { File.AppendAllText(logPath, $"{DateTime.Now}: SUPABASE LOAD ERROR: {ex.Message}\nInner: {ex.InnerException?.Message}\n"); } catch { }
         }
 
-        bool isOffline = false;
         if (catalog == null)
         {
-            isOffline = true;
             catalog = new List<StoreItemModel>
             {
                 new StoreItemModel { Id = "Quote_01", Title = "Цитата дня", Description = "Вдохновение на стекле", PreviewImage = "/Resource/Skins/Skin_Retro.png", DownloadUrl = "https://github.com/MazeFS/GlanceCore/releases/download/v0.5.0/QuotePlugin.dll", Author = "MazeFS", Rating = 4.8, Category = "Essentials" },
@@ -879,9 +862,7 @@ public partial class HubWindow : Window
 
             if (StoreLoadingSpinner != null) StoreLoadingSpinner.Visibility = Visibility.Collapsed;
             if (StoreList != null) StoreList.Visibility = Visibility.Visible;
-            if (isOffline && StoreOfflinePanel != null) StoreOfflinePanel.Visibility = Visibility.Visible;
-
-            try { File.AppendAllText(logPath, $"{DateTime.Now}: Successfully filtered and applied ItemsSource.\n\n"); } catch { }
+            if (catalog == null && StoreOfflinePanel != null) StoreOfflinePanel.Visibility = Visibility.Visible;
         });
     }
 
@@ -1004,51 +985,100 @@ public partial class HubWindow : Window
                     }
                 }
                 item.IsDownloaded = true;
+                DisplayPage();
+
             }
-            catch { }
+            catch (Exception ex)
+            {
+                try
+                {
+                    string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "debug_log.txt");
+                    File.AppendAllText(logPath, $"{DateTime.Now}: INSTALL ERROR ({item.Id}): {ex.Message}\nInner: {ex.InnerException?.Message}\n\n");
+                }
+                catch { }
+            }
+        }
+    }
+    private void DisplayPage()
+    {
+        if (WidgetsList == null || TxtPageInfo == null) return;
+
+        int totalItems = Core.WidgetHost.AvailableWidgets.Count;
+        int totalPages = (int)Math.Ceiling((double)totalItems / _itemsPerPage);
+        if (totalPages < 1) totalPages = 1;
+        if (_currentPage > totalPages) _currentPage = totalPages;
+
+        var pagedList = Core.WidgetHost.AvailableWidgets
+            .Skip((_currentPage - 1) * _itemsPerPage)
+            .Take(_itemsPerPage)
+            .ToList();
+
+        WidgetsList.ItemsSource = pagedList;
+        TxtPageInfo.Text = $"{_currentPage} / {totalPages}";
+    }
+
+    private void BtnPrevPage_Click(object sender, RoutedEventArgs e)
+    {
+        if (_currentPage > 1)
+        {
+            _currentPage--;
+            DisplayPage();
         }
     }
 
+    private void BtnNextPage_Click(object sender, RoutedEventArgs e)
+    {
+        int totalItems = Core.WidgetHost.AvailableWidgets.Count;
+        int totalPages = (int)Math.Ceiling((double)totalItems / _itemsPerPage);
+        if (_currentPage < totalPages)
+        {
+            _currentPage++;
+            DisplayPage();
+        }
+    }
     private void BtnUninstallPlugin_Click(object sender, RoutedEventArgs e)
     {
         if (string.IsNullOrEmpty(_editingWidgetId)) return;
-        var widgetInfo = Core.WidgetHost.AvailableWidgets.FirstOrDefault(w => w.Id == _editingWidgetId);
-        if (widgetInfo != null)
+
+        string msg = Application.Current.FindResource("Lang_Msg_UninstallPrompt") as string ?? "Are you sure?";
+        string title = Application.Current.FindResource("Lang_Msg_UninstallTitle") as string ?? "Uninstall";
+
+        var result = MessageBox.Show(msg, title, MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        if (result == MessageBoxResult.Yes)
         {
-            string msg = Application.Current.FindResource("Lang_Msg_UninstallPrompt") as string ?? "Are you sure?";
-            string title = Application.Current.FindResource("Lang_Msg_UninstallTitle") as string ?? "Uninstall";
+            Core.WidgetHost.CloseWidgetExplicitly(_editingWidgetId);
 
-            var result = MessageBox.Show(msg, title, MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (result == MessageBoxResult.Yes)
+            try
             {
-                Core.WidgetHost.CloseWidgetExplicitly(_editingWidgetId);
-                try
+                string pluginsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
+                string dllName = $"{_editingWidgetId.Replace("_01", "")}Plugin.dll";
+                string dllPath = Path.Combine(pluginsPath, dllName);
+                if (File.Exists(dllPath))
                 {
-                    string pluginsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
-                    string dllName = $"{_editingWidgetId.Replace("_01", "")}Plugin.dll";
-                    string dllPath = Path.Combine(pluginsPath, dllName);
-                    if (File.Exists(dllPath))
-                    {
-                        File.Move(dllPath, dllPath + ".deleted", true);
-                    }
+                    File.Move(dllPath, dllPath + ".deleted", true);
                 }
-                catch { }
-
-                Core.WidgetHost.AvailableWidgets.Remove(widgetInfo);
-                var cfg = Core.WidgetHost.CurrentConfig;
-                if (cfg.Widgets.ContainsKey(_editingWidgetId))
-                {
-                    cfg.Widgets.Remove(_editingWidgetId);
-                    Core.ConfigManager.Save(cfg);
-                }
-
-                WidgetsPanel.Visibility = Visibility.Visible;
-                WidgetConfigPanel.Visibility = Visibility.Collapsed;
             }
+            catch { }
+
+            var itemsToRemove = Core.WidgetHost.AvailableWidgets.Where(w => w.Id == _editingWidgetId).ToList();
+            foreach (var item in itemsToRemove)
+            {
+                Core.WidgetHost.AvailableWidgets.Remove(item);
+            }
+
+            var cfg = Core.WidgetHost.CurrentConfig;
+            if (cfg.Widgets.ContainsKey(_editingWidgetId))
+            {
+                cfg.Widgets.Remove(_editingWidgetId);
+                Core.ConfigManager.Save(cfg);
+            }
+
+            DisplayPage();
+
+            WidgetsPanel.Visibility = Visibility.Visible;
+            WidgetConfigPanel.Visibility = Visibility.Collapsed;
         }
     }
-    private void BtnPrevPage_Click(object sender, RoutedEventArgs e) { if (_currentPage > 1) { _currentPage--; UpdatePagination(); } }
-    private void BtnNextPage_Click(object sender, RoutedEventArgs e) { _currentPage++; UpdatePagination(); }
     private void BtnAbout_Click(object sender, RoutedEventArgs e)
     {
         if (!_isLoaded) return;

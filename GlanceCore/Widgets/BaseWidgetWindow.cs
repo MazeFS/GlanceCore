@@ -14,7 +14,7 @@ using System.Windows.Threading;
 
 public class BaseWidgetWindow : Window, INotifyPropertyChanged
 {
-    [DllImport("user32.dll")] protected static extern uint SetWindowDisplayAffinity(IntPtr hwnd, uint dwAffinity);
+    [DllImport("user32.dll", SetLastError = true)] protected static extern bool SetWindowDisplayAffinity(IntPtr hwnd, uint dwAffinity);
     protected const uint WDA_NONE = 0x00000000;
     protected const uint WDA_EXCLUDEFROMCAPTURE = 0x00000011;
 
@@ -45,12 +45,13 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
     }
     protected bool _isLocked = false;
     protected bool _shaderShouldBeEnabled = true;
-
+    private bool _useStaticWallpaperFallback = false;
+    private bool _lastStreamerMode = false;
     protected DispatcherTimer? _captureTimer;
     private DispatcherTimer? _fpsResetTimer;
     private double _shaderTime = 0;
     protected FrameworkElement? BaseMainRoot => FindName("MainRoot") as FrameworkElement;
-    protected ImageBrush? BaseWallpaperBrush => FindName("WallpaperBrush") as ImageBrush;
+    protected ImageBrush? BaseWallpaperBrush => BaseGlassBase?.Background as ImageBrush;
     protected Border? BaseGlassBase => FindName("GlassBase") as Border;
     protected Border? BaseMinimalBase => FindName("MinimalBase") as Border;
     protected Border? BaseGlossBevel => FindName("GlossBevel") as Border;
@@ -90,17 +91,49 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
         };
 
         this.LocationChanged += (s, e) => {
+            if (_useStaticWallpaperFallback) UpdateWin10WallpaperOffset();
             int movingFps = Core.WidgetHost.CurrentConfig.MovingFps;
             if (movingFps <= 0) movingFps = 60;
             if (_captureTimer != null) _captureTimer.Interval = TimeSpan.FromMilliseconds(1000.0 / movingFps);
             _fpsResetTimer?.Stop();
             _fpsResetTimer?.Start();
         };
-
+        CompositionTarget.Rendering += OnCompositionTargetRendering;
         this.SizeChanged += (s, e) => UpdateClipping();
         this.Loaded += (s, e) => ApplySkinSpecificVisuals();
     }
+    public void LoadStaticWallpaper()
+    {
+        try
+        {
+            string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string path = System.IO.Path.Combine(appData, @"Microsoft\Windows\Themes\TranscodedWallpaper");
+            if (System.IO.File.Exists(path) && BaseWallpaperBrush != null)
+            {
+                var bmp = new BitmapImage();
+                bmp.BeginInit();
+                bmp.UriSource = new Uri(path);
+                bmp.CacheOption = BitmapCacheOption.OnLoad;
+                bmp.EndInit();
+                bmp.Freeze();
+                BaseWallpaperBrush.ImageSource = bmp;
+                BaseWallpaperBrush.ViewboxUnits = BrushMappingMode.Absolute;
+                UpdateWin10WallpaperOffset();
+            }
+        }
+        catch { }
+    }
 
+    public void UpdateWin10WallpaperOffset()
+    {
+        if (BaseWallpaperBrush == null || BaseWallpaperBrush.ImageSource == null || ActualWidth <= 0) return;
+        var src = PresentationSource.FromVisual(this);
+        double dx = src?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
+        double dy = src?.CompositionTarget?.TransformToDevice.M22 ?? 1.0;
+
+        var rect = BaseGlassBase.TransformToAncestor(this).TransformBounds(new Rect(0, 0, BaseGlassBase.ActualWidth, BaseGlassBase.ActualHeight));
+        BaseWallpaperBrush.Viewbox = new Rect(Left * dx, Top * dy, rect.Width * dx, rect.Height * dy);
+    }
     protected void UpdateRealtimeBackground()
     {
         if (!this.IsVisible || BaseGlassBase == null || BaseGlassBase.ActualWidth <= 0) return;
@@ -111,17 +144,26 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
             var source = PresentationSource.FromVisual(this);
             double dpiX = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
             double dpiY = source?.CompositionTarget?.TransformToDevice.M22 ?? 1.0;
+
             var rect = BaseGlassBase.TransformToAncestor(this).TransformBounds(new Rect(0, 0, BaseGlassBase.ActualWidth, BaseGlassBase.ActualHeight));
             int w = (int)Math.Round(rect.Width * dpiX);
             int h = (int)Math.Round(rect.Height * dpiY);
+
             if (w <= 0 || h <= 0) return;
-            IntPtr hDesk = GetDesktopWindow(); IntPtr hSrc = GetWindowDC(hDesk);
-            IntPtr hDest = CreateCompatibleDC(hSrc); IntPtr hBmp = CreateCompatibleBitmap(hSrc, w, h);
+
+            IntPtr hDesk = GetDesktopWindow();
+            IntPtr hSrc = GetWindowDC(hDesk);
+            IntPtr hDest = CreateCompatibleDC(hSrc);
+            IntPtr hBmp = CreateCompatibleBitmap(hSrc, w, h);
             IntPtr hOld = SelectObject(hDest, hBmp);
+
             BitBlt(hDest, 0, 0, w, h, hSrc, (int)p.X, (int)p.Y, 0x00CC0020);
             SelectObject(hDest, hOld);
-            var bmp = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(hBmp, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+
+            var bmp = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                hBmp, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
             bmp.Freeze();
+
             DeleteDC(hDest); ReleaseDC(hDesk, hSrc); DeleteObject(hBmp);
             BaseWallpaperBrush.ImageSource = bmp;
         }
@@ -184,21 +226,9 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
         _captureTimer.Stop();
         BaseGlassBase.Effect = null;
         SetWindowDisplayAffinity(hwnd, WDA_NONE);
-        if (BaseWallpaperBrush != null) BaseWallpaperBrush.ImageSource = null;
+        if (BaseWallpaperBrush != null && BaseWallpaperBrush.ViewboxUnits == BrushMappingMode.RelativeToBoundingBox) BaseWallpaperBrush.ImageSource = null;
 
-        string widgetId = GetWidgetId();
-        var state = Core.WidgetHost.CurrentConfig.Widgets.GetValueOrDefault(widgetId);
-        string skinId = state?.SkinId ?? "LiquidGlass";
-
-        var widgetInfo = Core.WidgetHost.AvailableWidgets.FirstOrDefault(w => w.Id == widgetId);
-        if (widgetInfo?.PluginInstance is Plugins.IWidgetPlugin plugin && skinId != "LiquidGlass" && skinId != "Minimalism" && skinId != "Retro" && skinId != "Neon")
-        {
-            var customResources = plugin.GetSkinResources(skinId);
-            if (customResources != null)
-            {
-                this.Resources.MergedDictionaries.Add(customResources);
-            }
-        }
+        string skinId = Core.WidgetHost.CurrentConfig.Widgets.GetValueOrDefault(GetWidgetId())?.SkinId ?? "LiquidGlass";
 
         if (_shaderShouldBeEnabled)
         {
@@ -219,13 +249,16 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
             if (BaseGlossBevel != null) BaseGlossBevel.Visibility = Visibility.Visible;
 
             bool isStreamer = Core.WidgetHost.CurrentConfig.StreamerMode;
-            SetWindowDisplayAffinity(hwnd, isStreamer ? WDA_NONE : WDA_EXCLUDEFROMCAPTURE);
+            bool success = true;
 
-            var globalSkin = Core.WidgetHost.GlobalCustomSkins.FirstOrDefault(s => s.Id == skinId);
-            if (globalSkin != null)
+            if (!isStreamer)
             {
-                var customResources = globalSkin.GetResources();
-                if (customResources != null) this.Resources.MergedDictionaries.Add(customResources);
+                success = SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE);
+                _useStaticWallpaperFallback = !success;
+            }
+            else
+            {
+                _useStaticWallpaperFallback = false;
             }
 
             if (skinId == "Retro")
@@ -240,24 +273,33 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
                 BaseGlassBase.Effect = new UI.Shaders.NeonEffect { NeonColor = glowColor };
                 TextGlowEffect = new System.Windows.Media.Effects.DropShadowEffect { Color = glowColor, BlurRadius = 15, ShadowDepth = 0, Opacity = 0.9 };
             }
-            else if (globalSkin != null)
-            {
-                TextGlowEffect = null;
-                var fx = globalSkin.GetEffect();
-                if (fx != null) BaseGlassBase.Effect = fx;
-            }
-            else if (skinId != "LiquidGlass" && widgetInfo?.PluginInstance is Plugins.IWidgetPlugin)
-            {
-                TextGlowEffect = null;
-                if (this.Resources.Contains("CustomShaderEffect") && this.Resources["CustomShaderEffect"] is System.Windows.Media.Effects.ShaderEffect fx)
-                {
-                    BaseGlassBase.Effect = fx;
-                }
-            }
             else
             {
                 TextGlowEffect = null;
                 BaseGlassBase.Effect = new UI.Shaders.LiquidGlassEffect { Amount = GetAdjustedAmount() };
+            }
+
+            if (_useStaticWallpaperFallback)
+            {
+                LoadStaticWallpaper();
+            }
+            else if (isStreamer)
+            {
+                SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE);
+                Dispatcher.BeginInvoke(new Action(async () => {
+                    await System.Threading.Tasks.Task.Delay(100);
+                    UpdateRealtimeBackground();
+                    SetWindowDisplayAffinity(hwnd, WDA_NONE);
+                }), DispatcherPriority.Render);
+            }
+            else
+            {
+                if (BaseWallpaperBrush != null)
+                {
+                    BaseWallpaperBrush.ViewboxUnits = BrushMappingMode.RelativeToBoundingBox;
+                    BaseWallpaperBrush.Viewbox = new Rect(0, 0, 1, 1);
+                }
+                _captureTimer.Start();
             }
 
             UpdateClipping();
@@ -277,40 +319,41 @@ public class BaseWidgetWindow : Window, INotifyPropertyChanged
         this.BgOpacity = state.Opacity;
         this.Topmost = state.IsAlwaysOnTop;
         this._isLocked = isGlobalLocked;
-        if (!string.IsNullOrEmpty(state.FontFamily))
-        {
-            if (state.FontFamily.Contains("#"))
-            {
-                this.FontFamily = new FontFamily(new Uri(AppDomain.CurrentDomain.BaseDirectory), state.FontFamily);
-            }
-            else
-            {
-                this.FontFamily = new FontFamily(state.FontFamily);
-            }
-        }
+        this.FontFamily = new FontFamily(state.FontFamily);
         this.FontSize = state.FontSize;
         this.WidgetCornerRadius = new CornerRadius(state.CornerRadius);
-        _shaderShouldBeEnabled = isGlobalShaderEnabled;
 
-        try
-        {
-            var converter = new BrushConverter();
-            TextColorBrush = (Brush)converter.ConvertFromString(state.TextColor)!;
-            BgColorBrush = (Brush)converter.ConvertFromString(state.BgColor)!;
-            BorderColorBrush = (Brush)converter.ConvertFromString(state.BorderColor)!;
-        }
-        catch { }
-        if (BaseBackgroundLayer != null)
-        {
-            BaseBackgroundLayer.BorderThickness = state.ShowBorder ? new Thickness(1.5) : new Thickness(0);
-        }
         if (this.Content is FrameworkElement content)
         {
             if (state.CustomWidth > 0) content.Width = state.CustomWidth;
             if (state.CustomHeight > 0) content.Height = state.CustomHeight;
             content.LayoutTransform = new ScaleTransform(state.Scale, state.Scale);
         }
-        ApplyShaderSettings(isGlobalShaderEnabled);
+
+        if (BaseBackgroundLayer != null)
+        {
+            BaseBackgroundLayer.BorderThickness = state.ShowBorder ? new Thickness(1.5) : new Thickness(0);
+        }
+
+        string currentSkinId = Core.WidgetHost.CurrentConfig.Widgets.GetValueOrDefault(GetWidgetId())?.SkinId ?? "LiquidGlass";
+        bool isStreamerMode = Core.WidgetHost.CurrentConfig.StreamerMode;
+
+        bool needReapply = _shaderShouldBeEnabled != isGlobalShaderEnabled || BaseGlassBase?.Effect == null || _lastStreamerMode != isStreamerMode;
+        _lastStreamerMode = isStreamerMode;
+
+        if (BaseGlassBase?.Effect != null)
+        {
+            string currentEffectName = BaseGlassBase.Effect.GetType().Name;
+            if (currentSkinId == "Retro" && currentEffectName != "RetroPixelEffect") needReapply = true;
+            else if (currentSkinId == "Neon" && currentEffectName != "NeonEffect") needReapply = true;
+            else if (currentSkinId == "LiquidGlass" && currentEffectName != "LiquidGlassEffect") needReapply = true;
+            else if (currentSkinId == "Minimalism") needReapply = true;
+        }
+
+        if (needReapply)
+        {
+            ApplyShaderSettings(isGlobalShaderEnabled);
+        }
     }
 
     protected virtual void UpdateShaderIntensity()

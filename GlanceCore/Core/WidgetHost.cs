@@ -159,14 +159,16 @@ public static class WidgetHost
             widget.Close();
             _activeWidgets.Remove(widgetId);
             ConfigManager.Save(_config);
+
             AvailableWidgets.FirstOrDefault(w => w.Id == widgetId)?.NotifyStateChanged();
 
-            if (_activeWidgets.Count == 0 && Application.Current is App app && !app.IsHubVisible)
-                Application.Current.Shutdown();
+            bool isHubOpen = System.Windows.Application.Current.Windows.Cast<Window>().Any(w => w is Views.HubWindow && w.IsVisible);
+            if (_activeWidgets.Count == 0 && !isHubOpen)
+            {
+                System.Windows.Application.Current.Shutdown();
+            }
         }
-        MemoryOptimizer.Trim();
     }
-
     public static void Shutdown()
     {
         foreach (var kvp in _activeWidgets)
